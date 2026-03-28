@@ -134,12 +134,12 @@
     </main>
   </div>
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase-config.js"></script>
   <script>
     (async () => {
       // Check if user is logged in
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await sb.auth.getSession();
       if (!session) {
         window.location.href = 'login.html';
         return;
@@ -210,7 +210,7 @@
       // Logout handler
       document.getElementById('logoutBtn').addEventListener('click', async (e) => {
         e.preventDefault();
-        await supabase.auth.signOut();
+        await sb.auth.signOut();
         window.location.href = 'login.html';
       });
     })();

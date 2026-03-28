@@ -84,7 +84,7 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase-config.js"></script>
   <script>
     const form = document.getElementById('joinForm');
@@ -109,8 +109,7 @@
       const interests = document.getElementById('interests').value.trim();
 
       try {
-        // 1. Create auth user
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        const { data: authData, error: authError } = await sb.auth.signUp({
           email,
           password,
           options: {
@@ -120,9 +119,8 @@
 
         if (authError) throw authError;
 
-        // 2. Insert member profile
         if (authData.user) {
-          const { error: profileError } = await supabase.from('members').insert({
+          const { error: profileError } = await sb.from('members').insert({
             id: authData.user.id,
             first_name: firstName,
             last_name: lastName,
@@ -133,18 +131,12 @@
             interests: interests,
           });
 
-          if (profileError) {
-            console.error('Profile insert error:', profileError);
-            // Don't block — auth succeeded, profile can be retried
-          }
+          if (profileError) console.error('Profile insert error:', profileError);
         }
 
-        // 3. Check if email confirmation is required
         if (authData.session) {
-          // Auto-confirmed — go straight to dashboard
           window.location.href = 'dashboard.html';
         } else {
-          // Email confirmation required
           successMsg.textContent = 'Account created! Check your email to confirm, then log in.';
           successMsg.style.display = 'block';
           submitBtn.textContent = 'Account Created';
