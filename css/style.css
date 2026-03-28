@@ -101,15 +101,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 .logo-icon {
   width: 38px;
   height: 38px;
-  background: var(--navy);
-  color: var(--gold);
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
+  object-fit: contain;
 }
 .logo-text {
   font-weight: 700;
@@ -387,7 +380,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 .footer-links h4 { color: var(--white); font-size: 14px; font-weight: 600; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
 .footer-links a { display: block; font-size: 14px; color: var(--gray-400); margin-bottom: 10px; transition: color var(--transition); }
 .footer-links a:hover { color: var(--gold); }
-.footer .logo-icon { width: 32px; height: 32px; font-size: 17px; }
+.footer .logo-icon { width: 32px; height: 32px; }
 .footer .logo-text { color: var(--white); font-size: 18px; }
 
 /* ============================================
@@ -469,7 +462,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   overflow-y: auto;
 }
 .dash-sidebar .nav-logo { padding: 0 24px; margin-bottom: 32px; }
-.dash-sidebar .logo-icon { background: var(--burgundy); }
+.dash-sidebar .logo-icon { width: 36px; height: 36px; }
 .dash-sidebar .logo-text { color: var(--white); }
 .dash-nav a {
   display: flex;
