@@ -79,6 +79,16 @@
         </div>
       </div>
 
+      <!-- REFERRAL CODE -->
+      <div class="dash-section">
+        <h2>Your Referral Code</h2>
+        <p style="color: var(--gray-400); font-size: 14px; margin-bottom: 12px;">Share this code to invite others to GSMP.</p>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span id="myReferralCode" style="font-family:monospace;font-size:20px;font-weight:700;letter-spacing:2px;color:var(--navy);background:#f3f4f6;padding:10px 20px;border-radius:8px;">—</span>
+          <button onclick="navigator.clipboard.writeText(document.getElementById('myReferralCode').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500);" class="btn btn-ghost" style="font-size:13px;padding:8px 16px;">Copy</button>
+        </div>
+      </div>
+
       <!-- UPCOMING EVENTS -->
       <div class="dash-section">
         <h2>Upcoming Events</h2>
@@ -117,6 +127,7 @@
         document.getElementById('profileYear').textContent = member.year || '—';
         document.getElementById('profileCountry').textContent = member.country || '—';
         document.getElementById('profileInterests').textContent = member.interests || '—';
+        document.getElementById('myReferralCode').textContent = member.referral_code || '—';
       } else {
         // Fallback to auth metadata
         const meta = session.user.user_metadata;

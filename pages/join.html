@@ -143,6 +143,10 @@
         if (authError) throw authError;
 
         if (authData.user) {
+          // Generate personal referral code
+          const tag = (firstName.substring(0,4) + '-' + Math.random().toString(36).substring(2,6)).toUpperCase();
+          const personalCode = tag;
+
           const { error: profileError } = await sb.from('members').insert({
             id: authData.user.id,
             first_name: firstName,
@@ -152,12 +156,23 @@
             year: year,
             country: country,
             interests: interests,
+            referred_by: referralCode,
+            referral_code: personalCode,
           });
 
           if (profileError) console.error('Profile insert error:', profileError);
+
+          // Create their personal referral code in referral_codes table
+          await sb.from('referral_codes').insert({
+            code: personalCode,
+            note: 'Auto: ' + firstName + ' ' + lastName,
+            max_uses: 0,
+            times_used: 0,
+            active: true
+          });
         }
 
-        // Increment referral code usage
+        // Increment original referral code usage
         await sb.from('referral_codes').update({ times_used: (codeData.times_used || 0) + 1 }).eq('id', codeData.id);
 
         if (authData.session) {
