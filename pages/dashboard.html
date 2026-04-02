@@ -79,10 +79,12 @@
         </div>
       </div>
 
-      <!-- COMING SOON -->
+      <!-- UPCOMING EVENTS -->
       <div class="dash-section">
-        <h2>Coming Soon</h2>
-        <p style="color: var(--gray-400);">Chapters, events, credentials, and more — launching soon. Stay tuned.</p>
+        <h2>Upcoming Events</h2>
+        <div class="events-grid" id="eventsContainer">
+          <p style="color: var(--gray-400);">Loading events...</p>
+        </div>
       </div>
     </main>
   </div>
@@ -125,6 +127,40 @@
         document.getElementById('profileYear').textContent = '—';
         document.getElementById('profileCountry').textContent = '—';
         document.getElementById('profileInterests').textContent = '—';
+      }
+
+      // Fetch upcoming events (only those marked show_in_portal)
+      const { data: events } = await sb
+        .from('events')
+        .select('*')
+        .eq('show_in_portal', true)
+        .gte('event_date', new Date().toISOString())
+        .order('event_date', { ascending: true })
+        .limit(5);
+
+      const eventsContainer = document.getElementById('eventsContainer');
+      if (events && events.length > 0) {
+        eventsContainer.innerHTML = events.map(ev => {
+          const d = new Date(ev.event_date);
+          const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+          const day = d.getDate();
+          const time = d.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+          return `
+            <div class="event-card">
+              <div class="event-date">
+                <span class="event-month">${month}</span>
+                <span class="event-day">${day}</span>
+              </div>
+              <div class="event-info">
+                <span class="event-type">${ev.event_type}</span>
+                <h4>${ev.title}</h4>
+                <span class="event-meta">${ev.location || ''} &middot; ${time}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        eventsContainer.innerHTML = '<p style="color: var(--gray-400);">No upcoming events yet.</p>';
       }
 
       // Logout handler

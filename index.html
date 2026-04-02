@@ -24,6 +24,7 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="#about">About</a></li>
         <li><a href="#pillars">What We Do</a></li>
+        <li><a href="#events">Events</a></li>
         <li><a href="#faq">FAQ</a></li>
         <li><a href="pages/login.html" class="nav-btn-outline">Log In</a></li>
         <li><a href="pages/join.html" class="nav-btn-primary">Join GSMP</a></li>
@@ -127,6 +128,19 @@
     </div>
   </section>
 
+  <!-- EVENTS -->
+  <section class="section" id="events">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-tag">Upcoming</p>
+        <h2>Events</h2>
+      </div>
+      <div class="events-grid" id="homeEventsGrid">
+        <p style="color: var(--gray-400);">Loading events...</p>
+      </div>
+    </div>
+  </section>
+
   <!-- FAQ -->
   <section class="section section-alt" id="faq">
     <div class="container container-sm">
@@ -211,6 +225,44 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script>
+    // Load events on landing page (all events)
+    (async () => {
+      const { data: events } = await sb
+        .from('events')
+        .select('*')
+        .gte('event_date', new Date().toISOString())
+        .order('event_date', { ascending: true })
+        .limit(6);
+
+      const grid = document.getElementById('homeEventsGrid');
+      if (events && events.length > 0) {
+        grid.innerHTML = events.map(ev => {
+          const d = new Date(ev.event_date);
+          const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+          const day = d.getDate();
+          const time = d.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+          return `
+            <div class="event-card">
+              <div class="event-date">
+                <span class="event-month">${month}</span>
+                <span class="event-day">${day}</span>
+              </div>
+              <div class="event-info">
+                <span class="event-type">${ev.event_type}</span>
+                <h4>${ev.title}</h4>
+                <span class="event-meta">${ev.location || ''} &middot; ${time}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        grid.innerHTML = '<p style="color: var(--gray-400);">No upcoming events yet. Check back soon!</p>';
+      }
+    })();
+  </script>
   <script src="js/main.js"></script>
 </body>
 </html>
