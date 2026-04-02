@@ -15,12 +15,17 @@
         <span class="logo-text">GSMP</span>
       </a>
       <h1>Join GSMP</h1>
-      <p class="auth-sub">Join the Galen Society of Medical Professionals. It's free.</p>
+      <p class="auth-sub">Membership is by referral only. Enter your code to get started.</p>
 
       <div id="errorMsg" style="display:none; background:#FEE2E2; color:#991B1B; padding:12px 16px; border-radius:6px; font-size:14px; margin-bottom:16px;"></div>
       <div id="successMsg" style="display:none; background:#D1FAE5; color:#065F46; padding:12px 16px; border-radius:6px; font-size:14px; margin-bottom:16px;"></div>
 
       <form id="joinForm">
+        <div class="form-group">
+          <label for="referralCode">Referral Code</label>
+          <input type="text" id="referralCode" placeholder="Enter your referral code" required style="text-transform:uppercase;">
+        </div>
+
         <div class="form-row">
           <div class="form-group">
             <label for="firstName">First Name</label>
@@ -99,6 +104,7 @@
       submitBtn.textContent = 'Creating account...';
       submitBtn.disabled = true;
 
+      const referralCode = document.getElementById('referralCode').value.trim().toUpperCase();
       const firstName = document.getElementById('firstName').value.trim();
       const lastName = document.getElementById('lastName').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -109,6 +115,23 @@
       const interests = document.getElementById('interests').value.trim();
 
       try {
+        // Validate referral code
+        const { data: codeData, error: codeError } = await sb
+          .from('referral_codes')
+          .select('*')
+          .eq('code', referralCode)
+          .eq('active', true)
+          .single();
+
+        if (codeError || !codeData) {
+          throw new Error('Invalid or expired referral code.');
+        }
+
+        // Check if code has remaining uses
+        if (codeData.max_uses && codeData.times_used >= codeData.max_uses) {
+          throw new Error('This referral code has reached its usage limit.');
+        }
+
         const { data: authData, error: authError } = await sb.auth.signUp({
           email,
           password,
@@ -133,6 +156,9 @@
 
           if (profileError) console.error('Profile insert error:', profileError);
         }
+
+        // Increment referral code usage
+        await sb.from('referral_codes').update({ times_used: (codeData.times_used || 0) + 1 }).eq('id', codeData.id);
 
         if (authData.session) {
           window.location.href = 'dashboard.html';

@@ -56,10 +56,31 @@
 
     <div id="adminMsg" class="admin-msg"></div>
 
+    <!-- ANALYTICS -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;">
+      <div style="background:#f9fafb;border-radius:8px;padding:16px;text-align:center;">
+        <div style="font-size:28px;font-weight:700;color:var(--navy);" id="statMembers">-</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:2px;">Members</div>
+      </div>
+      <div style="background:#f9fafb;border-radius:8px;padding:16px;text-align:center;">
+        <div style="font-size:28px;font-weight:700;color:var(--navy);" id="statChapters">-</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:2px;">Chapters</div>
+      </div>
+      <div style="background:#f9fafb;border-radius:8px;padding:16px;text-align:center;">
+        <div style="font-size:28px;font-weight:700;color:var(--navy);" id="statEvents">-</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:2px;">Events</div>
+      </div>
+      <div style="background:#f9fafb;border-radius:8px;padding:16px;text-align:center;">
+        <div style="font-size:28px;font-weight:700;color:var(--navy);" id="statCodes">-</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:2px;">Active Codes</div>
+      </div>
+    </div>
+
     <div class="admin-tabs">
       <button class="admin-tab active" data-tab="chapters">Chapters</button>
       <button class="admin-tab" data-tab="events">Events</button>
       <button class="admin-tab" data-tab="members">Members</button>
+      <button class="admin-tab" data-tab="codes">Referral Codes</button>
     </div>
 
     <!-- CHAPTERS TAB -->
@@ -169,6 +190,37 @@
       </table>
     </div>
   </div>
+
+    <!-- REFERRAL CODES TAB -->
+    <div class="tab-content" id="tab-codes">
+      <div class="admin-form">
+        <h3>Create Referral Code</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Code</label>
+            <input type="text" id="codeValue" placeholder="e.g. GSMP2026" style="text-transform:uppercase;">
+          </div>
+          <div class="form-group">
+            <label>Max Uses (0 = unlimited)</label>
+            <input type="number" id="codeMaxUses" value="0" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Note (optional)</label>
+          <input type="text" id="codeNote" placeholder="e.g. For Dubai launch event">
+        </div>
+        <button class="btn-sm btn-add" onclick="addCode()">Create Code</button>
+      </div>
+
+      <table class="admin-table">
+        <thead>
+          <tr><th>Code</th><th>Note</th><th>Used</th><th>Max</th><th>Active</th><th></th></tr>
+        </thead>
+        <tbody id="codesTable">
+          <tr><td colspan="6" class="loading-text">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase-config.js"></script>
@@ -356,6 +408,75 @@
       loadMembers();
     }
 
+    // ========== REFERRAL CODES ==========
+    async function loadCodes() {
+      const { data, error } = await sb.from('referral_codes').select('*').order('code');
+      if (error) { showMsg('Error loading codes: ' + error.message, 'error'); return; }
+      const tbody = document.getElementById('codesTable');
+      if (!data || !data.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="color:#9ca3af;">No referral codes yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(c => `
+        <tr>
+          <td><strong style="font-family:monospace;letter-spacing:1px;">${c.code}</strong></td>
+          <td>${c.note || '—'}</td>
+          <td>${c.times_used || 0}</td>
+          <td>${c.max_uses || '∞'}</td>
+          <td><input type="checkbox" ${c.active ? 'checked' : ''} onchange="toggleCode('${c.id}', this.checked)"></td>
+          <td class="admin-actions">
+            <button class="btn-sm btn-danger" onclick="deleteCode('${c.id}')">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+      return data;
+    }
+
+    async function addCode() {
+      const code = document.getElementById('codeValue').value.trim().toUpperCase();
+      const max_uses = parseInt(document.getElementById('codeMaxUses').value) || 0;
+      const note = document.getElementById('codeNote').value.trim();
+      if (!code) { showMsg('Code is required.', 'error'); return; }
+
+      const { error } = await sb.from('referral_codes').insert({ code, max_uses, note, active: true, times_used: 0 });
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      showMsg('Code created!', 'success');
+      document.getElementById('codeValue').value = '';
+      document.getElementById('codeNote').value = '';
+      document.getElementById('codeMaxUses').value = '0';
+      loadCodes();
+      loadAnalytics();
+    }
+
+    async function toggleCode(id, active) {
+      const { error } = await sb.from('referral_codes').update({ active }).eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      showMsg(active ? 'Code activated.' : 'Code deactivated.', 'success');
+    }
+
+    async function deleteCode(id) {
+      if (!confirm('Delete this code?')) return;
+      const { error } = await sb.from('referral_codes').delete().eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      showMsg('Code deleted.', 'success');
+      loadCodes();
+      loadAnalytics();
+    }
+
+    // ========== ANALYTICS ==========
+    async function loadAnalytics() {
+      const [members, chaps, evts, codes] = await Promise.all([
+        sb.from('members').select('id', { count: 'exact', head: true }),
+        sb.from('chapters').select('id', { count: 'exact', head: true }),
+        sb.from('events').select('id', { count: 'exact', head: true }),
+        sb.from('referral_codes').select('id', { count: 'exact', head: true }).eq('active', true),
+      ]);
+      document.getElementById('statMembers').textContent = members.count || 0;
+      document.getElementById('statChapters').textContent = chaps.count || 0;
+      document.getElementById('statEvents').textContent = evts.count || 0;
+      document.getElementById('statCodes').textContent = codes.count || 0;
+    }
+
     // ========== INIT ==========
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
@@ -371,6 +492,8 @@
       await loadChapters();
       loadEvents();
       loadMembers();
+      loadCodes();
+      loadAnalytics();
 
       // Logout
       document.getElementById('logoutBtn').addEventListener('click', async (e) => {
