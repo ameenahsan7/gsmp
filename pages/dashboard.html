@@ -73,6 +73,10 @@
             <p style="font-weight: 600;" id="profileCountry">Loading...</p>
           </div>
           <div>
+            <p style="color: var(--gray-400); font-size: 13px; margin-bottom: 2px;">Chapter</p>
+            <p style="font-weight: 600;" id="profileChapter">Loading...</p>
+          </div>
+          <div>
             <p style="color: var(--gray-400); font-size: 13px; margin-bottom: 2px;">Interests</p>
             <p style="font-weight: 600;" id="profileInterests">Loading...</p>
           </div>
@@ -128,6 +132,14 @@
         document.getElementById('profileCountry').textContent = member.country || '—';
         document.getElementById('profileInterests').textContent = member.interests || '—';
         document.getElementById('myReferralCode').textContent = member.referral_code || '—';
+
+        // Fetch chapter name if assigned
+        if (member.chapter_id) {
+          const { data: chapter } = await sb.from('chapters').select('name').eq('id', member.chapter_id).single();
+          document.getElementById('profileChapter').textContent = chapter ? chapter.name : '—';
+        } else {
+          document.getElementById('profileChapter').textContent = 'Not assigned yet';
+        }
       } else {
         // Fallback to auth metadata
         const meta = session.user.user_metadata;
@@ -137,6 +149,7 @@
         document.getElementById('profileSchool').textContent = '—';
         document.getElementById('profileYear').textContent = '—';
         document.getElementById('profileCountry').textContent = '—';
+        document.getElementById('profileChapter').textContent = '—';
         document.getElementById('profileInterests').textContent = '—';
       }
 
