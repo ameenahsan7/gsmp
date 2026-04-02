@@ -147,6 +147,16 @@
           const tag = (firstName.substring(0,4) + '-' + Math.random().toString(36).substring(2,6)).toUpperCase();
           const personalCode = tag;
 
+          // Auto-assign chapter from referrer
+          let chapterId = null;
+          const { data: referrer } = await sb.from('members')
+            .select('chapter_id')
+            .eq('referral_code', referralCode)
+            .single();
+          if (referrer && referrer.chapter_id) {
+            chapterId = referrer.chapter_id;
+          }
+
           const { error: profileError } = await sb.from('members').insert({
             id: authData.user.id,
             first_name: firstName,
@@ -158,6 +168,7 @@
             interests: interests,
             referred_by: referralCode,
             referral_code: personalCode,
+            chapter_id: chapterId,
           });
 
           if (profileError) console.error('Profile insert error:', profileError);
