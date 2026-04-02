@@ -8,11 +8,7 @@
   <meta property="og:title" content="GSMP Member Profile">
   <meta property="og:description" content="Verified member of the Galen Society of Medical Professionals.">
   <style>
-    :root {
-      --navy: #1B2A4A;
-      --burgundy: #6B213F;
-      --gold: #C49A3C;
-    }
+    :root { --navy: #1B2A4A; --burgundy: #6B213F; --gold: #C49A3C; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
@@ -26,153 +22,178 @@
     .profile-card {
       background: #fff;
       border-radius: 20px;
-      max-width: 420px;
+      max-width: 400px;
       width: 100%;
       overflow: hidden;
       box-shadow: 0 20px 60px rgba(27,42,74,0.12), 0 1px 3px rgba(0,0,0,0.08);
     }
     .profile-banner {
       background: linear-gradient(135deg, var(--navy) 0%, #2a3f6a 100%);
-      padding: 36px 24px 48px;
+      padding: 40px 24px 52px;
       text-align: center;
       position: relative;
     }
-    .profile-banner::after {
-      content: '';
-      position: absolute;
-      bottom: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 72px;
-      height: 72px;
-      background: var(--gold);
-      border-radius: 50%;
-      border: 4px solid #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
     .profile-initials {
       position: absolute;
-      bottom: -20px;
+      bottom: -32px;
       left: 50%;
       transform: translateX(-50%);
-      width: 72px;
-      height: 72px;
+      width: 64px;
+      height: 64px;
       background: linear-gradient(135deg, var(--gold) 0%, #d4ad5a 100%);
       border-radius: 50%;
       border: 4px solid #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
       color: #fff;
       z-index: 2;
       letter-spacing: 1px;
     }
     .profile-body {
-      padding: 48px 28px 28px;
+      padding: 44px 24px 8px;
       text-align: center;
     }
     .profile-name {
       font-family: 'Playfair Display', serif;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--navy);
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
-    .profile-title {
-      font-size: 14px;
+    .profile-subtitle {
+      font-size: 13px;
       color: #6b7280;
+      margin-bottom: 14px;
+    }
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 600;
       margin-bottom: 20px;
     }
-    .profile-badge {
+    .verified-badge svg {
+      width: 16px;
+      height: 16px;
+      color: var(--gold);
+    }
+
+    /* Contact info rows */
+    .contact-info {
+      text-align: left;
+      padding: 0 4px;
+      margin-bottom: 20px;
+    }
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .contact-row:last-child { border-bottom: none; }
+    .contact-row svg {
+      width: 16px;
+      height: 16px;
+      color: #9ca3af;
+      flex-shrink: 0;
+    }
+    .contact-row span {
+      font-size: 13px;
+      color: #374151;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 0 4px;
+      margin-bottom: 16px;
+    }
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 14px 8px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .action-btn svg { width: 20px; height: 20px; }
+    .btn-call {
+      background: #EFF6FF;
+      color: #2563EB;
+    }
+    .btn-call:hover { background: #DBEAFE; }
+    .btn-whatsapp {
+      background: #F0FDF4;
+      color: #16A34A;
+    }
+    .btn-whatsapp:hover { background: #DCFCE7; }
+    .btn-email {
+      background: #FFF7ED;
+      color: #EA580C;
+    }
+    .btn-email:hover { background: #FFEDD5; }
+
+    /* Save contact */
+    .save-contact-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-bottom: 8px;
+    }
+    .save-contact-btn:hover { opacity: 0.9; }
+    .save-contact-btn svg { width: 18px; height: 18px; }
+
+    /* Footer */
+    .profile-footer {
+      text-align: center;
+      padding: 16px 24px 22px;
+      border-top: 1px solid #f3f4f6;
+    }
+    .profile-footer a {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: linear-gradient(135deg, var(--navy) 0%, #2a3f6a 100%);
-      color: #fff;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      margin-bottom: 24px;
-    }
-    .profile-badge svg {
-      width: 14px;
-      height: 14px;
-    }
-    .profile-details {
-      text-align: left;
-      border-top: 1px solid #f3f4f6;
-      padding-top: 20px;
-    }
-    .profile-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #f9fafb;
-    }
-    .profile-row:last-child { border-bottom: none; }
-    .profile-label {
-      font-size: 13px;
-      color: #9ca3af;
-      font-weight: 500;
-    }
-    .profile-value {
-      font-size: 13px;
-      color: #1f2937;
-      font-weight: 600;
-      text-align: right;
-    }
-    .profile-footer {
-      text-align: center;
-      padding: 16px 28px 24px;
-      border-top: 1px solid #f3f4f6;
-    }
-    .profile-footer-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
       text-decoration: none;
-      color: #9ca3af;
-      font-size: 12px;
+      color: #b0b5bf;
+      font-size: 11px;
       font-weight: 500;
       transition: color 0.2s;
     }
-    .profile-footer-logo:hover { color: var(--navy); }
-    .profile-footer-logo img {
-      width: 22px;
-      height: 22px;
+    .profile-footer a:hover { color: var(--navy); }
+    .profile-footer img {
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
-      opacity: 0.6;
+      opacity: 0.5;
     }
-    .profile-interests {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .interest-tag {
-      background: #f3f4f6;
-      color: #374151;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .loading-state {
-      text-align: center;
-      padding: 80px 20px;
-      color: #9ca3af;
-    }
-    .error-state {
-      text-align: center;
-      padding: 60px 20px;
-    }
+
+    .loading-state { text-align: center; padding: 80px 20px; color: #9ca3af; }
+    .error-state { text-align: center; padding: 60px 20px; }
     .error-state h2 { color: var(--navy); font-family: 'Playfair Display', serif; margin-bottom: 8px; }
     .error-state p { color: #6b7280; font-size: 14px; }
   </style>
@@ -187,6 +208,26 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase-config.js"></script>
   <script>
+    function generateVCard(name, phone, email, org, country) {
+      const vcard = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        'FN:' + name,
+        'TEL;TYPE=CELL:' + (phone || ''),
+        'EMAIL:' + (email || ''),
+        'ORG:GSMP' + (org ? ' — ' + org : ''),
+        'NOTE:Member of the Galen Society of Medical Professionals',
+        'END:VCARD'
+      ].join('\n');
+      const blob = new Blob([vcard], { type: 'text/vcard' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name.replace(/\s+/g, '_') + '.vcf';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
     (async () => {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
@@ -197,10 +238,9 @@
         return;
       }
 
-      // Look up member by their personal referral code
       const { data: member, error } = await sb
         .from('members')
-        .select('first_name, last_name, school, year, country, interests, chapter_id')
+        .select('first_name, last_name, school, country, email, phone, chapter_id')
         .eq('referral_code', code.toUpperCase())
         .single();
 
@@ -209,7 +249,6 @@
         return;
       }
 
-      // Get chapter name
       let chapterName = '';
       if (member.chapter_id) {
         const { data: chapter } = await sb.from('chapters').select('name').eq('id', member.chapter_id).single();
@@ -218,15 +257,11 @@
 
       const initials = (member.first_name?.charAt(0) || '') + (member.last_name?.charAt(0) || '');
       const fullName = `${member.first_name || ''} ${member.last_name || ''}`.trim();
+      const phone = member.phone || '';
+      const cleanPhone = phone.replace(/[^+\d]/g, '');
+      const whatsappNum = cleanPhone.replace('+', '');
 
-      // Update page title
       document.title = `${fullName} — GSMP`;
-
-      // Build interests tags
-      const interests = member.interests ? member.interests.split(',').map(i => i.trim()).filter(Boolean) : [];
-      const interestsHTML = interests.length
-        ? `<div class="profile-interests">${interests.map(i => `<span class="interest-tag">${i}</span>`).join('')}</div>`
-        : '';
 
       card.innerHTML = `
         <div class="profile-banner">
@@ -234,23 +269,62 @@
         </div>
         <div class="profile-body">
           <h1 class="profile-name">${fullName}</h1>
-          <p class="profile-title">${member.year || 'Member'}${member.school ? ' · ' + member.school : ''}</p>
-          <div class="profile-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Verified GSMP Member
+          <p class="profile-subtitle">${member.school || ''}${member.school && member.country ? ' · ' : ''}${member.country || ''}</p>
+          <div class="verified-badge">
+            <svg viewBox="0 0 24 24" fill="var(--gold)" stroke="var(--gold)" stroke-width="0"><path d="M12 2l2.4 4.8 5.3.8-3.8 3.7.9 5.3L12 14.1l-4.8 2.5.9-5.3L4.3 7.6l5.3-.8z"/></svg>
+            Verified Member
           </div>
-          ${interestsHTML}
-          <div class="profile-details">
-            ${member.school ? `<div class="profile-row"><span class="profile-label">Institution</span><span class="profile-value">${member.school}</span></div>` : ''}
-            ${member.country ? `<div class="profile-row"><span class="profile-label">Country</span><span class="profile-value">${member.country}</span></div>` : ''}
-            ${chapterName ? `<div class="profile-row"><span class="profile-label">Chapter</span><span class="profile-value">${chapterName}</span></div>` : ''}
-            ${member.year ? `<div class="profile-row"><span class="profile-label">Role</span><span class="profile-value">${member.year}</span></div>` : ''}
+
+          <div class="contact-info">
+            ${phone ? `
+            <div class="contact-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span>${phone}</span>
+            </div>` : ''}
+            <div class="contact-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span>${member.email || '—'}</span>
+            </div>
+            ${member.country ? `
+            <div class="contact-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>${member.country}${chapterName ? ' · ' + chapterName : ''}</span>
+            </div>` : ''}
           </div>
+
+          <div class="action-buttons">
+            ${phone ? `
+            <a href="tel:${cleanPhone}" class="action-btn btn-call">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </a>
+            <a href="https://wa.me/${whatsappNum}" target="_blank" class="action-btn btn-whatsapp">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              WhatsApp
+            </a>` : `
+            <a href="#" class="action-btn btn-call" style="opacity:0.4;pointer-events:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </a>
+            <a href="#" class="action-btn btn-whatsapp" style="opacity:0.4;pointer-events:none;">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              WhatsApp
+            </a>`}
+            <a href="mailto:${member.email || ''}" class="action-btn btn-email">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Email
+            </a>
+          </div>
+
+          <button class="save-contact-btn" onclick="generateVCard('${fullName.replace(/'/g,"\\'")}', '${cleanPhone}', '${member.email || ''}', '${(member.school || '').replace(/'/g,"\\'")}', '${(member.country || '').replace(/'/g,"\\'")}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            Save Contact
+          </button>
         </div>
         <div class="profile-footer">
-          <a href="../index.html" class="profile-footer-logo">
+          <a href="../index.html">
             <img src="../images/logo.jpeg" alt="GSMP">
-            Galen Society of Medical Professionals
+            GSMP
           </a>
         </div>
       `;

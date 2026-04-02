@@ -76,6 +76,11 @@
         </div>
 
         <div class="form-group">
+          <label for="phone">Phone (with country code)</label>
+          <input type="tel" id="phone" placeholder="e.g. +971501234567" required>
+        </div>
+
+        <div class="form-group">
           <label for="interests">Interests (optional)</label>
           <input type="text" id="interests" placeholder="e.g. Surgery, Research, Global Health">
         </div>
@@ -112,6 +117,7 @@
       const school = document.getElementById('school').value.trim();
       const year = document.getElementById('year').value;
       const country = document.getElementById('country').value.trim();
+      const phone = document.getElementById('phone').value.trim();
       const interests = document.getElementById('interests').value.trim();
 
       try {
@@ -167,6 +173,7 @@
             school: school,
             year: year,
             country: country,
+            phone: phone,
             interests: interests,
             referred_by: referralCode,
             referral_code: personalCode,

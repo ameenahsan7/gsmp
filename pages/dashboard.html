@@ -86,17 +86,14 @@
       <!-- SHARE PROFILE -->
       <div class="dash-section" id="shareSection" style="display:none;">
         <h2>Your Digital Profile</h2>
-        <p style="color: var(--gray-400); font-size: 14px; margin-bottom: 16px;">Share your verified GSMP profile with colleagues and connections.</p>
-        <div style="background:linear-gradient(135deg,#1B2A4A 0%,#2a3f6a 100%);border-radius:12px;padding:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
-          <div>
-            <div style="color:rgba(255,255,255,0.6);font-size:12px;font-weight:500;margin-bottom:4px;">Your profile link</div>
-            <div id="profileLink" style="color:#fff;font-size:13px;font-family:monospace;word-break:break-all;">—</div>
-          </div>
-          <div style="display:flex;gap:8px;flex-shrink:0;">
-            <button id="copyProfileBtn" onclick="copyProfileLink()" style="background:var(--gold);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Copy Link</button>
-            <button onclick="window.open(document.getElementById('profileLink').textContent, '_blank')" style="background:rgba(255,255,255,0.15);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Preview</button>
-          </div>
+        <p style="color: var(--gray-400); font-size: 14px; margin-bottom: 16px;">Share your verified GSMP profile card with colleagues and connections.</p>
+        <div style="display:flex;gap:10px;">
+          <button id="previewProfileBtn" onclick="window.open(document.getElementById('profileUrl').value, '_blank')" style="background:var(--navy);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Share Profile
+          </button>
         </div>
+        <input type="hidden" id="profileUrl" value="">
       </div>
 
       <!-- REFERRAL CODE -->
@@ -149,10 +146,10 @@
         document.getElementById('profileInterests').textContent = member.interests || '—';
         document.getElementById('myReferralCode').textContent = member.referral_code || '—';
 
-        // Set up profile sharing link
+        // Set up profile sharing
         if (member.referral_code) {
           const profileUrl = window.location.origin + '/gcmp/pages/profile.html?code=' + member.referral_code;
-          document.getElementById('profileLink').textContent = profileUrl;
+          document.getElementById('profileUrl').value = profileUrl;
           document.getElementById('shareSection').style.display = 'block';
         }
 
@@ -209,15 +206,6 @@
       } else {
         eventsContainer.innerHTML = '<p style="color: var(--gray-400);">No upcoming events yet.</p>';
       }
-
-      // Copy profile link handler
-      window.copyProfileLink = function() {
-        const link = document.getElementById('profileLink').textContent;
-        navigator.clipboard.writeText(link);
-        const btn = document.getElementById('copyProfileBtn');
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = 'Copy Link'; }, 1500);
-      };
 
       // Logout handler
       document.getElementById('logoutBtn').addEventListener('click', async (e) => {
