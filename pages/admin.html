@@ -40,6 +40,8 @@
     .admin-back:hover { text-decoration: underline; }
     .member-chapter-select { padding: 4px 8px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; }
     .loading-text { color: #9ca3af; font-style: italic; padding: 20px 0; }
+    .btn-csv { background: #fff; color: var(--navy); border: 1px solid #d1d5db; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-csv:hover { background: #f3f4f6; }
     .chapter-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
     .chapter-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
     .chapter-card-header h4 { font-size: 16px; color: var(--navy); margin: 0; }
@@ -110,6 +112,9 @@
 
     <!-- CHAPTERS TAB -->
     <div class="tab-content active" id="tab-chapters">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="btn-sm btn-csv" onclick="exportChaptersCSV()">&#x2B73; Export CSV</button>
+      </div>
       <div class="admin-form">
         <h3>Add Chapter</h3>
         <div class="form-row">
@@ -149,6 +154,9 @@
 
     <!-- EVENTS TAB -->
     <div class="tab-content" id="tab-events">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="btn-sm btn-csv" onclick="exportEventsCSV()">&#x2B73; Export CSV</button>
+      </div>
       <div class="admin-form">
         <h3>Add Event</h3>
         <div class="form-row">
@@ -200,6 +208,9 @@
 
     <!-- MEMBERS TAB -->
     <div class="tab-content" id="tab-members">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="btn-sm btn-csv" onclick="exportMembersCSV()">&#x2B73; Export CSV</button>
+      </div>
       <table class="admin-table">
         <thead>
           <tr><th>Name</th><th>Email</th><th>Institution</th><th>Chapter</th><th>Title</th><th>Referred By</th><th></th></tr>
@@ -468,6 +479,54 @@
       if (error) { showMsg('Error: ' + error.message, 'error'); return; }
       showMsg('Member removed.', 'success');
       loadMembers();
+    }
+
+    // ========== CSV EXPORT ==========
+    function downloadCSV(rows, filename) {
+      const csv = rows.map(r => r.map(c => '"' + String(c ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function exportChaptersCSV() {
+      if (!chapters.length) { showMsg('No chapters to export.', 'error'); return; }
+      const rows = [['Chapter Name', 'City', 'Country', 'Status', 'Description', 'Referral Codes']];
+      chapters.forEach(ch => {
+        const chCodes = allCodes.filter(c => c.chapter_id === ch.id).map(c => c.code).join('; ');
+        rows.push([ch.name, ch.city || '', ch.country || '', ch.status || '', ch.description || '', chCodes]);
+      });
+      downloadCSV(rows, 'gsmp_chapters.csv');
+      showMsg('Chapters exported!', 'success');
+    }
+
+    async function exportEventsCSV() {
+      const { data } = await sb.from('events').select('*').order('event_date', { ascending: true });
+      if (!data || !data.length) { showMsg('No events to export.', 'error'); return; }
+      const rows = [['Title', 'Type', 'Date', 'Location', 'Description', 'Portal']];
+      data.forEach(ev => rows.push([
+        ev.title, ev.event_type || '', ev.event_date || '', ev.location || '',
+        ev.description || '', ev.show_in_portal !== false ? 'Yes' : 'No'
+      ]));
+      downloadCSV(rows, 'gsmp_events.csv');
+      showMsg('Events exported!', 'success');
+    }
+
+    async function exportMembersCSV() {
+      const { data } = await sb.from('members').select('*').order('first_name');
+      if (!data || !data.length) { showMsg('No members to export.', 'error'); return; }
+      const rows = [['Name', 'Email', 'Institution', 'Chapter', 'Title', 'Referred By', 'Joined']];
+      data.forEach(m => {
+        const ch = chapters.find(c => c.id === m.chapter_id);
+        rows.push([
+          (m.first_name || '') + ' ' + (m.last_name || ''),
+          m.email || '', m.school || '', ch ? ch.name : '', m.member_title || 'Member',
+          m.referred_by || '', m.created_at ? new Date(m.created_at).toLocaleDateString() : ''
+        ]);
+      });
+      downloadCSV(rows, 'gsmp_all_members.csv');
+      showMsg('Members exported!', 'success');
     }
 
     // ========== ANALYTICS ==========

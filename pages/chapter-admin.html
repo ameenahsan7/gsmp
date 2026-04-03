@@ -41,6 +41,8 @@
     .admin-back:hover { text-decoration: underline; }
     .member-chapter-select { padding: 4px 8px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; }
     .loading-text { color: #9ca3af; font-style: italic; padding: 20px 0; }
+    .btn-csv { background: #fff; color: var(--navy); border: 1px solid #d1d5db; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-csv:hover { background: #f3f4f6; }
     .chapter-info { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 24px; }
     .chapter-info h3 { font-size: 16px; color: var(--navy); margin-bottom: 4px; }
     .chapter-info-meta { font-size: 13px; color: #6b7280; }
@@ -104,6 +106,9 @@
 
     <!-- MEMBERS TAB -->
     <div class="tab-content active" id="tab-members">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="btn-sm btn-csv" onclick="exportMembersCSV()">&#x2B73; Export CSV</button>
+      </div>
       <table class="admin-table">
         <thead>
           <tr><th>Name</th><th>Email</th><th>Institution</th><th>Title</th><th>Referred By</th></tr>
@@ -116,6 +121,9 @@
 
     <!-- EVENTS TAB -->
     <div class="tab-content" id="tab-events">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="btn-sm btn-csv" onclick="exportEventsCSV()">&#x2B73; Export CSV</button>
+      </div>
       <div class="admin-form">
         <h3>Add Event</h3>
         <div class="form-row">
@@ -167,6 +175,9 @@
 
     <!-- CODES TAB -->
     <div class="tab-content" id="tab-codes">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="btn-sm btn-csv" onclick="exportCodesCSV()">&#x2B73; Export CSV</button>
+      </div>
       <div class="chapter-info" id="chapterInfo">
         <p class="loading-text">Loading...</p>
       </div>
@@ -316,18 +327,23 @@
           `).join('')
         : '<p style="color:#9ca3af;font-size:13px;">No referral codes yet.</p>';
 
-      container.innerHTML = `
-        <h3>${myChapter ? myChapter.name : 'Your Chapter'}</h3>
-        <div class="chapter-info-meta">${myChapter ? [myChapter.city, myChapter.country].filter(Boolean).join(', ') : ''}</div>
-        <div style="margin-top:16px;">
-          <h4 style="font-size:14px;font-weight:600;color:#374151;margin-bottom:8px;">Referral Codes</h4>
-          ${codesHTML}
-          <div class="add-code-inline">
+      // Chapter Leads can only have 1 referral code — hide add form if one exists
+      const addFormHTML = codes.length === 0
+        ? `<div class="add-code-inline">
             <input type="text" id="newCode" placeholder="CODE" maxlength="20">
             <input type="number" id="newCodeMax" placeholder="Max" min="0" value="0" title="Max uses (0 = unlimited)">
             <input type="text" id="newCodeNote" placeholder="Note" style="width:160px;">
             <button class="btn-sm btn-add" onclick="addCode()">+ Add</button>
-          </div>
+          </div>`
+        : '';
+
+      container.innerHTML = `
+        <h3>${myChapter ? myChapter.name : 'Your Chapter'}</h3>
+        <div class="chapter-info-meta">${myChapter ? [myChapter.city, myChapter.country].filter(Boolean).join(', ') : ''}</div>
+        <div style="margin-top:16px;">
+          <h4 style="font-size:14px;font-weight:600;color:#374151;margin-bottom:8px;">Referral Code</h4>
+          ${codesHTML}
+          ${addFormHTML}
         </div>
       `;
     }
@@ -347,6 +363,49 @@
       const { error } = await sb.from('referral_codes').update({ active }).eq('id', id);
       if (error) { showMsg('Error: ' + error.message, 'error'); return; }
       showMsg(active ? 'Code activated.' : 'Code deactivated.', 'success');
+    }
+
+    // ========== CSV EXPORT ==========
+    function downloadCSV(rows, filename) {
+      const csv = rows.map(r => r.map(c => '"' + String(c ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function exportMembersCSV() {
+      const { data } = await sb.from('members').select('*').eq('chapter_id', myChapterId).order('first_name');
+      if (!data || !data.length) { showMsg('No members to export.', 'error'); return; }
+      const rows = [['Name', 'Email', 'Institution', 'Title', 'Referred By', 'Joined']];
+      data.forEach(m => rows.push([
+        (m.first_name || '') + ' ' + (m.last_name || ''),
+        m.email || '', m.school || '', m.member_title || 'Member',
+        m.referred_by || '', m.created_at ? new Date(m.created_at).toLocaleDateString() : ''
+      ]));
+      downloadCSV(rows, 'chapter_members.csv');
+      showMsg('Members exported!', 'success');
+    }
+
+    async function exportEventsCSV() {
+      const { data } = await sb.from('events').select('*').order('event_date', { ascending: true });
+      if (!data || !data.length) { showMsg('No events to export.', 'error'); return; }
+      const rows = [['Title', 'Type', 'Date', 'Location', 'Description', 'Portal']];
+      data.forEach(ev => rows.push([
+        ev.title, ev.event_type || '', ev.event_date || '', ev.location || '',
+        ev.description || '', ev.show_in_portal !== false ? 'Yes' : 'No'
+      ]));
+      downloadCSV(rows, 'events.csv');
+      showMsg('Events exported!', 'success');
+    }
+
+    async function exportCodesCSV() {
+      const { data } = await sb.from('referral_codes').select('*').eq('chapter_id', myChapterId).order('code');
+      if (!data || !data.length) { showMsg('No codes to export.', 'error'); return; }
+      const rows = [['Code', 'Times Used', 'Max Uses', 'Note', 'Active']];
+      data.forEach(c => rows.push([c.code, c.times_used || 0, c.max_uses || 'Unlimited', c.note || '', c.active ? 'Yes' : 'No']));
+      downloadCSV(rows, 'chapter_referral_codes.csv');
+      showMsg('Codes exported!', 'success');
     }
 
     // ========== INIT ==========
