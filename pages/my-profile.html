@@ -33,18 +33,15 @@
     .btn-wa { background: #25D366; color: #fff; }
     .visiting-card {
       max-width: 380px;
-      min-height: 200px;
       background: linear-gradient(135deg, var(--navy) 0%, #22345c 60%, #2a3f6a 100%);
       border-radius: 14px;
-      padding: 24px 28px;
+      padding: 20px 24px 16px;
       margin-top: 8px;
       position: relative;
       overflow: hidden;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
       box-shadow: 0 4px 20px rgba(27,42,74,0.25);
-      display: flex;
-      flex-direction: column;
     }
     .visiting-card:hover {
       transform: translateY(-2px);
@@ -66,20 +63,20 @@
       border-radius: 50%;
       background: rgba(255,255,255,0.04);
     }
-    .vc-top { display: flex; align-items: center; gap: 10px; margin-bottom: auto; position: relative; z-index: 1; }
-    .vc-logo { width: 36px; height: 36px; border-radius: 6px; }
-    .vc-org { color: rgba(255,255,255,0.5); font-size: 9px; font-weight: 600; letter-spacing: 1px; line-height: 1.3; }
-    .vc-body { position: relative; z-index: 1; margin-top: 14px; }
-    .vc-name { color: #fff; font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-    .vc-detail { color: rgba(255,255,255,0.55); font-size: 12px; margin-bottom: 2px; }
-    .vc-contact-row { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
-    .vc-contact-row svg { width: 11px; height: 11px; color: rgba(255,255,255,0.4); flex-shrink: 0; }
-    .vc-contact-row span { color: rgba(255,255,255,0.5); font-size: 10.5px; }
+    .vc-top { display: flex; align-items: center; gap: 8px; position: relative; z-index: 1; }
+    .vc-logo { width: 32px; height: 32px; border-radius: 6px; }
+    .vc-org { color: rgba(255,255,255,0.5); font-size: 9px; font-weight: 600; letter-spacing: 0.8px; line-height: 1.3; }
+    .vc-body { position: relative; z-index: 1; margin-top: 12px; }
+    .vc-name { color: #fff; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 3px; line-height: 1.2; }
+    .vc-detail { color: rgba(255,255,255,0.5); font-size: 11px; margin-bottom: 1px; }
+    .vc-contact-row { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+    .vc-contact-row svg { width: 10px; height: 10px; color: rgba(255,255,255,0.35); flex-shrink: 0; }
+    .vc-contact-row span { color: rgba(255,255,255,0.45); font-size: 10px; }
     .vc-verified {
-      position: absolute; top: 24px; right: 24px; z-index: 1;
+      position: absolute; top: 20px; right: 20px; z-index: 1;
     }
-    .vc-verified svg { width: 20px; height: 20px; }
-    .vc-footer { position: relative; z-index: 1; margin-top: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .vc-verified svg { width: 18px; height: 18px; }
+    .vc-footer { position: relative; z-index: 1; margin-top: 12px; display: flex; align-items: center; justify-content: space-between; }
     .vc-tap { color: rgba(255,255,255,0.3); font-size: 10px; font-weight: 500; letter-spacing: 0.5px; }
     .vc-share-row { display: flex; gap: 6px; }
     .vc-share-btn {
