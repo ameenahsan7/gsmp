@@ -237,6 +237,18 @@
   <script>
     const ADMIN_EMAILS = ['ameenahsan7@gmail.com', 'ameen.ahsan@propertyfinder.ae'];
 
+    // Breakglass: ?bg=YOUR_PASSPHRASE bypasses email check
+    // Hash of the passphrase stored here so it's not plaintext in source
+    const BG_HASH = '09593112ce6122a0c7ebc7de7b87f1ad0f63b7b826c85b3ea7ad4b304a541f66';
+    async function checkBreakglass() {
+      const bg = new URLSearchParams(window.location.search).get('bg');
+      if (!bg) return false;
+      const encoded = new TextEncoder().encode(bg);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
+      const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashHex === BG_HASH;
+    }
+
     let chapters = [];
     let allCodes = [];
     let editingEventId = null;
@@ -636,7 +648,8 @@
       const { data: { session } } = await sb.auth.getSession();
       if (!session) { window.location.href = 'login.html'; return; }
 
-      if (!ADMIN_EMAILS.includes(session.user.email)) {
+      const isBreakglass = await checkBreakglass();
+      if (!ADMIN_EMAILS.includes(session.user.email) && !isBreakglass) {
         document.querySelector('.admin-page').innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2 style="color:#991B1B;">Access Denied</h2><p>You do not have admin privileges.</p><a href="dashboard.html">Back to Dashboard</a></div>';
         return;
       }
