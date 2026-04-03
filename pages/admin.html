@@ -52,6 +52,26 @@
     .add-code-inline { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
     .add-code-inline input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; font-family: 'Inter', sans-serif; text-transform: uppercase; width: 140px; }
     .add-code-inline input[type="number"] { width: 70px; }
+
+    @media (max-width: 768px) {
+      .admin-page { padding: 20px 12px; }
+      .admin-header h1 { font-size: 22px; }
+      .admin-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .admin-tab { padding: 10px 16px; font-size: 13px; white-space: nowrap; }
+      .admin-stats-grid {
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 8px !important;
+      }
+      .admin-form .form-row { grid-template-columns: 1fr; }
+      .admin-table { font-size: 12px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .admin-table th, .admin-table td { padding: 8px 8px; white-space: nowrap; }
+      .member-chapter-select { font-size: 12px; padding: 3px 6px; }
+      .chapter-card { padding: 14px; }
+      .chapter-card-header { flex-direction: column; gap: 8px; }
+      .add-code-inline { flex-wrap: wrap; }
+      .add-code-inline input { width: 100% !important; }
+      .code-row { flex-wrap: wrap; gap: 6px; }
+    }
   </style>
 </head>
 <body>
@@ -67,7 +87,7 @@
     <div id="adminMsg" class="admin-msg"></div>
 
     <!-- ANALYTICS -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;">
+    <div class="admin-stats-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;">
       <div style="background:#f9fafb;border-radius:8px;padding:16px;text-align:center;">
         <div style="font-size:28px;font-weight:700;color:var(--navy);" id="statMembers">-</div>
         <div style="font-size:12px;color:#6b7280;margin-top:2px;">Members</div>

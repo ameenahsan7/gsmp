@@ -297,8 +297,10 @@
           const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
           const day = d.getDate();
           const time = d.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+          const hasDesc = ev.description && ev.description.trim();
+          const descText = hasDesc ? (ev.description.length > 280 ? ev.description.substring(0, 280) + '...' : ev.description) : '';
           return `
-            <div class="event-card">
+            <div class="event-card${hasDesc ? ' has-desc' : ''}" ${hasDesc ? 'onclick="this.classList.toggle(\'expanded\')"' : ''}>
               <div class="event-date">
                 <span class="event-month">${month}</span>
                 <span class="event-day">${day}</span>
@@ -307,7 +309,9 @@
                 <span class="event-type">${ev.event_type}</span>
                 <h4>${ev.title}</h4>
                 <span class="event-meta">${ev.location || ''} &middot; ${time}</span>
+                ${hasDesc ? `<div class="event-desc">${descText}</div>` : ''}
               </div>
+              ${hasDesc ? '<div class="expand-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>' : ''}
             </div>
           `;
         }).join('');

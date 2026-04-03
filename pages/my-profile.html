@@ -8,7 +8,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <style>
     @media (max-width: 768px) {
-      .profile-grid { grid-template-columns: 1fr !important; }
+      .profile-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+      .profile-field label { font-size: 11px; }
+      .profile-field p { font-size: 14px; }
+      .referral-box { flex-direction: column; gap: 10px; text-align: center; }
+      .share-actions { margin-left: 0; justify-content: center; }
+      .referral-code { font-size: 18px; }
+      .visiting-card { width: 100% !important; max-width: 100% !important; }
+      .vc-name { font-size: 20px !important; }
+      .vc-title-tag { font-size: 11px !important; }
+      .vc-logo { width: 60px !important; height: 60px !important; }
+      .vc-org { font-size: 8px !important; }
+      .vc-left { padding: 14px 8px !important; gap: 8px !important; }
+      .vc-right { padding: 18px 16px 14px !important; }
+      .vc-verified svg { width: 20px !important; height: 20px !important; }
+      .vc-badge { font-size: 8px !important; padding: 3px 8px !important; bottom: 12px !important; right: 12px !important; }
+      .vc-footer { padding: 6px 10px !important; }
+      .vc-share-btn { width: 24px !important; height: 24px !important; }
     }
     .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .profile-field label { font-size: 12px; color: #9ca3af; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
