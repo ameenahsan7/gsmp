@@ -31,22 +31,60 @@
     .share-btn svg { width: 18px; height: 18px; }
     .btn-copy { background: var(--navy); color: #fff; }
     .btn-wa { background: #25D366; color: #fff; }
-    .profile-card-preview {
-      background: linear-gradient(135deg, var(--navy) 0%, #2a3f6a 100%);
-      border-radius: 12px; padding: 20px 24px;
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    .visiting-card {
+      aspect-ratio: 1.75 / 1;
+      max-width: 380px;
+      background: linear-gradient(135deg, var(--navy) 0%, #22345c 60%, #2a3f6a 100%);
+      border-radius: 14px;
+      padding: 24px 28px;
       margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(27,42,74,0.25);
     }
-    .profile-card-preview .left { color: rgba(255,255,255,0.7); font-size: 13px; }
-    .profile-card-preview .left strong { color: #fff; font-weight: 600; }
-    .preview-btn {
-      background: rgba(255,255,255,0.15); color: #fff; border: none;
-      padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
-      cursor: pointer; display: flex; align-items: center; gap: 6px;
+    .visiting-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(27,42,74,0.35);
+    }
+    .visiting-card::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: rgba(196,154,60,0.12);
+    }
+    .visiting-card::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: -20px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .vc-top { display: flex; align-items: center; gap: 10px; margin-bottom: auto; position: relative; z-index: 1; }
+    .vc-logo { width: 28px; height: 28px; border-radius: 50%; opacity: 0.7; }
+    .vc-org { color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+    .vc-body { position: relative; z-index: 1; margin-top: 20px; }
+    .vc-name { color: #fff; font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+    .vc-detail { color: rgba(255,255,255,0.55); font-size: 12px; margin-bottom: 2px; }
+    .vc-verified {
+      position: absolute; top: 24px; right: 24px; z-index: 1;
+    }
+    .vc-verified svg { width: 20px; height: 20px; }
+    .vc-footer { position: relative; z-index: 1; margin-top: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .vc-tap { color: rgba(255,255,255,0.3); font-size: 10px; font-weight: 500; letter-spacing: 0.5px; }
+    .vc-share-row { display: flex; gap: 6px; }
+    .vc-share-btn {
+      width: 30px; height: 30px; border-radius: 6px; border: none;
+      background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
       transition: background 0.2s;
     }
-    .preview-btn:hover { background: rgba(255,255,255,0.25); }
-    .preview-btn svg { width: 16px; height: 16px; }
+    .vc-share-btn:hover { background: rgba(255,255,255,0.2); }
+    .vc-share-btn svg { width: 14px; height: 14px; }
     .status-pill {
       display: inline-flex; align-items: center; gap: 6px;
       background: #D1FAE5; color: #065F46; padding: 6px 14px;
@@ -157,17 +195,32 @@
 
       <!-- DIGITAL PROFILE CARD -->
       <div class="dash-section" id="shareSection" style="display:none;">
-        <h2>Digital Profile Card</h2>
-        <p style="color: #9ca3af; font-size: 13px; margin-bottom: 4px;">Your shareable GSMP identity — with contact info and a save-to-phone button.</p>
-        <div class="profile-card-preview">
-          <div class="left">
-            <strong id="cardName">—</strong><br>
-            Verified GSMP Member
+        <h2>Your Digital Card</h2>
+        <p style="color: #9ca3af; font-size: 13px; margin-bottom: 4px;">Tap to preview. Share it with anyone.</p>
+        <div class="visiting-card" onclick="window.open(document.getElementById('profileUrl').value, '_blank')">
+          <div class="vc-top">
+            <img src="../images/logo.jpeg" alt="GSMP" class="vc-logo">
+            <span class="vc-org">GSMP</span>
           </div>
-          <button class="preview-btn" onclick="window.open(document.getElementById('profileUrl').value, '_blank')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            View Card
-          </button>
+          <div class="vc-verified" title="Verified Member">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12.5l2.5 2.5 5.5-5.5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="vc-body">
+            <div class="vc-name" id="cardName">—</div>
+            <div class="vc-detail" id="cardSchool"></div>
+            <div class="vc-detail" id="cardCountry"></div>
+          </div>
+          <div class="vc-footer">
+            <span class="vc-tap">Tap to view full card</span>
+            <div class="vc-share-row">
+              <button class="vc-share-btn" title="Share via WhatsApp" onclick="event.stopPropagation();shareCardWhatsApp()">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              </button>
+              <button class="vc-share-btn" title="Copy link" onclick="event.stopPropagation();copyCardLink()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </button>
+            </div>
+          </div>
         </div>
         <input type="hidden" id="profileUrl" value="">
       </div>
@@ -187,6 +240,18 @@
       setTimeout(() => {
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
       }, 1500);
+    }
+
+    function shareCardWhatsApp() {
+      const name = _memberData.first_name || '';
+      const profileUrl = document.getElementById('profileUrl')?.value || '';
+      const msg = `Check out my GSMP profile card:\n${profileUrl}`;
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    }
+
+    function copyCardLink() {
+      const url = document.getElementById('profileUrl')?.value || '';
+      navigator.clipboard.writeText(url);
     }
 
     function shareWhatsApp() {
@@ -221,6 +286,8 @@
           const profileUrl = window.location.origin + '/gcmp/pages/profile.html?code=' + member.referral_code;
           document.getElementById('profileUrl').value = profileUrl;
           document.getElementById('cardName').textContent = `${member.first_name} ${member.last_name}`;
+          document.getElementById('cardSchool').textContent = member.school || '';
+          document.getElementById('cardCountry').textContent = member.country || '';
           document.getElementById('shareSection').style.display = 'block';
         }
 
