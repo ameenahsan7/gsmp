@@ -90,11 +90,17 @@
       position: absolute; top: 16px; right: 18px;
     }
     .vc-verified svg { width: 26px; height: 26px; }
-    .vc-sparkle {
-      position: absolute; bottom: 18px; right: 20px;
-      color: rgba(255,255,255,0.15);
+    .vc-badge {
+      position: absolute; bottom: 16px; right: 18px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      padding: 4px 10px;
+      color: rgba(255,255,255,0.4);
+      font-family: 'Inter', sans-serif;
+      font-size: 9px; font-weight: 600;
+      letter-spacing: 0.8px; text-transform: uppercase;
     }
-    .vc-sparkle svg { width: 28px; height: 28px; }
     .vc-footer {
       position: absolute; bottom: 0; left: 0; right: 0;
       padding: 8px 16px; display: flex; align-items: center;
@@ -261,10 +267,8 @@
             </div>
             <div class="vc-name" id="cardName">—</div>
             <div class="vc-title-tag" id="cardTitleTag">Member</div>
-            <!-- Sparkle decoration -->
-            <div class="vc-sparkle">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0L14.59 8.41L23 12L14.59 15.59L12 24L9.41 15.59L1 12L9.41 8.41L12 0Z"/></svg>
-            </div>
+            <!-- Member badge -->
+            <div class="vc-badge" id="cardBadge">Member</div>
             <div class="vc-footer">
               <span class="vc-tap">Tap to view</span>
               <div class="vc-share-row">
@@ -413,7 +417,9 @@
           const prefix = getPrefix(member.year);
           document.getElementById('cardName').textContent = `${prefix}${toTitleCase(member.first_name)} ${toTitleCase(member.last_name)}`;
           // Title: member_title (Member, Ambassador, Agent, etc.)
-          document.getElementById('cardTitleTag').textContent = member.member_title || 'Member';
+          const title = member.member_title || 'Member';
+          document.getElementById('cardTitleTag').textContent = title;
+          document.getElementById('cardBadge').textContent = title;
           document.getElementById('shareSection').style.display = 'block';
         }
 
