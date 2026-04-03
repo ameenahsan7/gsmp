@@ -254,7 +254,7 @@
 
       const { data: member, error } = await sb
         .from('members')
-        .select('first_name, last_name, school, year, country, email, phone, chapter_id, degree, field, specialty')
+        .select('first_name, last_name, school, year, country, city, email, phone, chapter_id, degree, field, specialty')
         .eq('referral_code', code.toUpperCase())
         .single();
 
@@ -278,6 +278,7 @@
       const cleanPhone = phone.replace(/[^+\d]/g, '');
       const whatsappNum = cleanPhone.replace('+', '');
       const school = member.school || '';
+      const city = toTitleCase(member.city || '');
       const country = toTitleCase(member.country);
       const degree = member.degree || '';
       const field = member.field || '';
@@ -319,7 +320,7 @@
             ${country ? `
             <div class="contact-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span>${country}${chapterName ? ' · ' + chapterName : ''}</span>
+              <span>${[city, country].filter(Boolean).join(', ')}${chapterName ? ' · ' + chapterName : ''}</span>
             </div>` : ''}
           </div>
 

@@ -166,6 +166,10 @@
             <p id="profileCountry">Loading...</p>
           </div>
           <div class="profile-field">
+            <label>City</label>
+            <p id="profileCity">Loading...</p>
+          </div>
+          <div class="profile-field">
             <label>Chapter</label>
             <p id="profileChapter">Loading...</p>
           </div>
@@ -304,6 +308,7 @@
         document.getElementById('profileSpecialty').textContent = member.specialty || '—';
         document.getElementById('profileYear').textContent = member.year || '—';
         document.getElementById('profileCountry').textContent = member.country || '—';
+        document.getElementById('profileCity').textContent = member.city || '—';
         document.getElementById('profileInterests').textContent = member.interests || '—';
         document.getElementById('myReferralCode').textContent = member.referral_code || '—';
 

@@ -64,6 +64,11 @@
         </div>
 
         <div class="form-group">
+          <label for="city">City</label>
+          <input type="text" id="city" placeholder="e.g. Dubai, Mumbai, London" required>
+        </div>
+
+        <div class="form-group">
           <label for="school">Institution</label>
           <input type="text" id="school" placeholder="e.g. Johns Hopkins, UCL, AIIMS" required>
         </div>
@@ -174,6 +179,7 @@
       const school = document.getElementById('school').value.trim();
       const year = document.getElementById('year').value;
       const country = document.getElementById('country').value.trim();
+      const city = document.getElementById('city').value.trim();
       const gender = document.getElementById('gender').value;
       const degree = document.getElementById('degree').value;
       const field = document.getElementById('field').value;
@@ -234,6 +240,7 @@
             school: school,
             year: year,
             country: country,
+            city: city,
             gender: gender,
             degree: degree,
             field: field,
