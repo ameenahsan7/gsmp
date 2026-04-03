@@ -101,6 +101,11 @@
       font-size: 13px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 1px; line-height: 1.4;
     }
+    .vc-code {
+      color: rgba(255,255,255,0.25); font-family: 'Inter', sans-serif;
+      font-size: 9px; font-weight: 500; letter-spacing: 2px;
+      margin-top: 6px; text-transform: uppercase;
+    }
     .vc-verified {
       position: absolute; top: 16px; right: 18px;
     }
@@ -271,6 +276,7 @@
             </div>
             <div class="vc-name" id="cardName">—</div>
             <div class="vc-title-tag" id="cardTitleTag">Member</div>
+            <div class="vc-code" id="cardCode"></div>
             <div class="vc-footer">
               <span class="vc-tap">Tap to view</span>
               <div class="vc-share-row">
@@ -439,6 +445,7 @@
           document.getElementById('cardName').textContent = `${prefix}${toTitleCase(member.first_name)} ${toTitleCase(member.last_name)}`;
           // Title: member_title (Member, Ambassador, Agent, etc.) — dynamic from DB
           document.getElementById('cardTitleTag').textContent = member.member_title || 'Member';
+          document.getElementById('cardCode').textContent = member.referral_code || '';
           document.getElementById('shareSection').style.display = 'block';
         }
 
