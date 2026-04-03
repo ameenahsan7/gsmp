@@ -32,64 +32,86 @@
     .btn-copy { background: var(--navy); color: #fff; }
     .btn-wa { background: #25D366; color: #fff; }
     .visiting-card {
-      max-width: 400px;
+      width: 520px;
+      max-width: 100%;
+      aspect-ratio: 3.5 / 2;
       display: flex;
       border-radius: 14px;
       overflow: hidden;
       margin-top: 8px;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(27,42,74,0.25);
+      box-shadow: 0 6px 28px rgba(27,42,74,0.30);
     }
     .visiting-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(27,42,74,0.35);
+      box-shadow: 0 10px 36px rgba(27,42,74,0.40);
     }
     /* Left panel — logo + branding */
     .vc-left {
-      width: 38%;
-      background: #f0f1f5;
+      width: 34%;
+      min-height: 100%;
+      background: #eceef2;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 14px;
-      gap: 8px;
+      padding: 24px 16px;
+      gap: 14px;
     }
-    .vc-logo { width: 56px; height: 56px; border-radius: 8px; }
-    .vc-org { color: var(--navy); font-size: 9px; font-weight: 700; letter-spacing: 0.6px; line-height: 1.35; text-align: center; text-transform: uppercase; }
+    .vc-logo { width: 80px; height: 80px; border-radius: 6px; object-fit: contain; }
+    .vc-org {
+      color: var(--navy); font-family: 'Inter', sans-serif;
+      font-size: 10px; font-weight: 800; letter-spacing: 0.8px;
+      line-height: 1.45; text-align: center; text-transform: uppercase;
+    }
     /* Right panel — info */
     .vc-right {
-      width: 62%;
-      background: linear-gradient(135deg, var(--navy) 0%, #22345c 60%, #2a3f6a 100%);
-      padding: 18px 18px 14px;
+      width: 66%;
+      min-height: 100%;
+      background: linear-gradient(145deg, #1B2A4A 0%, #1e3050 50%, #243a5e 100%);
+      padding: 28px 30px 24px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       position: relative;
     }
-    .vc-name { color: #fff; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; margin-bottom: 1px; line-height: 1.2; }
-    .vc-title-tag { color: var(--gold); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-    .vc-detail { color: rgba(255,255,255,0.5); font-size: 10px; margin-bottom: 1px; }
-    .vc-contact-row { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
-    .vc-contact-row svg { width: 9px; height: 9px; color: rgba(255,255,255,0.35); flex-shrink: 0; }
-    .vc-contact-row span { color: rgba(255,255,255,0.5); font-size: 9.5px; }
-    .vc-verified {
-      position: absolute; top: 12px; right: 12px;
+    .vc-name {
+      color: #fff; font-family: 'Playfair Display', serif;
+      font-size: 28px; font-weight: 700; line-height: 1.15;
+      margin-bottom: 6px;
     }
-    .vc-verified svg { width: 16px; height: 16px; }
-    .vc-footer { margin-top: 10px; display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
-    .vc-tap { color: rgba(255,255,255,0.25); font-size: 8px; font-weight: 500; letter-spacing: 0.3px; margin-right: auto; }
+    .vc-title-tag {
+      color: var(--gold); font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; line-height: 1.4;
+    }
+    .vc-verified {
+      position: absolute; top: 16px; right: 18px;
+    }
+    .vc-verified svg { width: 26px; height: 26px; }
+    .vc-sparkle {
+      position: absolute; bottom: 18px; right: 20px;
+      color: rgba(255,255,255,0.15);
+    }
+    .vc-sparkle svg { width: 28px; height: 28px; }
+    .vc-footer {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 8px 16px; display: flex; align-items: center;
+      justify-content: flex-end; gap: 4px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.15));
+      border-radius: 0 0 14px 0;
+    }
+    .vc-tap { color: rgba(255,255,255,0.3); font-size: 8px; font-weight: 500; letter-spacing: 0.3px; margin-right: auto; }
     .vc-share-row { display: flex; gap: 4px; }
     .vc-share-btn {
       width: 26px; height: 26px; border-radius: 5px; border: none;
-      background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.6);
       cursor: pointer; display: flex; align-items: center; justify-content: center;
       transition: background 0.2s;
     }
-    .vc-share-btn svg { width: 12px; height: 12px; }
-    .vc-share-btn:hover { background: rgba(255,255,255,0.2); }
-    .vc-share-btn svg { width: 14px; height: 14px; }
+    .vc-share-btn:hover { background: rgba(255,255,255,0.25); }
+    .vc-share-btn svg { width: 13px; height: 13px; }
     .status-pill {
       display: inline-flex; align-items: center; gap: 6px;
       background: #D1FAE5; color: #065F46; padding: 6px 14px;
@@ -232,24 +254,16 @@
             <img src="../images/logo.jpeg" alt="GSMP" class="vc-logo">
             <span class="vc-org">Galen Society of<br>Medical Professionals</span>
           </div>
-          <!-- Right: Info -->
+          <!-- Right: Name + Title only -->
           <div class="vc-right">
             <div class="vc-verified" title="Verified Member">
               <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12.5l2.5 2.5 5.5-5.5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <div class="vc-name" id="cardName">—</div>
-            <div class="vc-title-tag" id="cardTitleTag"></div>
-            <div class="vc-contact-row" id="cardLocation" style="display:none;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span id="cardLocationText"></span>
-            </div>
-            <div class="vc-contact-row" id="cardPhone" style="display:none;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              <span id="cardPhoneText"></span>
-            </div>
-            <div class="vc-contact-row" id="cardEmail" style="display:none;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
-              <span id="cardEmailText"></span>
+            <div class="vc-title-tag" id="cardTitleTag">Member</div>
+            <!-- Sparkle decoration -->
+            <div class="vc-sparkle">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0L14.59 8.41L23 12L14.59 15.59L12 24L9.41 15.59L1 12L9.41 8.41L12 0Z"/></svg>
             </div>
             <div class="vc-footer">
               <span class="vc-tap">Tap to view</span>
@@ -312,30 +326,28 @@
         const footer = card.querySelector('.vc-footer');
         if (footer) footer.style.display = 'none';
 
-        // Force business card ratio (3.5:2)
+        // Lock card to exact business card size
         const origStyles = card.style.cssText;
-        card.style.width = '420px';
-        card.style.height = '240px';
+        card.style.width = '520px';
         card.style.maxWidth = 'none';
-        // Force both panels to fill height
-        const left = card.querySelector('.vc-left');
-        const right = card.querySelector('.vc-right');
-        const origLeftStyle = left ? left.style.cssText : '';
-        const origRightStyle = right ? right.style.cssText : '';
-        if (left) left.style.height = '240px';
-        if (right) right.style.height = '240px';
+        card.style.aspectRatio = '3.5 / 2';
+        card.style.borderRadius = '14px';
 
+        // Wait a frame for layout
+        await new Promise(r => requestAnimationFrame(r));
+
+        const rect = card.getBoundingClientRect();
         const canvas = await html2canvas(card, {
           scale: 3,
           backgroundColor: null,
           useCORS: true,
-          logging: false
+          logging: false,
+          width: Math.round(rect.width),
+          height: Math.round(rect.height)
         });
 
-        // Restore everything
+        // Restore
         card.style.cssText = origStyles;
-        if (left) left.style.cssText = origLeftStyle;
-        if (right) right.style.cssText = origRightStyle;
         if (footer) footer.style.display = '';
 
         const link = document.createElement('a');
@@ -400,25 +412,8 @@
           document.getElementById('profileUrl').value = profileUrl;
           const prefix = getPrefix(member.year);
           document.getElementById('cardName').textContent = `${prefix}${toTitleCase(member.first_name)} ${toTitleCase(member.last_name)}`;
-          // Title tag: degree + specialty/field
-          const deg = (member.degree || '').toUpperCase();
-          const spec = member.specialty || member.field || '';
-          const titleParts = [deg, spec].filter(Boolean).join(' · ');
-          document.getElementById('cardTitleTag').textContent = titleParts || member.member_title || 'Member';
-          // Location
-          const loc = [member.city, member.country].filter(Boolean).join(', ');
-          if (loc) {
-            document.getElementById('cardLocationText').textContent = loc;
-            document.getElementById('cardLocation').style.display = 'flex';
-          }
-          if (member.phone) {
-            document.getElementById('cardPhoneText').textContent = member.phone;
-            document.getElementById('cardPhone').style.display = 'flex';
-          }
-          if (member.email) {
-            document.getElementById('cardEmailText').textContent = member.email;
-            document.getElementById('cardEmail').style.display = 'flex';
-          }
+          // Title: member_title (Member, Ambassador, Agent, etc.)
+          document.getElementById('cardTitleTag').textContent = member.member_title || 'Member';
           document.getElementById('shareSection').style.display = 'block';
         }
 
