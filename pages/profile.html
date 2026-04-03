@@ -163,6 +163,43 @@
     .save-contact-btn:hover { opacity: 0.9; }
     .save-contact-btn svg { width: 18px; height: 18px; }
 
+    .share-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      background: #fff;
+      color: var(--navy);
+      border: 1.5px solid var(--navy);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+    .share-btn:hover { background: var(--navy); color: #fff; }
+    .share-btn svg { width: 18px; height: 18px; }
+    .share-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--navy);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .share-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
     /* Footer */
     .profile-footer {
       text-align: center;
@@ -207,6 +244,22 @@
     function toTitleCase(str) {
       if (!str) return '';
       return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    // Share profile card
+    async function shareProfile(name) {
+      const url = window.location.href;
+      const text = `Check out ${name}'s profile on GSMP`;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: name + ' — GSMP', text: text, url: url });
+        } catch(e) { /* user cancelled */ }
+      } else {
+        await navigator.clipboard.writeText(url);
+        const toast = document.getElementById('shareToast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      }
     }
 
     // Determine title prefix based on role/year
@@ -352,7 +405,13 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
             Save Contact
           </button>
+
+          <button class="share-btn" onclick="shareProfile('${displayName}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share This Card
+          </button>
         </div>
+        <div class="share-toast" id="shareToast">Link copied!</div>
         <div class="profile-footer">
           <a href="../index.html">
             <img src="../images/logo.jpeg" alt="GSMP">
