@@ -12,165 +12,49 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #f8f9fc 0%, #eef1f8 100%);
+      background: linear-gradient(160deg, #f0f2f7 0%, #e4e8f0 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
     }
-    .profile-card {
-      background: #fff;
-      border-radius: 20px;
+
+    /* ── Business Card Shell ── */
+    .bcard {
       max-width: 400px;
       width: 100%;
+      border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(27,42,74,0.12), 0 1px 3px rgba(0,0,0,0.08);
+      box-shadow: 0 24px 64px rgba(27,42,74,0.16), 0 2px 6px rgba(0,0,0,0.06);
+      background: #fff;
     }
-    .profile-banner {
-      background: linear-gradient(135deg, var(--navy) 0%, #2a3f6a 100%);
-      padding: 40px 24px 52px;
-      text-align: center;
+
+    /* ── Top Banner ── */
+    .bcard-top {
+      background: linear-gradient(135deg, var(--navy) 0%, #263d66 50%, #1f3358 100%);
+      padding: 28px 24px 48px;
       position: relative;
+      text-align: center;
       overflow: visible;
     }
-    .profile-initials {
+    /* Decorative gold line */
+    .bcard-top::after {
+      content: '';
       position: absolute;
-      bottom: -32px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 64px;
-      height: 64px;
-      background: linear-gradient(135deg, var(--gold) 0%, #d4ad5a 100%);
-      border-radius: 50%;
-      border: 4px solid #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 700;
-      color: #fff;
-      z-index: 2;
-      letter-spacing: 1px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, var(--gold) 50%, transparent 100%);
     }
-    .profile-body {
-      padding: 44px 24px 8px;
-      text-align: center;
-    }
-    .profile-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--navy);
-      margin-bottom: 2px;
-    }
-    .profile-subtitle {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 14px;
-    }
-    .verified-tick {
-      display: inline-flex;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-    .verified-tick svg {
-      width: 22px;
-      height: 22px;
-    }
-
-    /* Contact info rows */
-    .contact-info {
-      text-align: left;
-      padding: 0 4px;
-      margin-bottom: 20px;
-    }
-    .contact-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid #f3f4f6;
-    }
-    .contact-row:last-child { border-bottom: none; }
-    .contact-row svg {
-      width: 16px;
-      height: 16px;
-      color: #9ca3af;
-      flex-shrink: 0;
-    }
-    .contact-row span {
-      font-size: 13px;
-      color: #374151;
-    }
-
-    /* Action buttons */
-    .action-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-      padding: 0 4px;
-      margin-bottom: 16px;
-    }
-    .action-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding: 14px 8px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-size: 11px;
-      font-weight: 600;
-      transition: all 0.2s;
-      border: none;
-      cursor: pointer;
-    }
-    .action-btn svg { width: 20px; height: 20px; }
-    .btn-call {
-      background: #EFF6FF;
-      color: #2563EB;
-    }
-    .btn-call:hover { background: #DBEAFE; }
-    .btn-whatsapp {
-      background: #F0FDF4;
-      color: #16A34A;
-    }
-    .btn-whatsapp:hover { background: #DCFCE7; }
-    .btn-email {
-      background: #FFF7ED;
-      color: #EA580C;
-    }
-    .btn-email:hover { background: #FFEDD5; }
-
-    /* Save contact */
-    .save-contact-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 14px;
-      background: var(--navy);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      margin-bottom: 8px;
-    }
-    .save-contact-btn:hover { opacity: 0.9; }
-    .save-contact-btn svg { width: 18px; height: 18px; }
-
-    .share-icon-btn {
+    .bcard-share {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 36px;
-      height: 36px;
-      background: rgba(255,255,255,0.15);
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.12);
       border: none;
       border-radius: 50%;
       display: flex;
@@ -180,20 +64,182 @@
       transition: background 0.2s;
       z-index: 3;
     }
-    .share-icon-btn:hover { background: rgba(255,255,255,0.3); }
-    .share-icon-btn svg { width: 16px; height: 16px; color: #fff; }
-    .member-tag {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
+    .bcard-share:hover { background: rgba(255,255,255,0.25); }
+    .bcard-share svg { width: 14px; height: 14px; color: rgba(255,255,255,0.7); }
+    /* GSMP watermark in banner */
+    .bcard-logo {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .bcard-logo img { width: 20px; height: 20px; border-radius: 50%; opacity: 0.4; }
+    .bcard-logo span { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; color: rgba(255,255,255,0.35); text-transform: uppercase; }
+    /* Initials avatar */
+    .bcard-avatar {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--gold) 0%, #d4ad5a 100%);
+      border-radius: 50%;
+      border: 3px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      z-index: 2;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    /* ── Card Body ── */
+    .bcard-body {
+      padding: 40px 24px 20px;
+      text-align: center;
+    }
+    .bcard-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 3px;
+      line-height: 1.2;
+    }
+    .bcard-credentials {
+      font-size: 12.5px;
       color: var(--gold);
-      background: rgba(196,154,60,0.1);
-      padding: 3px 12px;
-      border-radius: 20px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+    .bcard-location {
+      font-size: 12.5px;
+      color: #8b92a0;
+      margin-bottom: 10px;
+    }
+    /* Member tag + verified */
+    .bcard-badges {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .bcard-tag {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: var(--gold);
+      background: rgba(196,154,60,0.08);
+      border: 1px solid rgba(196,154,60,0.18);
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+    .bcard-verified svg { width: 18px; height: 18px; }
+
+    /* ── Divider ── */
+    .bcard-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+      margin: 0 8px 16px;
+    }
+
+    /* ── Contact rows ── */
+    .bcard-contact {
+      text-align: left;
+      padding: 0 8px;
+      margin-bottom: 18px;
+    }
+    .bcard-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 9px 0;
+    }
+    .bcard-row + .bcard-row { border-top: 1px solid #f5f6f8; }
+    .bcard-row svg { width: 15px; height: 15px; color: #b0b5c0; flex-shrink: 0; }
+    .bcard-row span { font-size: 13px; color: #374151; }
+
+    /* ── Action buttons ── */
+    .bcard-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      padding: 0 8px;
       margin-bottom: 14px;
     }
+    .bcard-act {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 12px 6px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 600;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .bcard-act svg { width: 18px; height: 18px; }
+    .act-call { background: #EEF4FF; color: #2563EB; }
+    .act-call:hover { background: #DBEAFE; }
+    .act-wa { background: #EEFBF3; color: #16A34A; }
+    .act-wa:hover { background: #DCFCE7; }
+    .act-mail { background: #FFF7ED; color: #EA580C; }
+    .act-mail:hover { background: #FFEDD5; }
+
+    /* ── Save contact ── */
+    .bcard-save {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: calc(100% - 16px);
+      margin: 0 8px 6px;
+      padding: 13px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .bcard-save:hover { opacity: 0.9; }
+    .bcard-save svg { width: 16px; height: 16px; }
+
+    /* ── Footer ── */
+    .bcard-footer {
+      text-align: center;
+      padding: 14px 24px 18px;
+      border-top: 1px solid #f3f4f6;
+    }
+    .bcard-footer a {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      text-decoration: none;
+      color: #c0c4cc;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      transition: color 0.2s;
+    }
+    .bcard-footer a:hover { color: var(--navy); }
+    .bcard-footer img { width: 16px; height: 16px; border-radius: 50%; opacity: 0.4; }
+
+    /* Toast */
     .share-toast {
       position: fixed;
       bottom: 30px;
@@ -212,30 +258,6 @@
     }
     .share-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Footer */
-    .profile-footer {
-      text-align: center;
-      padding: 16px 24px 22px;
-      border-top: 1px solid #f3f4f6;
-    }
-    .profile-footer a {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      text-decoration: none;
-      color: #b0b5bf;
-      font-size: 11px;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-    .profile-footer a:hover { color: var(--navy); }
-    .profile-footer img {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      opacity: 0.5;
-    }
-
     .loading-state { text-align: center; padding: 80px 20px; color: #9ca3af; }
     .error-state { text-align: center; padding: 60px 20px; }
     .error-state h2 { color: var(--navy); font-family: 'Playfair Display', serif; margin-bottom: 8px; }
@@ -243,7 +265,7 @@
   </style>
 </head>
 <body>
-  <div class="profile-card" id="profileCard">
+  <div class="bcard" id="profileCard">
     <div class="loading-state" id="loadingState">
       <p>Loading profile...</p>
     </div>
@@ -252,29 +274,32 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase-config.js"></script>
   <script>
-    // Proper Title Case
-    function toTitleCase(str) {
+    // Smart casing: handles abbreviations like UAE, USA, UK, etc.
+    const UPPERCASE_WORDS = new Set(['uae','usa','uk','us','eu','ussr','drc','car','png']);
+    function smartCase(str) {
       if (!str) return '';
-      return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+      return str.trim().split(/\s+/).map(w => {
+        const lower = w.toLowerCase();
+        if (UPPERCASE_WORDS.has(lower)) return w.toUpperCase();
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+      }).join(' ');
     }
 
-    // Share profile card
+    // Share
     async function shareProfile(name) {
       const url = window.location.href;
       const text = `Check out ${name}'s profile on GSMP`;
       if (navigator.share) {
-        try {
-          await navigator.share({ title: name + ' — GSMP', text: text, url: url });
-        } catch(e) { /* user cancelled */ }
+        try { await navigator.share({ title: name + ' — GSMP', text, url }); } catch(e) {}
       } else {
         await navigator.clipboard.writeText(url);
-        const toast = document.getElementById('shareToast');
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
+        const t = document.getElementById('shareToast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
       }
     }
 
-    // Determine title prefix based on role/year
+    // Title prefix
     function getPrefix(year) {
       if (!year) return '';
       const y = year.toLowerCase();
@@ -282,11 +307,10 @@
       return '';
     }
 
-    // Generate proper vCard
+    // vCard
     function generateVCard(firstName, lastName, prefix, phone, email, org, credential) {
       const lines = [
-        'BEGIN:VCARD',
-        'VERSION:3.0',
+        'BEGIN:VCARD', 'VERSION:3.0',
         'N:' + lastName + ';' + prefix + firstName + ';;;',
         'FN:' + prefix + firstName + ' ' + lastName,
       ];
@@ -296,9 +320,7 @@
       lines.push('ORG:GSMP' + (org ? ' - ' + org : ''));
       lines.push('NOTE:Verified member of the Galen Society of Medical Professionals');
       lines.push('END:VCARD');
-
-      const vcard = lines.join('\r\n');
-      const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+      const blob = new Blob([lines.join('\r\n')], { type: 'text/vcard;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -330,110 +352,109 @@
 
       let chapterName = '';
       if (member.chapter_id) {
-        const { data: chapter } = await sb.from('chapters').select('name').eq('id', member.chapter_id).single();
-        chapterName = chapter ? chapter.name : '';
+        const { data: ch } = await sb.from('chapters').select('name').eq('id', member.chapter_id).single();
+        chapterName = ch ? ch.name : '';
       }
 
-      const firstName = toTitleCase(member.first_name);
-      const lastName = toTitleCase(member.last_name);
+      const firstName = smartCase(member.first_name);
+      const lastName = smartCase(member.last_name);
       const prefix = getPrefix(member.year);
       const displayName = prefix + firstName + ' ' + lastName;
       const initials = (firstName.charAt(0) || '') + (lastName.charAt(0) || '');
       const phone = member.phone || '';
       const cleanPhone = phone.replace(/[^+\d]/g, '');
       const whatsappNum = cleanPhone.replace('+', '');
-      const school = member.school || '';
-      const city = toTitleCase(member.city || '');
-      const country = toTitleCase(member.country);
-      const degree = member.degree || '';
-      const field = member.field || '';
-      const specialty = toTitleCase(member.specialty || '');
-      // Build credential line: e.g. "MBBS · Cardiology" or "MD · Surgery" or just "MBBS"
+      const city = smartCase(member.city || '');
+      const country = smartCase(member.country);
+      const degree = (member.degree || '').toUpperCase();
+      const field = smartCase(member.field || '');
+      const specialty = smartCase(member.specialty || '');
       const credParts = [degree, specialty || field].filter(Boolean);
       const credentialLine = credParts.join(' · ');
+      const memberTitle = member.member_title || 'Member';
+      const locationLine = [city, country].filter(Boolean).join(', ');
 
       document.title = displayName + ' — GSMP';
-
-      // Store data for vCard download
-      window._vcardData = { firstName, lastName, prefix, cleanPhone, email: member.email || '', school, credentialLine };
-
-      const memberTitle = member.member_title || 'Member';
+      window._vcardData = { firstName, lastName, prefix, cleanPhone, email: member.email || '', school: member.school || '', credentialLine };
 
       card.innerHTML = `
-        <div class="profile-banner">
-          <button class="share-icon-btn" onclick="shareProfile('${displayName}')" title="Share">
+        <div class="bcard-top">
+          <div class="bcard-logo">
+            <img src="../images/logo.jpeg" alt="">
+            <span>GSMP</span>
+          </div>
+          <button class="bcard-share" onclick="shareProfile('${displayName.replace(/'/g, "\\'")}')" title="Share">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           </button>
-          <div class="profile-initials">${initials}</div>
+          <div class="bcard-avatar">${initials}</div>
         </div>
-        <div class="profile-body">
-          <h1 class="profile-name">${displayName}</h1>
-          ${credentialLine ? `<p style="font-size:13px;color:var(--gold);font-weight:600;margin-bottom:2px;">${credentialLine}</p>` : ''}
-          <p class="profile-subtitle">${country}</p>
-          <span class="member-tag">${memberTitle}</span>
-          <div class="verified-tick" title="Verified GSMP Member">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" fill="#16A34A"/>
-              <path d="M8 12.5l2.5 2.5 5.5-5.5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <div class="bcard-body">
+          <h1 class="bcard-name">${displayName}</h1>
+          ${credentialLine ? `<p class="bcard-credentials">${credentialLine}</p>` : ''}
+          <p class="bcard-location">${locationLine}</p>
+          <div class="bcard-badges">
+            <span class="bcard-tag">${memberTitle}</span>
+            <span class="bcard-verified" title="Verified GSMP Member">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12.5l2.5 2.5 5.5-5.5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
           </div>
+          <div class="bcard-divider"></div>
 
-          <div class="contact-info">
+          <div class="bcard-contact">
             ${phone ? `
-            <div class="contact-row">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <div class="bcard-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               <span>${phone}</span>
             </div>` : ''}
-            <div class="contact-row">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <div class="bcard-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
               <span>${member.email || '—'}</span>
             </div>
-            ${country ? `
-            <div class="contact-row">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span>${[city, country].filter(Boolean).join(', ')}${chapterName ? ' · ' + chapterName : ''}</span>
+            ${locationLine ? `
+            <div class="bcard-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>${locationLine}${chapterName ? ' · ' + chapterName : ''}</span>
             </div>` : ''}
           </div>
 
-          <div class="action-buttons">
+          <div class="bcard-actions">
             ${phone ? `
-            <a href="tel:${cleanPhone}" class="action-btn btn-call">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <a href="tel:${cleanPhone}" class="bcard-act act-call">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               Call
             </a>
-            <a href="https://wa.me/${whatsappNum}" target="_blank" class="action-btn btn-whatsapp">
+            <a href="https://wa.me/${whatsappNum}" target="_blank" class="bcard-act act-wa">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
               WhatsApp
             </a>` : `
-            <a href="#" class="action-btn btn-call" style="opacity:0.3;pointer-events:none;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <a href="#" class="bcard-act act-call" style="opacity:0.3;pointer-events:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               Call
             </a>
-            <a href="#" class="action-btn btn-whatsapp" style="opacity:0.3;pointer-events:none;">
+            <a href="#" class="bcard-act act-wa" style="opacity:0.3;pointer-events:none;">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
               WhatsApp
             </a>`}
-            <a href="mailto:${member.email || ''}" class="action-btn btn-email">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <a href="mailto:${member.email || ''}" class="bcard-act act-mail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
               Email
             </a>
           </div>
 
-          <button class="save-contact-btn" onclick="generateVCard(window._vcardData.firstName, window._vcardData.lastName, window._vcardData.prefix, window._vcardData.cleanPhone, window._vcardData.email, window._vcardData.school, window._vcardData.credentialLine)">
+          <button class="bcard-save" onclick="generateVCard(window._vcardData.firstName, window._vcardData.lastName, window._vcardData.prefix, window._vcardData.cleanPhone, window._vcardData.email, window._vcardData.school, window._vcardData.credentialLine)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
             Save Contact
           </button>
-
         </div>
-        <div class="share-toast" id="shareToast">Link copied!</div>
-        <div class="profile-footer">
+        <div class="bcard-footer">
           <a href="../index.html">
             <img src="../images/logo.jpeg" alt="GSMP">
-            GSMP
+            Galen Society of Medical Professionals
           </a>
         </div>
       `;
     })();
   </script>
+  <div class="share-toast" id="shareToast">Link copied!</div>
 </body>
 </html>
