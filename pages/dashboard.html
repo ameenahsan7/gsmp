@@ -101,7 +101,8 @@
           const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
           const day = d.getDate();
           const time = d.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-          const desc = ev.description || '';
+          const rawDesc = ev.description || '';
+          const desc = rawDesc.length > 280 ? rawDesc.substring(0, 280) + '...' : rawDesc;
           return `
             <div class="event-card${desc ? ' has-desc' : ''}" onclick="${desc ? 'this.classList.toggle(\'expanded\')' : ''}">
               <div class="event-date">
