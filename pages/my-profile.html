@@ -310,14 +310,15 @@
         const origMaxWidth = card.style.maxWidth;
         const origBorderRadius = card.style.borderRadius;
 
-        // Force business card ratio (3.5 x 2 inches = 1050 x 600 at 300dpi concept)
-        card.style.width = '420px';
-        card.style.height = '240px';
+        // Force compact card size, let height auto-fit content
+        card.style.width = '360px';
+        card.style.height = 'auto';
         card.style.maxWidth = 'none';
         card.style.borderRadius = '14px';
+        card.style.padding = '18px 22px 18px';
 
         const canvas = await html2canvas(card, {
-          scale: 4,
+          scale: 3,
           backgroundColor: '#1B2A4A',
           useCORS: true,
           logging: false
@@ -328,6 +329,7 @@
         card.style.height = origHeight;
         card.style.maxWidth = origMaxWidth;
         card.style.borderRadius = origBorderRadius;
+        card.style.padding = '';
         if (footer) footer.style.display = '';
 
         const link = document.createElement('a');
