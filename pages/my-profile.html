@@ -408,7 +408,7 @@
       const code = document.getElementById('myReferralCode').textContent;
       const name = _memberData.first_name || '';
       const profileUrl = document.getElementById('profileUrl')?.value || '';
-      const msg = `Hey! I'm a member of GSMP (Galen Society of Medical Professionals) — a global network for medical professionals. I'd love for you to join.\n\nUse my referral code: *${code}*\nSign up here: https://ameenahsan7.github.io/gcmp/pages/join.html\n\nCheck out my profile: ${profileUrl}`;
+      const msg = `Hey! I'm a member of GSMP (Galen Society of Medical Professionals) — a global network for medical professionals. I'd love for you to join.\n\nUse my referral code: *${code}*\nSign up here: https://ameenahsan7.github.io/gsmp/pages/join.html\n\nCheck out my profile: ${profileUrl}`;
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     }
 
@@ -439,7 +439,7 @@
         document.getElementById('myReferralCode').textContent = member.referral_code || '—';
 
         if (member.referral_code) {
-          const profileUrl = window.location.origin + '/gcmp/pages/profile.html?code=' + member.referral_code;
+          const profileUrl = window.location.origin + '/gsmp/pages/profile.html?code=' + member.referral_code;
           document.getElementById('profileUrl').value = profileUrl;
           const prefix = getPrefix(member.year);
           document.getElementById('cardName').textContent = `${prefix}${toTitleCase(member.first_name)} ${toTitleCase(member.last_name)}`;
