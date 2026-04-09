@@ -202,7 +202,7 @@
 
       <table class="admin-table">
         <thead>
-          <tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>Created By</th><th>Portal</th><th></th></tr>
+          <tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>RSVPs</th><th>Created By</th><th>Portal</th><th></th></tr>
         </thead>
         <tbody id="eventsTable">
           <tr><td colspan="6" class="loading-text">Loading...</td></tr>
@@ -395,20 +395,40 @@
       if (error) { showMsg('Error loading events: ' + error.message, 'error'); return; }
       const tbody = document.getElementById('eventsTable');
       if (!data || !data.length) {
-        tbody.innerHTML = '<tr><td colspan="7" style="color:#9ca3af;">No events yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="color:#9ca3af;">No events yet.</td></tr>';
         return;
       }
       document.getElementById('statEvents').textContent = data.length;
+      // Fetch RSVP counts + names
+      const eventIds = data.map(e => e.id);
+      const { data: rsvps } = await sb.from('event_rsvps').select('event_id, member_id').in('event_id', eventIds);
+      const rsvpCounts = {};
+      const rsvpMemberIds = {};
+      if (rsvps) rsvps.forEach(r => {
+        rsvpCounts[r.event_id] = (rsvpCounts[r.event_id] || 0) + 1;
+        if (!rsvpMemberIds[r.event_id]) rsvpMemberIds[r.event_id] = [];
+        rsvpMemberIds[r.event_id].push(r.member_id);
+      });
+      const allMemberIds = [...new Set((rsvps || []).map(r => r.member_id))];
+      let memberNames = {};
+      if (allMemberIds.length > 0) {
+        const { data: members } = await sb.from('members').select('id, first_name, last_name').in('id', allMemberIds);
+        if (members) members.forEach(m => { memberNames[m.id] = m.first_name + ' ' + m.last_name; });
+      }
+
       tbody.innerHTML = data.map(ev => {
         const d = ev.event_date ? new Date(ev.event_date).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
         const portalChecked = ev.show_in_portal !== false ? 'checked' : '';
         const creator = ev.created_by ? ev.created_by.split('@')[0] : '—';
+        const count = rsvpCounts[ev.id] || 0;
+        const names = (rsvpMemberIds[ev.id] || []).map(id => memberNames[id] || 'Unknown').join(', ');
         return `
           <tr>
             <td><strong>${ev.title}</strong></td>
             <td>${ev.event_type || '—'}</td>
             <td>${d}</td>
             <td>${ev.location || '—'}</td>
+            <td style="text-align:center;" title="${names}"><strong style="color:${count > 0 ? '#059669' : '#9ca3af'}">${count}</strong></td>
             <td style="font-size:12px;color:#6b7280;">${creator}</td>
             <td><input type="checkbox" ${portalChecked} onchange="togglePortal('${ev.id}', this.checked)"></td>
             <td class="admin-actions">

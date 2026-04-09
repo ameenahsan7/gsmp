@@ -112,6 +112,8 @@
         }
       }
 
+      const userId = session.user.id;
+
       // Fetch upcoming events (only those marked show_in_portal)
       const { data: events } = await sb
         .from('events')
@@ -120,6 +122,43 @@
         .gte('event_date', new Date().toISOString())
         .order('event_date', { ascending: true })
         .limit(5);
+
+      // Fetch all RSVPs for these events
+      let myRsvps = new Set();
+      let rsvpCounts = {};
+      if (events && events.length > 0) {
+        const eventIds = events.map(e => e.id);
+        // Get my RSVPs
+        const { data: myR } = await sb.from('event_rsvps').select('event_id').eq('member_id', userId).in('event_id', eventIds);
+        if (myR) myR.forEach(r => myRsvps.add(r.event_id));
+        // Get counts per event
+        const { data: allR } = await sb.from('event_rsvps').select('event_id').in('event_id', eventIds);
+        if (allR) allR.forEach(r => { rsvpCounts[r.event_id] = (rsvpCounts[r.event_id] || 0) + 1; });
+      }
+
+      // RSVP toggle function
+      window.toggleRsvp = async function(eventId, btn) {
+        btn.disabled = true;
+        const hasRsvp = myRsvps.has(eventId);
+        if (hasRsvp) {
+          await sb.from('event_rsvps').delete().eq('member_id', userId).eq('event_id', eventId);
+          myRsvps.delete(eventId);
+          rsvpCounts[eventId] = Math.max(0, (rsvpCounts[eventId] || 1) - 1);
+          btn.classList.remove('rsvpd');
+          btn.innerHTML = '<span class="rsvp-label">RSVP</span>';
+        } else {
+          await sb.from('event_rsvps').insert({ event_id: eventId, member_id: userId });
+          myRsvps.add(eventId);
+          rsvpCounts[eventId] = (rsvpCounts[eventId] || 0) + 1;
+          btn.classList.add('rsvpd');
+          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span class="rsvp-label">Going</span>';
+        }
+        // Update count display
+        const countEl = btn.parentElement.querySelector('.rsvp-count');
+        const c = rsvpCounts[eventId] || 0;
+        if (countEl) countEl.innerHTML = c > 0 ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> ${c} going` : '';
+        btn.disabled = false;
+      };
 
       const eventsContainer = document.getElementById('eventsContainer');
       if (events && events.length > 0) {
@@ -130,8 +169,15 @@
           const time = d.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
           const rawDesc = ev.description || '';
           const desc = rawDesc.length > 280 ? rawDesc.substring(0, 280) + '...' : rawDesc;
+          const isRsvpd = myRsvps.has(ev.id);
+          const count = rsvpCounts[ev.id] || 0;
           return `
-            <div class="event-card${desc ? ' has-desc' : ''}" onclick="${desc ? 'this.classList.toggle(\'expanded\')' : ''}">
+            <div class="event-card${desc ? ' has-desc' : ''}">
+              <button class="rsvp-btn${isRsvpd ? ' rsvpd' : ''}" onclick="event.stopPropagation(); toggleRsvp(${ev.id}, this)">
+                ${isRsvpd
+                  ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span class="rsvp-label">Going</span>'
+                  : '<span class="rsvp-label">RSVP</span>'}
+              </button>
               <div class="event-date">
                 <span class="event-month">${month}</span>
                 <span class="event-day">${day}</span>
@@ -140,12 +186,17 @@
                 <span class="event-type">${ev.event_type}</span>
                 <h4>${ev.title}</h4>
                 <span class="event-meta">${ev.location || ''} &middot; ${time}</span>
+                <div class="rsvp-count">${count > 0 ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> ${count} going` : ''}</div>
                 ${desc ? `<div class="event-desc">${desc}</div>` : ''}
               </div>
               ${desc ? '<svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' : ''}
             </div>
           `;
         }).join('');
+        // Re-attach expand toggle
+        document.querySelectorAll('.event-card.has-desc').forEach(card => {
+          card.addEventListener('click', () => card.classList.toggle('expanded'));
+        });
       } else {
         eventsContainer.innerHTML = '<p style="color: var(--gray-400);">No upcoming events yet.</p>';
       }

@@ -346,6 +346,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   border-radius: var(--radius-md);
   padding: 24px;
   transition: all var(--transition);
+  position: relative;
 }
 .event-card:hover { box-shadow: var(--shadow-md); border-color: var(--burgundy); }
 .event-date {
@@ -410,6 +411,42 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   margin-top: 10px;
   overflow-y: auto;
 }
+
+/* --- RSVP --- */
+.rsvp-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid var(--navy);
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+}
+.rsvp-btn:hover { background: var(--navy); color: #fff; }
+.rsvp-btn.rsvpd {
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
+}
+.rsvp-btn.rsvpd:hover { background: #DC2626; border-color: #DC2626; }
+.rsvp-btn.rsvpd:hover .rsvp-label { display: none; }
+.rsvp-btn.rsvpd:hover::after { content: 'Cancel'; }
+.rsvp-count {
+  font-size: 11px;
+  color: var(--gray-400);
+  margin-top: 4px;
+}
+.rsvp-count svg { width: 13px; height: 13px; vertical-align: -2px; margin-right: 2px; }
 
 /* --- FAQ --- */
 .faq-list { display: flex; flex-direction: column; gap: 8px; }
