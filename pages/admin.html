@@ -66,24 +66,43 @@
     .edit-actions { display: flex; gap: 6px; margin-top: 8px; }
 
     @media (max-width: 768px) {
-      .admin-page { padding: 20px 12px; }
+      .admin-page { padding: 16px 10px; }
+      .admin-header { flex-direction: column; align-items: flex-start; gap: 8px; }
       .admin-header h1 { font-size: 22px; }
-      .admin-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .admin-tab { padding: 10px 16px; font-size: 13px; white-space: nowrap; }
+      .admin-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      .admin-tabs::-webkit-scrollbar { display: none; }
+      .admin-tab { padding: 12px 16px; font-size: 13px; white-space: nowrap; min-height: 44px; }
       .admin-stats-grid {
         grid-template-columns: 1fr 1fr 1fr !important;
         gap: 8px !important;
       }
+      .admin-form { padding: 16px; }
       .admin-form .form-row { grid-template-columns: 1fr; }
+      .admin-form input, .admin-form select, .admin-form textarea { padding: 10px 12px; font-size: 16px; }
       .admin-table { font-size: 12px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
       .admin-table th, .admin-table td { padding: 8px 8px; white-space: nowrap; }
-      .member-chapter-select { font-size: 12px; padding: 3px 6px; }
+      .member-chapter-select { font-size: 14px; padding: 6px 8px; min-height: 36px; }
+      .btn-sm { min-height: 40px; min-width: 40px; padding: 8px 14px; font-size: 13px; }
+      .btn-csv { min-height: 40px; padding: 8px 12px; font-size: 12px; }
+      .admin-actions { gap: 8px; flex-wrap: wrap; }
       .chapter-card { padding: 14px; }
       .chapter-card-header { flex-direction: column; gap: 8px; }
       .add-code-inline { flex-wrap: wrap; }
-      .add-code-inline input { width: 100% !important; }
+      .add-code-inline input { width: 100% !important; font-size: 16px; padding: 10px; }
       .code-row { flex-wrap: wrap; gap: 6px; }
+      .edit-inline { padding: 12px; }
       .edit-inline .form-row { grid-template-columns: 1fr; }
+      .edit-inline input, .edit-inline select, .edit-inline textarea { padding: 10px; font-size: 16px; }
+      .edit-actions { flex-wrap: wrap; }
+      .admin-back { font-size: 13px; min-height: 44px; display: inline-flex; align-items: center; }
+    }
+    @media (max-width: 380px) {
+      .admin-page { padding: 12px 8px; }
+      .admin-header h1 { font-size: 20px; }
+      .admin-tab { padding: 10px 12px; font-size: 12px; }
+      .admin-stats-grid { grid-template-columns: 1fr !important; }
+      .admin-form { padding: 12px; }
+      .chapter-card { padding: 12px; }
     }
   </style>
 </head>

@@ -30,22 +30,22 @@
         <div class="form-row">
           <div class="form-group">
             <label for="firstName">First Name</label>
-            <input type="text" id="firstName" placeholder="Galen" required>
+            <input type="text" id="firstName" placeholder="Galen" required autocomplete="given-name">
           </div>
           <div class="form-group">
             <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" placeholder="of Pergamon" required>
+            <input type="text" id="lastName" placeholder="of Pergamon" required autocomplete="family-name">
           </div>
         </div>
 
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" placeholder="you@medschool.edu" required>
+          <input type="email" id="email" placeholder="you@medschool.edu" required inputmode="email" autocomplete="email">
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Min 8 characters" minlength="8" required>
+          <input type="password" id="password" placeholder="Min 8 characters" minlength="8" required autocomplete="new-password">
         </div>
 
         <div class="form-row">
@@ -140,7 +140,7 @@
 
         <div class="form-group">
           <label for="phone">Phone (with country code)</label>
-          <input type="tel" id="phone" placeholder="e.g. +971501234567" required>
+          <input type="tel" id="phone" placeholder="e.g. +971501234567" required inputmode="tel" autocomplete="tel">
         </div>
 
         <div class="form-group">
