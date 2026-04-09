@@ -183,7 +183,7 @@
 
       <table class="admin-table">
         <thead>
-          <tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>Portal</th><th></th></tr>
+          <tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>Created By</th><th>Portal</th><th></th></tr>
         </thead>
         <tbody id="eventsTable">
           <tr><td colspan="6" class="loading-text">Loading...</td></tr>
@@ -209,6 +209,7 @@
     let myChapter = null;
     let myMemberId = null;
     let editingEventId = null;
+    let currentUserEmail = '';
 
     // Tab switching
     document.querySelectorAll('.admin-tab').forEach(tab => {
@@ -301,7 +302,7 @@
       const description = document.getElementById('newChDesc').value.trim();
       if (!name) { showMsg('Chapter name is required.', 'error'); return; }
 
-      const { data, error } = await sb.from('chapters').insert({ name, city, country, status, description }).select().single();
+      const { data, error } = await sb.from('chapters').insert({ name, city, country, status, description, created_by: currentUserEmail }).select().single();
       if (error) { showMsg('Error: ' + error.message, 'error'); return; }
 
       // Auto-assign this chapter to the current member
@@ -375,19 +376,21 @@
       if (error) { showMsg('Error loading events: ' + error.message, 'error'); return; }
       const tbody = document.getElementById('eventsTable');
       if (!data || !data.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="color:#9ca3af;">No events yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="color:#9ca3af;">No events yet.</td></tr>';
         return;
       }
       document.getElementById('statEvents').textContent = data.length;
       tbody.innerHTML = data.map(ev => {
         const d = ev.event_date ? new Date(ev.event_date).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
         const portalChecked = ev.show_in_portal !== false ? 'checked' : '';
+        const creator = ev.created_by ? ev.created_by.split('@')[0] : '—';
         return `
           <tr>
             <td><strong>${ev.title}</strong></td>
             <td>${ev.event_type || '—'}</td>
             <td>${d}</td>
             <td>${ev.location || '—'}</td>
+            <td style="font-size:12px;color:#6b7280;">${creator}</td>
             <td><input type="checkbox" ${portalChecked} onchange="togglePortal('${ev.id}', this.checked)"></td>
             <td class="admin-actions">
               <button class="btn-sm btn-edit" onclick="editEvent('${ev.id}','${ev.title.replace(/'/g,"\\'")}','${ev.event_type || ''}','${ev.event_date || ''}','${(ev.location||'').replace(/'/g,"\\'")}','${(ev.description||'').replace(/'/g,"\\'")}',${ev.show_in_portal !== false})">Edit</button>
@@ -441,7 +444,7 @@
         showMsg('Event updated!', 'success');
         cancelEventEdit();
       } else {
-        const { error } = await sb.from('events').insert({ title, event_type, event_date, location, description, show_in_portal });
+        const { error } = await sb.from('events').insert({ title, event_type, event_date, location, description, show_in_portal, created_by: currentUserEmail });
         if (error) { showMsg('Error: ' + error.message, 'error'); return; }
         showMsg('Event added!', 'success');
         document.getElementById('eventTitle').value = '';
@@ -483,6 +486,7 @@
               <span class="code-badge">${c.code}</span>
               <span class="code-meta">Used: ${c.times_used || 0}${c.max_uses ? '/' + c.max_uses : ''}</span>
               <span class="code-meta">${c.note || ''}</span>
+              ${c.created_by ? '<span class="code-meta" style="font-size:11px;opacity:0.7;">by ' + c.created_by.split('@')[0] + '</span>' : ''}
               <span style="margin-left:auto;display:flex;gap:4px;align-items:center;">
                 <input type="checkbox" ${c.active ? 'checked' : ''} onchange="toggleCode('${c.id}', this.checked)" title="Active">
               </span>
@@ -516,7 +520,7 @@
       const max_uses = parseInt(document.getElementById('newCodeMax').value) || 0;
       const note = document.getElementById('newCodeNote').value.trim();
       if (!code) { showMsg('Code is required.', 'error'); return; }
-      const { error } = await sb.from('referral_codes').insert({ code, max_uses, note, chapter_id: myChapterId, active: true, times_used: 0 });
+      const { error } = await sb.from('referral_codes').insert({ code, max_uses, note, chapter_id: myChapterId, active: true, times_used: 0, created_by: currentUserEmail });
       if (error) { showMsg('Error: ' + error.message, 'error'); return; }
       showMsg('Code added!', 'success');
       loadCodes();
@@ -576,6 +580,7 @@
       const { data: { session } } = await sb.auth.getSession();
       if (!session) { window.location.href = 'login.html'; return; }
 
+      currentUserEmail = session.user.email;
       // Get member data — must be Chapter Lead
       const { data: member } = await sb.from('members').select('*').eq('id', session.user.id).single();
 
