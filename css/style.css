@@ -412,6 +412,127 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   overflow-y: auto;
 }
 
+/* --- ARTICLES --- */
+.articles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 28px;
+}
+.article-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+.article-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); border-color: var(--burgundy); }
+.article-img {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: var(--gray-100);
+}
+.article-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.article-card:hover .article-img img { transform: scale(1.05); }
+.article-body {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.article-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--burgundy);
+  background: rgba(107,33,63,0.08);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  align-self: flex-start;
+}
+.article-body h3 {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+.article-body p {
+  font-size: 14px;
+  color: var(--gray-600);
+  line-height: 1.6;
+  flex: 1;
+}
+.article-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-100);
+  font-size: 12px;
+  color: var(--gray-400);
+}
+.article-author { font-weight: 600; color: var(--gray-600); }
+.article-empty { text-align: center; padding: 40px 20px; color: var(--gray-400); font-size: 15px; }
+
+/* Spotlight / Community cards (smaller, horizontal) */
+.spotlight-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.spotlight-card {
+  display: flex;
+  gap: 20px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  padding: 20px;
+  transition: all var(--transition);
+  align-items: flex-start;
+}
+.spotlight-card:hover { box-shadow: var(--shadow-md); border-color: var(--burgundy); }
+.spotlight-img {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--gray-100);
+}
+.spotlight-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.spotlight-body h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.spotlight-body p {
+  font-size: 13px;
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+.spotlight-date { font-size: 11px; color: var(--gray-400); margin-top: 8px; }
+
 /* --- RSVP --- */
 .rsvp-btn {
   position: absolute;
@@ -695,6 +816,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   .dash-grid { grid-template-columns: repeat(2, 1fr); }
   .chapters-grid { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .articles-grid { grid-template-columns: 1fr 1fr; }
+  .spotlight-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
@@ -826,6 +949,20 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   .page-header { padding: 90px 0 40px; }
   .page-header h1 { font-size: 26px; }
   .page-header p { font-size: 15px; }
+
+  /* ── Articles / Spotlight ── */
+  .articles-grid { grid-template-columns: 1fr; gap: 16px; }
+  .article-card:hover { transform: none; }
+  .article-img { height: 180px; }
+  .article-body { padding: 18px; }
+  .article-body h3 { font-size: 17px; }
+  .article-body p { font-size: 13px; }
+  .spotlight-grid { grid-template-columns: 1fr; gap: 14px; }
+  .spotlight-card { padding: 16px; gap: 14px; }
+  .spotlight-card:hover { transform: none; }
+  .spotlight-img { width: 80px; height: 80px; }
+  .spotlight-body h4 { font-size: 15px; }
+  .spotlight-body p { font-size: 12px; }
 }
 
 /* ── Extra small phones ── */
@@ -849,4 +986,9 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   .dash-grid { grid-template-columns: 1fr; }
   .dash-card .dash-value { font-size: 20px; }
   .footer-grid { grid-template-columns: 1fr; }
+  .article-img { height: 150px; }
+  .article-body { padding: 14px; }
+  .article-body h3 { font-size: 15px; }
+  .spotlight-card { flex-direction: column; }
+  .spotlight-img { width: 100%; height: 140px; }
 }

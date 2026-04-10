@@ -132,6 +132,19 @@
     </div>
   </section>
 
+  <!-- NEWS & INSIGHTS -->
+  <section class="section" id="news">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-tag">Latest</p>
+        <h2>News &amp; Insights</h2>
+      </div>
+      <div class="articles-grid" id="newsGrid">
+        <p class="article-empty">Loading articles...</p>
+      </div>
+    </div>
+  </section>
+
   <!-- GROWTH PATH -->
   <section class="section" id="growth">
     <div class="container container-sm">
@@ -183,6 +196,19 @@
             <div style="font-size:13px;color:#9ca3af;">Highest recognition. Lasting impact and leadership.</div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FROM THE COMMUNITY -->
+  <section class="section section-alt" id="community-stories">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-tag">Community</p>
+        <h2>From The Community</h2>
+      </div>
+      <div class="spotlight-grid" id="spotlightGrid">
+        <p class="article-empty">Loading community updates...</p>
       </div>
     </div>
   </section>
@@ -287,6 +313,63 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-config.js"></script>
   <script>
+    // ── Load Articles (News & Insights + Community Spotlight) ──
+    (async () => {
+      const { data: articles } = await sb
+        .from('articles')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+
+      // Split by category
+      const news = (articles || []).filter(a => a.category === 'news');
+      const community = (articles || []).filter(a => a.category === 'community');
+
+      // ── News & Insights (vertical cards, max 6) ──
+      const newsGrid = document.getElementById('newsGrid');
+      if (news.length > 0) {
+        newsGrid.innerHTML = news.slice(0, 6).map(a => {
+          const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+          const excerpt = a.excerpt || (a.content ? (a.content.length > 120 ? a.content.substring(0, 120) + '...' : a.content) : '');
+          return `
+            <div class="article-card">
+              ${a.image_url ? `<div class="article-img"><img src="${a.image_url}" alt="${a.title}" loading="lazy"></div>` : ''}
+              <div class="article-body">
+                ${a.tag ? `<span class="article-tag">${a.tag}</span>` : '<span class="article-tag">News</span>'}
+                <h3>${a.title}</h3>
+                <p>${excerpt}</p>
+                <div class="article-meta">
+                  <span class="article-author">${a.author || 'GSMP'}</span>
+                  <span>${date}</span>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+      } else {
+        newsGrid.innerHTML = '<p class="article-empty">No articles published yet. Stay tuned!</p>';
+      }
+
+      // ── From The Community (horizontal spotlight cards, max 6) ──
+      const spotGrid = document.getElementById('spotlightGrid');
+      if (community.length > 0) {
+        spotGrid.innerHTML = community.slice(0, 6).map(a => {
+          const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric' });
+          const excerpt = a.excerpt || (a.content ? (a.content.length > 100 ? a.content.substring(0, 100) + '...' : a.content) : '');
+          return `
+            <div class="spotlight-card">
+              ${a.image_url ? `<div class="spotlight-img"><img src="${a.image_url}" alt="${a.title}" loading="lazy"></div>` : ''}
+              <div class="spotlight-body">
+                <h4>${a.title}</h4>
+                <p>${excerpt}</p>
+                <span class="spotlight-date">${date}</span>
+              </div>
+            </div>`;
+        }).join('');
+      } else {
+        spotGrid.innerHTML = '<p class="article-empty">No community updates yet. Check back soon!</p>';
+      }
+    })();
+
     // Load events on landing page (all events)
     (async () => {
       const { data: events } = await sb

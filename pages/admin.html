@@ -138,6 +138,7 @@
       <button class="admin-tab active" data-tab="chapters">Chapters</button>
       <button class="admin-tab" data-tab="events">Events</button>
       <button class="admin-tab" data-tab="members">Members</button>
+      <button class="admin-tab" data-tab="articles">Articles</button>
     </div>
 
     <!-- CHAPTERS TAB -->
@@ -249,6 +250,63 @@
           <tr><td colspan="6" class="loading-text">Loading...</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- ARTICLES TAB -->
+    <div class="tab-content" id="tab-articles">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="btn-sm btn-csv" onclick="exportArticlesCSV()">&#x2B73; Export CSV</button>
+      </div>
+      <div class="admin-form">
+        <h3 id="articleFormTitle">Add Article</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Title *</label>
+            <input type="text" id="articleTitle" placeholder="Article title">
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="articleCategory">
+              <option value="news">News &amp; Insights</option>
+              <option value="community">Community Spotlight</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tag Label</label>
+            <input type="text" id="articleTag" placeholder="e.g. Research, Opinion, Event Recap">
+          </div>
+          <div class="form-group">
+            <label>Author</label>
+            <input type="text" id="articleAuthor" placeholder="Author name (default: GSMP)">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Excerpt / Summary *</label>
+          <textarea id="articleExcerpt" placeholder="Short summary shown on cards (2-3 sentences)" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Full Content</label>
+          <textarea id="articleContent" placeholder="Full article content (optional — can add later)" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Image URL</label>
+          <input type="text" id="articleImage" placeholder="https://images.unsplash.com/... or any image URL">
+          <span style="font-size:11px;color:#9ca3af;">Image auto-fits any size. Use Unsplash, Pexels or any direct image link.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">
+            <input type="checkbox" id="articlePublished" checked> Published (visible on homepage)
+          </label>
+        </div>
+        <div style="margin-top:12px;">
+          <button class="btn-sm btn-add" id="articleSubmitBtn" onclick="addArticle()">Add Article</button>
+        </div>
+      </div>
+      <div id="articlesListContainer">
+        <p class="loading-text">Loading articles...</p>
+      </div>
     </div>
   </div>
 
@@ -725,6 +783,145 @@
       showMsg('Members exported!', 'success');
     }
 
+    // ========== ARTICLES ==========
+    let editingArticleId = null;
+
+    async function loadArticles() {
+      const { data, error } = await sb.from('articles').select('*').order('created_at', { ascending: false });
+      const container = document.getElementById('articlesListContainer');
+      if (error) { showMsg('Error loading articles: ' + error.message, 'error'); return; }
+      if (!data || !data.length) {
+        container.innerHTML = '<p style="color:#9ca3af;">No articles yet. Add one above.</p>';
+        return;
+      }
+      container.innerHTML = data.map(a => {
+        const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+        const statusBadge = a.published
+          ? '<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Published</span>'
+          : '<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Draft</span>';
+        const catLabel = a.category === 'community' ? 'Community' : 'News';
+        const imgPreview = a.image_url
+          ? `<img src="${a.image_url}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;" onerror="this.style.display='none'">`
+          : '<div style="width:60px;height:60px;background:#f3f4f6;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:10px;">No img</div>';
+        return `
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:12px;">
+            ${imgPreview}
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <strong style="font-size:15px;color:var(--navy);">${a.title}</strong>
+                ${statusBadge}
+                <span style="font-size:11px;color:#9ca3af;background:#f3f4f6;padding:2px 8px;border-radius:10px;">${catLabel}</span>
+              </div>
+              <p style="font-size:13px;color:#6b7280;margin:0 0 6px;line-height:1.4;">${a.excerpt || (a.content ? a.content.substring(0, 100) + '...' : 'No content')}</p>
+              <div style="font-size:11px;color:#9ca3af;">By ${a.author || 'GSMP'} · ${date}${a.tag ? ' · ' + a.tag : ''}</div>
+            </div>
+            <div class="admin-actions" style="flex-shrink:0;">
+              <button class="btn-sm btn-edit" onclick="editArticle('${a.id}')">Edit</button>
+              <button class="btn-sm" style="background:${a.published ? '#FEF3C7' : '#D1FAE5'};color:${a.published ? '#92400E' : '#065F46'};border:none;" onclick="toggleArticlePublish('${a.id}', ${!a.published})">${a.published ? 'Unpublish' : 'Publish'}</button>
+              <button class="btn-sm btn-danger" onclick="deleteArticle('${a.id}')">Delete</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function addArticle() {
+      const title = document.getElementById('articleTitle').value.trim();
+      const category = document.getElementById('articleCategory').value;
+      const tag = document.getElementById('articleTag').value.trim();
+      const author = document.getElementById('articleAuthor').value.trim();
+      const excerpt = document.getElementById('articleExcerpt').value.trim();
+      const content = document.getElementById('articleContent').value.trim();
+      const image_url = document.getElementById('articleImage').value.trim();
+      const published = document.getElementById('articlePublished').checked;
+
+      if (!title || !excerpt) { showMsg('Title and excerpt are required.', 'error'); return; }
+
+      const payload = { title, category, tag: tag || null, author: author || 'GSMP', excerpt, content: content || null, image_url: image_url || null, published, created_by: currentUserEmail };
+
+      if (editingArticleId) {
+        const { error } = await sb.from('articles').update(payload).eq('id', editingArticleId);
+        if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+        showMsg('Article updated!', 'success');
+        cancelArticleEdit();
+      } else {
+        const { error } = await sb.from('articles').insert(payload);
+        if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+        showMsg('Article added!', 'success');
+        clearArticleForm();
+      }
+      loadArticles();
+    }
+
+    function clearArticleForm() {
+      document.getElementById('articleTitle').value = '';
+      document.getElementById('articleTag').value = '';
+      document.getElementById('articleAuthor').value = '';
+      document.getElementById('articleExcerpt').value = '';
+      document.getElementById('articleContent').value = '';
+      document.getElementById('articleImage').value = '';
+      document.getElementById('articlePublished').checked = true;
+      document.getElementById('articleCategory').value = 'news';
+    }
+
+    async function editArticle(id) {
+      const { data: a } = await sb.from('articles').select('*').eq('id', id).single();
+      if (!a) { showMsg('Article not found.', 'error'); return; }
+      editingArticleId = id;
+      document.getElementById('articleTitle').value = a.title || '';
+      document.getElementById('articleCategory').value = a.category || 'news';
+      document.getElementById('articleTag').value = a.tag || '';
+      document.getElementById('articleAuthor').value = a.author || '';
+      document.getElementById('articleExcerpt').value = a.excerpt || '';
+      document.getElementById('articleContent').value = a.content || '';
+      document.getElementById('articleImage').value = a.image_url || '';
+      document.getElementById('articlePublished').checked = a.published !== false;
+      document.getElementById('articleFormTitle').textContent = 'Edit Article';
+      document.getElementById('articleSubmitBtn').textContent = 'Update Article';
+      if (!document.getElementById('articleCancelBtn')) {
+        document.getElementById('articleSubmitBtn').insertAdjacentHTML('afterend',
+          ' <button class="btn-sm btn-edit" id="articleCancelBtn" onclick="cancelArticleEdit()">Cancel</button>');
+      }
+      // Scroll to form
+      document.getElementById('articleFormTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelArticleEdit() {
+      editingArticleId = null;
+      clearArticleForm();
+      document.getElementById('articleFormTitle').textContent = 'Add Article';
+      document.getElementById('articleSubmitBtn').textContent = 'Add Article';
+      const cancelBtn = document.getElementById('articleCancelBtn');
+      if (cancelBtn) cancelBtn.remove();
+    }
+
+    async function toggleArticlePublish(id, published) {
+      const { error } = await sb.from('articles').update({ published }).eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      showMsg(published ? 'Article published!' : 'Article unpublished.', 'success');
+      loadArticles();
+    }
+
+    async function deleteArticle(id) {
+      if (!confirm('Delete this article? This cannot be undone.')) return;
+      const { error } = await sb.from('articles').delete().eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      showMsg('Article deleted.', 'success');
+      loadArticles();
+    }
+
+    async function exportArticlesCSV() {
+      const { data } = await sb.from('articles').select('*').order('created_at', { ascending: false });
+      if (!data || !data.length) { showMsg('No articles to export.', 'error'); return; }
+      const rows = [['Title', 'Category', 'Tag', 'Author', 'Excerpt', 'Published', 'Image URL', 'Created At', 'Created By']];
+      data.forEach(a => rows.push([
+        a.title, a.category || '', a.tag || '', a.author || '', a.excerpt || '',
+        a.published ? 'Yes' : 'No', a.image_url || '',
+        a.created_at ? new Date(a.created_at).toLocaleDateString() : '', a.created_by || ''
+      ]));
+      downloadCSV(rows, 'gsmp_articles.csv');
+      showMsg('Articles exported!', 'success');
+    }
+
     // ========== ANALYTICS ==========
     async function loadAnalytics() {
       const [members, chaps, evts] = await Promise.all([
@@ -752,6 +949,7 @@
       await loadChapters();
       loadEvents();
       loadMembers();
+      loadArticles();
       loadAnalytics();
 
       document.getElementById('logoutBtn').addEventListener('click', async (e) => {
