@@ -52,6 +52,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 
 /* --- LAYOUT --- */
 .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+.container-wide { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
 .container-sm { max-width: 800px; }
 .section { padding: 80px 0; }
 .section-alt { background: var(--gray-50); }
@@ -427,7 +428,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   overflow: hidden;
   border: 1px solid var(--gray-200);
   transition: all var(--transition);
-  height: 380px;
+  height: 420px;
 }
 .article-featured:hover { box-shadow: var(--shadow-lg); border-color: var(--burgundy); }
 .article-featured .article-img {
