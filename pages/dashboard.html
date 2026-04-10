@@ -173,7 +173,7 @@
           const count = rsvpCounts[ev.id] || 0;
           return `
             <div class="event-card${desc ? ' has-desc' : ''}">
-              <button class="rsvp-btn${isRsvpd ? ' rsvpd' : ''}" onclick="event.stopPropagation(); toggleRsvp(${ev.id}, this)">
+              <button class="rsvp-btn${isRsvpd ? ' rsvpd' : ''}" onclick="event.stopPropagation(); toggleRsvp('${ev.id}', this)">
                 ${isRsvpd
                   ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span class="rsvp-label">Going</span>'
                   : '<span class="rsvp-label">RSVP</span>'}
