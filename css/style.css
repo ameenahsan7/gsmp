@@ -415,7 +415,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 /* --- ARTICLES --- */
 .articles-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 28px;
 }
 .article-card {
@@ -474,6 +474,10 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   color: var(--gray-600);
   line-height: 1.6;
   flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .article-meta {
   display: flex;
@@ -491,7 +495,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 /* Spotlight / Community cards (smaller, horizontal) */
 .spotlight-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 24px;
 }
 .spotlight-card {
@@ -530,6 +534,10 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   font-size: 13px;
   color: var(--gray-600);
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .spotlight-date { font-size: 11px; color: var(--gray-400); margin-top: 8px; }
 
