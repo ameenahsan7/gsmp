@@ -300,6 +300,11 @@
           <input type="text" id="articleImage" placeholder="https://images.unsplash.com/... or any image URL">
           <span style="font-size:11px;color:#9ca3af;">Image auto-fits any size. Best results with 600px+ wide images. Use Unsplash, Pexels or any direct image link.</span>
         </div>
+        <div class="form-group">
+          <label>Publish Date</label>
+          <input type="date" id="articleDate" style="max-width:220px;">
+          <span style="font-size:11px;color:#9ca3af;">Override the publish date. Defaults to today if left empty.</span>
+        </div>
         <div style="display:flex;align-items:center;gap:16px;">
           <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">
             <input type="checkbox" id="articlePublished" checked> Published (visible on homepage)
@@ -838,10 +843,12 @@
       const content = document.getElementById('articleContent').value.trim();
       const image_url = document.getElementById('articleImage').value.trim();
       const published = document.getElementById('articlePublished').checked;
+      const dateVal = document.getElementById('articleDate').value;
 
       if (!title || !excerpt) { showMsg('Title and excerpt are required.', 'error'); return; }
 
       const payload = { title, category, tag: tag || null, author: author || 'GSMP', excerpt, content: content || null, image_url: image_url || null, published, created_by: currentUserEmail };
+      if (dateVal) payload.created_at = new Date(dateVal).toISOString();
 
       if (editingArticleId) {
         const { error } = await sb.from('articles').update(payload).eq('id', editingArticleId);
@@ -866,6 +873,7 @@
       document.getElementById('articleImage').value = '';
       document.getElementById('articlePublished').checked = true;
       document.getElementById('articleCategory').value = 'news';
+      document.getElementById('articleDate').value = '';
     }
 
     async function editArticle(id) {
@@ -880,6 +888,7 @@
       document.getElementById('articleContent').value = a.content || '';
       document.getElementById('articleImage').value = a.image_url || '';
       document.getElementById('articlePublished').checked = a.published !== false;
+      document.getElementById('articleDate').value = a.created_at ? a.created_at.slice(0,10) : '';
       document.getElementById('articleFormTitle').textContent = 'Edit Article';
       document.getElementById('articleSubmitBtn').textContent = 'Update Article';
       if (!document.getElementById('articleCancelBtn')) {
