@@ -325,43 +325,65 @@
       const news = (articles || []).filter(a => a.category === 'news');
       const community = (articles || []).filter(a => a.category === 'community');
 
-      // ── News & Insights (vertical cards, max 6) ──
+      // ── News & Insights (featured hero + secondary cards) ──
       const newsGrid = document.getElementById('newsGrid');
       if (news.length > 0) {
-        newsGrid.innerHTML = news.slice(0, 6).map(a => {
-          const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
-          const excerpt = a.excerpt || (a.content ? (a.content.length > 120 ? a.content.substring(0, 120) + '...' : a.content) : '');
-          return `
-            <div class="article-card">
-              ${a.image_url ? `<div class="article-img"><img src="${a.image_url}" alt="${a.title}" loading="lazy"></div>` : ''}
-              <div class="article-body">
-                ${a.tag ? `<span class="article-tag">${a.tag}</span>` : '<span class="article-tag">News</span>'}
-                <h3>${a.title}</h3>
-                <p>${excerpt}</p>
-                <div class="article-meta">
-                  <span class="article-author">${a.author || 'GSMP'}</span>
-                  <span>${date}</span>
-                </div>
+        const featured = news[0];
+        const rest = news.slice(1, 6);
+        const fDate = new Date(featured.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+        const fExcerpt = featured.excerpt || (featured.content ? featured.content.substring(0, 200) : '');
+
+        let html = `
+          <div class="article-featured">
+            ${featured.image_url ? `<div class="article-img"><img src="${featured.image_url}" alt="${featured.title}" loading="lazy"></div>` : ''}
+            <div class="article-body">
+              ${featured.tag ? `<span class="article-tag">${featured.tag}</span>` : '<span class="article-tag">News</span>'}
+              <h3>${featured.title}</h3>
+              <p>${fExcerpt}</p>
+              <div class="article-meta">
+                <span class="article-author">${featured.author || 'GSMP'}</span>
+                <span class="article-meta-dot">&middot;</span>
+                <span>${fDate}</span>
               </div>
-            </div>`;
-        }).join('');
+            </div>
+          </div>`;
+
+        if (rest.length > 0) {
+          html += '<div class="articles-secondary">' + rest.map(a => {
+            const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+            return `
+              <div class="article-card">
+                ${a.image_url ? `<div class="article-img"><img src="${a.image_url}" alt="${a.title}" loading="lazy"></div>` : ''}
+                <div class="article-body">
+                  <h3>${a.title}</h3>
+                  <p>${a.excerpt || ''}</p>
+                  <div class="article-meta">
+                    <span class="article-author">${a.author || 'GSMP'}</span>
+                    <span class="article-meta-dot">&middot;</span>
+                    <span>${date}</span>
+                  </div>
+                </div>
+              </div>`;
+          }).join('') + '</div>';
+        }
+        newsGrid.innerHTML = html;
       } else {
         newsGrid.innerHTML = '<p class="article-empty">No articles published yet. Stay tuned!</p>';
       }
 
-      // ── From The Community (horizontal spotlight cards, max 6) ──
+      // ── From The Community (full-width alternating image/text layout) ──
       const spotGrid = document.getElementById('spotlightGrid');
       if (community.length > 0) {
-        spotGrid.innerHTML = community.slice(0, 6).map(a => {
-          const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric' });
-          const excerpt = a.excerpt || (a.content ? (a.content.length > 100 ? a.content.substring(0, 100) + '...' : a.content) : '');
+        spotGrid.innerHTML = community.slice(0, 4).map(a => {
+          const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+          const excerpt = a.excerpt || (a.content ? a.content.substring(0, 180) : '');
           return `
             <div class="spotlight-card">
               ${a.image_url ? `<div class="spotlight-img"><img src="${a.image_url}" alt="${a.title}" loading="lazy"></div>` : ''}
               <div class="spotlight-body">
                 <h4>${a.title}</h4>
                 <p>${excerpt}</p>
-                <span class="spotlight-date">${date}</span>
+                <span class="spotlight-date">${a.author || 'GSMP'} &middot; ${date}</span>
               </div>
             </div>`;
         }).join('');
