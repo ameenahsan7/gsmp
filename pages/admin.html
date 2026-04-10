@@ -262,7 +262,8 @@
         <div class="form-row">
           <div class="form-group">
             <label>Title *</label>
-            <input type="text" id="articleTitle" placeholder="Article title">
+            <input type="text" id="articleTitle" placeholder="Article title" maxlength="80">
+            <span style="font-size:11px;color:#9ca3af;">Max 80 characters</span>
           </div>
           <div class="form-group">
             <label>Category *</label>
@@ -275,7 +276,8 @@
         <div class="form-row">
           <div class="form-group">
             <label>Tag Label</label>
-            <input type="text" id="articleTag" placeholder="e.g. Research, Opinion, Event Recap">
+            <input type="text" id="articleTag" placeholder="e.g. Research, Opinion, Event Recap" maxlength="20">
+            <span style="font-size:11px;color:#9ca3af;">1–2 words (e.g. Research, Opinion)</span>
           </div>
           <div class="form-group">
             <label>Author</label>
@@ -284,16 +286,18 @@
         </div>
         <div class="form-group">
           <label>Excerpt / Summary *</label>
-          <textarea id="articleExcerpt" placeholder="Short summary shown on cards (2-3 sentences)" rows="2"></textarea>
+          <textarea id="articleExcerpt" placeholder="Short summary shown on cards (2-3 sentences)" rows="2" maxlength="150"></textarea>
+          <span style="font-size:11px;color:#9ca3af;">100–150 characters recommended. News cards show ~120 chars, Community cards show ~100 chars.</span>
         </div>
         <div class="form-group">
           <label>Full Content</label>
           <textarea id="articleContent" placeholder="Full article content (optional — can add later)" rows="4"></textarea>
+          <span style="font-size:11px;color:#9ca3af;">No limit. Not shown on homepage — for future article pages.</span>
         </div>
         <div class="form-group">
           <label>Image URL</label>
           <input type="text" id="articleImage" placeholder="https://images.unsplash.com/... or any image URL">
-          <span style="font-size:11px;color:#9ca3af;">Image auto-fits any size. Use Unsplash, Pexels or any direct image link.</span>
+          <span style="font-size:11px;color:#9ca3af;">Image auto-fits any size. Best results with 600px+ wide images. Use Unsplash, Pexels or any direct image link.</span>
         </div>
         <div style="display:flex;align-items:center;gap:16px;">
           <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">
