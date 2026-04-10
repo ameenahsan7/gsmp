@@ -28,21 +28,22 @@
     .admin-form label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #374151; }
     .admin-form input, .admin-form select, .admin-form textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; font-family: 'Inter', sans-serif; }
     .admin-form textarea { resize: vertical; min-height: 60px; }
-    .btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
-    .btn-add { background: var(--navy); color: #fff; }
-    .btn-add:hover { opacity: 0.9; }
-    .btn-danger { background: #EF4444; color: #fff; }
-    .btn-danger:hover { background: #DC2626; }
+    .btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 6px; border: 1px solid #d1d5db; cursor: pointer; font-weight: 600; background: #fff; color: var(--navy); transition: all 0.15s; }
+    .btn-sm:hover { background: #f3f4f6; }
+    .btn-add { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .btn-add:hover { opacity: 0.9; background: var(--navy); }
+    .btn-danger { background: #fff; color: #991B1B; border-color: #991B1B; }
+    .btn-danger:hover { background: #FEF2F2; }
     .admin-actions { display: flex; gap: 6px; }
     .admin-msg { padding: 10px 14px; border-radius: 6px; font-size: 14px; margin-bottom: 16px; display: none; }
-    .admin-msg.success { display: block; background: #D1FAE5; color: #065F46; }
-    .admin-msg.error { display: block; background: #FEE2E2; color: #991B1B; }
     .admin-back { text-decoration: none; color: var(--navy); font-size: 14px; font-weight: 500; }
     .admin-back:hover { text-decoration: underline; }
     .member-chapter-select { padding: 4px 8px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; }
     .loading-text { color: #9ca3af; font-style: italic; padding: 20px 0; }
-    .btn-csv { background: #fff; color: var(--navy); border: 1px solid #d1d5db; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-csv { background: #fff; color: var(--navy); border: 1px solid #d1d5db; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
     .btn-csv:hover { background: #f3f4f6; }
+    .admin-msg.success { display: block; background: #f0f4f8; color: var(--navy); border: 1px solid #d1d5db; }
+    .admin-msg.error { display: block; background: #fff; color: #991B1B; border: 1px solid #e5c7c7; }
     .chapter-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
     .chapter-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
     .chapter-card-header h4 { font-size: 16px; color: var(--navy); margin: 0; }
@@ -55,8 +56,8 @@
     .add-code-inline { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
     .add-code-inline input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; font-family: 'Inter', sans-serif; text-transform: uppercase; width: 140px; }
     .add-code-inline input[type="number"] { width: 70px; }
-    .btn-edit { background: #f3f4f6; color: var(--navy); border: 1px solid #d1d5db; }
-    .btn-edit:hover { background: #e5e7eb; }
+    .btn-edit { background: #fff; color: var(--navy); border: 1px solid #d1d5db; }
+    .btn-edit:hover { background: #f3f4f6; }
     .edit-inline { background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 16px; margin-top: 12px; }
     .edit-inline .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .edit-inline .form-group { margin-bottom: 10px; }
@@ -293,11 +294,7 @@
           <textarea id="articleExcerpt" placeholder="Short summary shown on cards (2-3 sentences)" rows="3" maxlength="600"></textarea>
           <span style="font-size:11px;color:#9ca3af;">Featured news cards show up to ~500 chars. Community cards show ~300 chars. Write 3-5 sentences for best results.</span>
         </div>
-        <div class="form-group">
-          <label>Full Content</label>
-          <textarea id="articleContent" placeholder="Full article content (optional — can add later)" rows="4"></textarea>
-          <span style="font-size:11px;color:#9ca3af;">No limit. Not shown on homepage — for future article pages.</span>
-        </div>
+        <textarea id="articleContent" style="display:none;"></textarea>
         <div class="form-group">
           <label>Image URL</label>
           <input type="text" id="articleImage" placeholder="https://images.unsplash.com/... or any image URL">
@@ -805,8 +802,8 @@
       container.innerHTML = data.map(a => {
         const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
         const statusBadge = a.published
-          ? '<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Published</span>'
-          : '<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Draft</span>';
+          ? '<span style="background:#f0f4f8;color:var(--navy);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid #d1d5db;">Published</span>'
+          : '<span style="background:#fff;color:#6b7280;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid #d1d5db;">Draft</span>';
         const catLabel = a.category === 'community' ? 'Community' : 'News';
         const imgPreview = a.image_url
           ? `<img src="${a.image_url}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;" onerror="this.style.display='none'">`
@@ -825,7 +822,7 @@
             </div>
             <div class="admin-actions" style="flex-shrink:0;">
               <button class="btn-sm btn-edit" onclick="editArticle('${a.id}')">Edit</button>
-              <button class="btn-sm" style="background:${a.published ? '#FEF3C7' : '#D1FAE5'};color:${a.published ? '#92400E' : '#065F46'};border:none;" onclick="toggleArticlePublish('${a.id}', ${!a.published})">${a.published ? 'Unpublish' : 'Publish'}</button>
+              <button class="btn-sm" onclick="toggleArticlePublish('${a.id}', ${!a.published})">${a.published ? 'Unpublish' : 'Publish'}</button>
               <button class="btn-sm btn-danger" onclick="deleteArticle('${a.id}')">Delete</button>
             </div>
           </div>`;

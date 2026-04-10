@@ -29,15 +29,16 @@
     .admin-form label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #374151; }
     .admin-form input, .admin-form select, .admin-form textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; font-family: 'Inter', sans-serif; }
     .admin-form textarea { resize: vertical; min-height: 60px; }
-    .btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
-    .btn-add { background: var(--navy); color: #fff; }
-    .btn-add:hover { opacity: 0.9; }
-    .btn-danger { background: #EF4444; color: #fff; }
-    .btn-danger:hover { background: #DC2626; }
+    .btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 6px; border: 1px solid #d1d5db; cursor: pointer; font-weight: 600; background: #fff; color: var(--navy); transition: all 0.15s; }
+    .btn-sm:hover { background: #f3f4f6; }
+    .btn-add { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .btn-add:hover { opacity: 0.9; background: var(--navy); }
+    .btn-danger { background: #fff; color: #991B1B; border-color: #991B1B; }
+    .btn-danger:hover { background: #FEF2F2; }
     .admin-actions { display: flex; gap: 6px; }
     .admin-msg { padding: 10px 14px; border-radius: 6px; font-size: 14px; margin-bottom: 16px; display: none; }
-    .admin-msg.success { display: block; background: #D1FAE5; color: #065F46; }
-    .admin-msg.error { display: block; background: #FEE2E2; color: #991B1B; }
+    .admin-msg.success { display: block; background: #f0f4f8; color: var(--navy); border: 1px solid #d1d5db; }
+    .admin-msg.error { display: block; background: #fff; color: #991B1B; border: 1px solid #e5c7c7; }
     .admin-back { text-decoration: none; color: var(--navy); font-size: 14px; font-weight: 500; }
     .admin-back:hover { text-decoration: underline; }
     .member-chapter-select { padding: 4px 8px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; }
@@ -53,9 +54,9 @@
     .add-code-inline { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
     .add-code-inline input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; font-family: 'Inter', sans-serif; text-transform: uppercase; width: 140px; }
     .add-code-inline input[type="number"] { width: 70px; }
-    .btn-edit { background: #f3f4f6; color: var(--navy); border: 1px solid #d1d5db; }
-    .btn-edit:hover { background: #e5e7eb; }
-    .edit-inline { background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 16px; margin-top: 12px; }
+    .btn-edit { background: #fff; color: var(--navy); border: 1px solid #d1d5db; }
+    .btn-edit:hover { background: #f3f4f6; }
+    .edit-inline { background: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; padding: 16px; margin-top: 12px; }
     .edit-inline .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .edit-inline .form-group { margin-bottom: 10px; }
     .edit-inline label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 3px; }
