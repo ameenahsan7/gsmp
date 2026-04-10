@@ -393,7 +393,14 @@
     }
 
     async function deleteChapter(id) {
-      if (!confirm('Delete this chapter and all its referral codes?')) return;
+      // Check if members are assigned to this chapter
+      const { count } = await sb.from('members').select('id', { count: 'exact', head: true }).eq('chapter_id', id);
+      const memberWarning = count > 0 ? `\n\n⚠️ ${count} member(s) are assigned to this chapter. They will be unassigned.` : '';
+      if (!confirm('Delete this chapter and all its referral codes?' + memberWarning)) return;
+      // Unassign members from this chapter
+      if (count > 0) {
+        await sb.from('members').update({ chapter_id: null }).eq('chapter_id', id);
+      }
       // Delete codes for this chapter first
       await sb.from('referral_codes').delete().eq('chapter_id', id);
       const { error } = await sb.from('chapters').delete().eq('id', id);
