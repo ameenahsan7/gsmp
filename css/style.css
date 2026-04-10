@@ -924,8 +924,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   .navbar { padding: 10px 0; }
 
   /* ── Hero ── */
-  .hero { min-height: auto; }
-  .hero-content { padding: 160px 0 50px; }
+  .hero { min-height: auto; padding-top: 70px; }
+  .hero-content { padding: 60px 0 40px; }
   .hero h1 { font-size: 26px; line-height: 1.25; }
   .hero-sub { font-size: 15px; margin-bottom: 24px; }
   .hero-actions { display: none; }
@@ -1062,7 +1062,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 @media (max-width: 380px) {
   .hero h1 { font-size: 22px; }
   .hero-sub { font-size: 13px; }
-  .hero-content { padding: 150px 0 40px; }
+  .hero-content { padding: 50px 0 36px; }
   .hero-stats { flex-direction: column; gap: 8px; }
   .stat-num { font-size: 16px; }
   .section { padding: 36px 0; }
