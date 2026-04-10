@@ -1046,16 +1046,17 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   .article-featured .article-img { height: 220px; }
   .article-featured .article-body { padding: 24px 20px; }
   .article-body h3 { font-size: 20px; }
-  .article-body p { font-size: 14px; -webkit-line-clamp: 3; }
+  .article-body p { font-size: 14px; -webkit-line-clamp: unset; display: block; overflow: visible; }
   .articles-secondary { grid-template-columns: 1fr; }
-  .article-card { grid-template-columns: 100px 1fr; }
-  .article-card .article-img { min-height: 100px; }
+  .article-card { grid-template-columns: 1fr; }
+  .article-card .article-img { height: 180px; min-height: 180px; }
+  .article-card .article-body p { -webkit-line-clamp: unset; display: block; overflow: visible; }
   .spotlight-card { grid-template-columns: 1fr; height: auto; }
   .spotlight-card:nth-child(even) { direction: ltr; }
   .spotlight-img { height: 200px; }
   .spotlight-body { padding: 20px; }
   .spotlight-body h4 { font-size: 18px; }
-  .spotlight-body p { font-size: 13px; }
+  .spotlight-body p { font-size: 13px; -webkit-line-clamp: unset; display: block; overflow: visible; }
 }
 
 /* ── Extra small phones ── */
