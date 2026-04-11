@@ -47,6 +47,11 @@
           <label for="password">Password</label>
           <input type="password" id="password" placeholder="Min 8 characters" minlength="8" required autocomplete="new-password">
         </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Re-enter your password" minlength="8" required autocomplete="new-password">
+          <span id="passwordMatch" style="font-size:12px;display:none;margin-top:4px;"></span>
+        </div>
 
         <div class="form-row">
           <div class="form-group">
@@ -165,6 +170,23 @@
     const successMsg = document.getElementById('successMsg');
     const submitBtn = document.getElementById('submitBtn');
 
+    // Real-time password match feedback
+    const confirmPw = document.getElementById('confirmPassword');
+    const matchHint = document.getElementById('passwordMatch');
+    confirmPw.addEventListener('input', () => {
+      const pw = document.getElementById('password').value;
+      const cpw = confirmPw.value;
+      if (!cpw) { matchHint.style.display = 'none'; return; }
+      matchHint.style.display = 'block';
+      if (pw === cpw) {
+        matchHint.textContent = 'Passwords match';
+        matchHint.style.color = '#059669';
+      } else {
+        matchHint.textContent = 'Passwords do not match';
+        matchHint.style.color = '#dc2626';
+      }
+    });
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorMsg.style.display = 'none';
@@ -177,6 +199,14 @@
       const lastName = document.getElementById('lastName').value.trim();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      if (password !== confirmPassword) {
+        errorMsg.textContent = 'Passwords do not match.';
+        errorMsg.style.display = 'block';
+        submitBtn.textContent = 'Join GSMP';
+        submitBtn.disabled = false;
+        return;
+      }
       const school = document.getElementById('school').value.trim();
       const year = document.getElementById('year').value;
       const country = document.getElementById('country').value.trim();
