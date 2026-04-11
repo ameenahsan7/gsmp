@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="icon" type="image/png" href="../../images/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SaaS Admin — GSMP</title>
-  <link rel="stylesheet" href="../css/style.css?v=8">
+  <link rel="stylesheet" href="../../css/style.css?v=8">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <style>
     body { background: #0d1117; color: #c9d1d9; }
@@ -116,7 +116,7 @@
   <div class="admin-page">
     <div class="admin-header">
       <div>
-        <a href="dashboard.html" class="admin-back">&larr; Back to Dashboard</a>
+        <a href="../dashboard" class="admin-back">&larr; Back to Dashboard</a>
         <h1>SaaS Admin</h1>
       </div>
       <a href="#" id="logoutBtn" class="btn btn-ghost" style="font-size:14px;">Log Out</a>
@@ -402,7 +402,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="../js/supabase-config.js"></script>
+  <script src="../../js/supabase-config.js"></script>
   <script>
     const ADMIN_EMAILS = ['ameenahsan7@gmail.com', 'ameen.ahsan@propertyfinder.ae'];
 
@@ -790,10 +790,10 @@
 
     // ========== VIEW AS (IMPERSONATION) ==========
     function viewAsMember(memberId) {
-      window.open('dashboard.html?view_as=' + memberId, '_blank');
+      window.open('../dashboard?view_as=' + memberId, '_blank');
     }
     function viewProfileAs(memberId) {
-      window.open('my-profile.html?view_as=' + memberId, '_blank');
+      window.open('../my-profile?view_as=' + memberId, '_blank');
     }
 
     // ========== CSV EXPORT ==========
@@ -1167,12 +1167,12 @@
     // ========== INIT ==========
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
-      if (!session) { window.location.href = 'login.html'; return; }
+      if (!session) { window.location.href = '../login'; return; }
 
       currentUserEmail = session.user.email;
       const isBreakglass = await checkBreakglass();
       if (!ADMIN_EMAILS.includes(session.user.email) && !isBreakglass) {
-        document.querySelector('.admin-page').innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2 style="color:#991B1B;">Access Denied</h2><p>You do not have admin privileges.</p><a href="dashboard.html">Back to Dashboard</a></div>';
+        document.querySelector('.admin-page').innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2 style="color:#991B1B;">Access Denied</h2><p>You do not have admin privileges.</p><a href="../dashboard">Back to Dashboard</a></div>';
         return;
       }
 
@@ -1186,7 +1186,7 @@
       document.getElementById('logoutBtn').addEventListener('click', async (e) => {
         e.preventDefault();
         await sb.auth.signOut();
-        window.location.href = 'login.html';
+        window.location.href = '../login';
       });
     })();
   </script>

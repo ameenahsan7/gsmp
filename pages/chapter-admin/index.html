@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="icon" type="image/png" href="../../images/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chapter Admin — GSMP</title>
-  <link rel="stylesheet" href="../css/style.css?v=7">
+  <link rel="stylesheet" href="../../css/style.css?v=7">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <style>
     .admin-page { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
@@ -103,7 +103,7 @@
   <div class="admin-page">
     <div class="admin-header">
       <div>
-        <a href="dashboard.html" class="admin-back">&larr; Back to Dashboard</a>
+        <a href="../dashboard" class="admin-back">&larr; Back to Dashboard</a>
         <h1>Chapter Admin</h1>
         <div class="admin-header-sub" id="chapterLabel">Loading...</div>
       </div>
@@ -223,7 +223,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="../js/supabase-config.js"></script>
+  <script src="../../js/supabase-config.js"></script>
   <script>
     let myChapterId = null;
     let myChapter = null;
@@ -654,14 +654,14 @@
     // ========== INIT ==========
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
-      if (!session) { window.location.href = 'login.html'; return; }
+      if (!session) { window.location.href = '../login'; return; }
 
       currentUserEmail = session.user.email;
       // Get member data — must be Chapter Lead
       const { data: member } = await sb.from('members').select('*').eq('id', session.user.id).single();
 
       if (!member || member.member_title !== 'Chapter Lead') {
-        document.querySelector('.admin-page').innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2 style="color:#991B1B;">Access Denied</h2><p>This page is for Chapter Leads only.</p><a href="dashboard.html">Back to Dashboard</a></div>';
+        document.querySelector('.admin-page').innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2 style="color:#991B1B;">Access Denied</h2><p>This page is for Chapter Leads only.</p><a href="../dashboard">Back to Dashboard</a></div>';
         return;
       }
 
@@ -685,7 +685,7 @@
       document.getElementById('logoutBtn').addEventListener('click', async (e) => {
         e.preventDefault();
         await sb.auth.signOut();
-        window.location.href = 'login.html';
+        window.location.href = '../login';
       });
     })();
   </script>

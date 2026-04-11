@@ -18,7 +18,7 @@
   <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
     <div class="container nav-container">
-      <a href="index.html" class="nav-logo">
+      <a href="/" class="nav-logo">
         <img src="images/logo.jpeg" alt="GSMP" class="logo-icon">
         <span class="logo-text">GSMP</span>
       </a>
@@ -27,8 +27,8 @@
         <li><a href="#pillars">What We Do</a></li>
         <li><a href="#events">Events</a></li>
         <li><a href="#faq">FAQ</a></li>
-        <li><a href="pages/shop.html">Shop</a></li>
-        <li><a href="pages/login.html" class="nav-btn-primary">Member Login</a></li>
+        <li><a href="pages/shop">Shop</a></li>
+        <li><a href="pages/login" class="nav-btn-primary">Member Login</a></li>
       </ul>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -289,7 +289,7 @@
         <img src="https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=300&q=80" alt="" style="width:160px;height:160px;object-fit:cover;" loading="lazy">
         <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&q=80" alt="" style="width:160px;height:160px;object-fit:cover;" loading="lazy">
       </div>
-      <a href="pages/shop.html" style="font-size:14px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:2px solid var(--navy);padding-bottom:2px;">Browse Essentials &rarr;</a>
+      <a href="pages/shop" style="font-size:14px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:2px solid var(--navy);padding-bottom:2px;">Browse Essentials &rarr;</a>
     </div>
   </section>
 
@@ -299,7 +299,7 @@
     <div class="container" style="position:relative;">
       <h2>Built on trust.<br>Grown through purpose.</h2>
       <p>GSMP membership is curated and referral-based. If you've been invited, we're glad to have you.</p>
-      <a href="pages/login.html" class="btn btn-primary btn-lg">Member Login</a>
+      <a href="pages/login" class="btn btn-primary btn-lg">Member Login</a>
     </div>
   </section>
 
@@ -322,8 +322,8 @@
       </div>
       <div class="footer-links">
         <h4>Members</h4>
-        <a href="pages/login.html">Member Login</a>
-        <a href="pages/dashboard.html">Dashboard</a>
+        <a href="pages/login">Member Login</a>
+        <a href="pages/dashboard">Dashboard</a>
       </div>
       <div class="footer-links">
         <h4>Connect</h4>
@@ -433,7 +433,7 @@
           const day = d.getDate();
           const img = ev.image_url || defaultImages[(ev.event_type || '').toLowerCase()] || defaultImages['default'];
           return `
-            <div class="event-card" onclick="window.location.href='pages/login.html'">
+            <div class="event-card" onclick="window.location.href='pages/login'">
               <img class="event-card-img" src="${img}" alt="${ev.title}" loading="lazy">
               <div class="event-card-overlay">
                 <div class="event-card-type">${ev.event_type || 'Event'}</div>

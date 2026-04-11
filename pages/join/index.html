@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="icon" type="image/png" href="../../images/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Join GSMP — Create Your Account</title>
-  <link rel="stylesheet" href="../css/style.css?v=7">
+  <link rel="stylesheet" href="../../css/style.css?v=7">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="auth-page">
     <div class="auth-card">
-      <a href="../index.html" class="nav-logo">
-        <img src="../images/logo.jpeg" alt="GSMP" class="logo-icon">
+      <a href="../../" class="nav-logo">
+        <img src="../../images/logo.jpeg" alt="GSMP" class="logo-icon">
         <span class="logo-text">GSMP</span>
       </a>
       <h1>Join GSMP</h1>
@@ -152,13 +152,13 @@
       </form>
 
       <p class="auth-footer">
-        Already a member? <a href="login.html">Log in</a>
+        Already a member? <a href="../login">Log in</a>
       </p>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="../js/supabase-config.js"></script>
+  <script src="../../js/supabase-config.js"></script>
   <script>
     const form = document.getElementById('joinForm');
     const errorMsg = document.getElementById('errorMsg');
@@ -269,7 +269,7 @@
         await sb.from('referral_codes').update({ times_used: (codeData.times_used || 0) + 1 }).eq('id', codeData.id);
 
         if (authData.session) {
-          window.location.href = 'dashboard.html';
+          window.location.href = '../dashboard';
         } else {
           successMsg.textContent = 'Account created! Check your email to confirm, then log in.';
           successMsg.style.display = 'block';
