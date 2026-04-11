@@ -51,6 +51,11 @@
     </div>
   </section>
 
+  <!-- HERO EVENTS GRID (right after hero, no heading, edge-to-edge) -->
+  <section style="padding:0;margin:0;">
+    <div class="events-grid" id="heroEventsGrid"></div>
+  </section>
+
   <!-- ABOUT -->
   <section class="section" id="about">
     <div class="container">
@@ -400,16 +405,15 @@
       }
     })();
 
-    // Load events on landing page (all events)
+    // Load events on landing page (hero grid + lower grid)
     (async () => {
       const { data: events } = await sb
         .from('events')
         .select('*')
         .gte('event_date', new Date().toISOString())
         .order('event_date', { ascending: true })
-        .limit(6);
+        .limit(10);
 
-      const grid = document.getElementById('homeEventsGrid');
       const defaultImages = {
         'workshop': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80',
         'conference': 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
@@ -417,8 +421,9 @@
         'seminar': 'https://images.unsplash.com/photo-1587825140708-dfaf18c4f3ab?w=800&q=80',
         'default': 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&q=80'
       };
-      if (events && events.length > 0) {
-        grid.innerHTML = events.map(ev => {
+
+      function renderEventCards(list) {
+        return list.map(ev => {
           const d = new Date(ev.event_date);
           const month = d.toLocaleString('en', { month: 'short' });
           const day = d.getDate();
@@ -434,8 +439,20 @@
             </div>
           `;
         }).join('');
+      }
+
+      const heroGrid = document.getElementById('heroEventsGrid');
+      const lowerGrid = document.getElementById('homeEventsGrid');
+
+      if (events && events.length > 0) {
+        // Hero grid: first 5 events (1 hero + 4 grid)
+        heroGrid.innerHTML = renderEventCards(events.slice(0, 5));
+        // Lower grid: next 5 events (or repeat first 5 if fewer than 6 total)
+        const lowerEvents = events.length > 5 ? events.slice(5, 10) : events.slice(0, 5);
+        lowerGrid.innerHTML = renderEventCards(lowerEvents);
       } else {
-        grid.innerHTML = '<p style="color: var(--gray-400);">No upcoming events yet. Check back soon!</p>';
+        heroGrid.style.display = 'none';
+        lowerGrid.innerHTML = '<p style="color: var(--gray-400);">No upcoming events yet. Check back soon!</p>';
       }
     })();
   </script>
