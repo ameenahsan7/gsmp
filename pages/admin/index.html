@@ -261,8 +261,24 @@
 
     <!-- ARTICLES TAB -->
     <div class="tab-content" id="tab-articles">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:8px;">
+        <label class="btn-sm btn-csv" style="cursor:pointer;margin:0;">
+          &#x2B71; Import CSV
+          <input type="file" accept=".csv" onchange="importArticlesCSV(this)" style="display:none;">
+        </label>
         <button class="btn-sm btn-csv" onclick="exportArticlesCSV()">&#x2B73; Export CSV</button>
+      </div>
+      <div id="articleImportPreview" style="display:none;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:12px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:13px;font-weight:600;color:#58a6ff;" id="articleImportInfo">Preview</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-sm btn-add" onclick="confirmArticleImport()">Confirm Import</button>
+            <button class="btn-sm btn-edit" onclick="cancelArticleImport()">Cancel</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table" id="articleImportTable"><thead></thead><tbody></tbody></table>
+        </div>
       </div>
       <div class="admin-form">
         <h3 id="articleFormTitle">Add Article</h3>
@@ -1039,14 +1055,134 @@
     async function exportArticlesCSV() {
       const { data } = await sb.from('articles').select('*').order('created_at', { ascending: false });
       if (!data || !data.length) { showMsg('No articles to export.', 'error'); return; }
-      const rows = [['Title', 'Category', 'Tag', 'Author', 'Excerpt', 'Published', 'Image URL', 'Created At', 'Created By']];
+      const rows = [['Title', 'Category', 'Tag', 'Author', 'Excerpt', 'Content', 'Published', 'Image URL', 'Created At', 'Created By']];
       data.forEach(a => rows.push([
-        a.title, a.category || '', a.tag || '', a.author || '', a.excerpt || '',
+        a.title, a.category || '', a.tag || '', a.author || '', a.excerpt || '', a.content || '',
         a.published ? 'Yes' : 'No', a.image_url || '',
         a.created_at ? new Date(a.created_at).toLocaleDateString() : '', a.created_by || ''
       ]));
       downloadCSV(rows, 'gsmp_articles.csv');
       showMsg('Articles exported!', 'success');
+    }
+
+    // ========== ARTICLE CSV IMPORT ==========
+    let pendingArticleImport = [];
+
+    function importArticlesCSV(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const rows = parseCSV(e.target.result);
+        if (rows.length < 2) { showMsg('CSV is empty or has no data rows.', 'error'); input.value = ''; return; }
+
+        const header = rows[0].map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+        const colMap = {};
+        const fields = [
+          { key: 'title', aliases: ['title'] },
+          { key: 'category', aliases: ['category', 'cat'] },
+          { key: 'tag', aliases: ['tag', 'taglabel'] },
+          { key: 'author', aliases: ['author'] },
+          { key: 'excerpt', aliases: ['excerpt', 'excerptsummary', 'summary'] },
+          { key: 'content', aliases: ['content', 'fullarticlecontent', 'body', 'fullcontent'] },
+          { key: 'published', aliases: ['published', 'visible'] },
+          { key: 'image_url', aliases: ['imageurl', 'image', 'img'] },
+          { key: 'created_at', aliases: ['createdat', 'publishdate', 'date'] },
+          { key: 'created_by', aliases: ['createdby'] },
+        ];
+        fields.forEach(f => {
+          const idx = header.findIndex(h => f.aliases.includes(h));
+          if (idx !== -1) colMap[f.key] = idx;
+        });
+
+        if (colMap.title === undefined) { showMsg('CSV must have a "Title" column.', 'error'); input.value = ''; return; }
+
+        const items = [];
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i];
+          const title = r[colMap.title] || '';
+          if (!title) continue;
+          const pubVal = colMap.published !== undefined ? r[colMap.published] : 'Yes';
+          const dateVal = colMap.created_at !== undefined ? r[colMap.created_at] : '';
+          items.push({
+            title,
+            category: colMap.category !== undefined ? r[colMap.category] || 'news' : 'news',
+            tag: colMap.tag !== undefined ? r[colMap.tag] || null : null,
+            author: colMap.author !== undefined ? r[colMap.author] || 'GSMP' : 'GSMP',
+            excerpt: colMap.excerpt !== undefined ? r[colMap.excerpt] || null : null,
+            content: colMap.content !== undefined ? r[colMap.content] || null : null,
+            published: !pubVal || pubVal.toLowerCase() === 'yes' || pubVal === '1' || pubVal.toLowerCase() === 'true',
+            image_url: colMap.image_url !== undefined ? r[colMap.image_url] || null : null,
+            created_at: dateVal ? new Date(dateVal).toISOString() : null,
+          });
+        }
+
+        if (!items.length) { showMsg('No valid rows found in CSV.', 'error'); input.value = ''; return; }
+
+        pendingArticleImport = items;
+
+        const preview = document.getElementById('articleImportPreview');
+        document.getElementById('articleImportInfo').textContent = items.length + ' article' + (items.length > 1 ? 's' : '') + ' found in CSV';
+        const thead = document.querySelector('#articleImportTable thead');
+        const tbody = document.querySelector('#articleImportTable tbody');
+        thead.innerHTML = '<tr><th>#</th><th>Title</th><th>Category</th><th>Tag</th><th>Content</th><th>Published</th></tr>';
+        tbody.innerHTML = items.map((item, i) => {
+          const hasContent = item.content ? '<span style="color:#3fb950;">Yes (' + item.content.length + ' chars)</span>' : '<span style="color:#8b949e;">No</span>';
+          return `
+            <tr>
+              <td style="color:#484f58;">${i + 1}</td>
+              <td><strong>${item.title}</strong>${item.excerpt ? '<br><span style="font-size:11px;color:#8b949e;">' + item.excerpt.substring(0, 60) + '...</span>' : ''}</td>
+              <td>${item.category}</td>
+              <td>${item.tag || '—'}</td>
+              <td>${hasContent}</td>
+              <td style="color:${item.published ? '#3fb950' : '#f85149'}">${item.published ? 'Yes' : 'No'}</td>
+            </tr>`;
+        }).join('');
+        preview.style.display = 'block';
+        input.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    async function confirmArticleImport() {
+      if (!pendingArticleImport.length) return;
+      const btn = document.querySelector('#articleImportPreview .btn-add');
+      btn.textContent = 'Importing...';
+      btn.disabled = true;
+
+      let updated = 0, inserted = 0, errors = 0;
+      for (const item of pendingArticleImport) {
+        const { data: existing } = await sb.from('articles').select('id').eq('title', item.title).limit(1);
+        const payload = { ...item, created_by: item.created_by || currentUserEmail };
+        if (!payload.created_at) delete payload.created_at;
+
+        if (existing && existing.length > 0) {
+          delete payload.created_by;
+          const { error } = await sb.from('articles').update(payload).eq('id', existing[0].id);
+          if (error) { errors++; } else { updated++; }
+        } else {
+          if (!payload.created_at) payload.created_at = new Date().toISOString();
+          const { error } = await sb.from('articles').insert(payload);
+          if (error) { errors++; } else { inserted++; }
+        }
+      }
+
+      let msg = '';
+      if (inserted) msg += inserted + ' added';
+      if (updated) msg += (msg ? ', ' : '') + updated + ' updated';
+      if (errors) msg += (msg ? ', ' : '') + errors + ' failed';
+      showMsg('Import done: ' + msg, errors ? 'error' : 'success');
+
+      cancelArticleImport();
+      loadArticles();
+    }
+
+    function cancelArticleImport() {
+      pendingArticleImport = [];
+      document.getElementById('articleImportPreview').style.display = 'none';
+      const btn = document.querySelector('#articleImportPreview .btn-add');
+      btn.textContent = 'Confirm Import';
+      btn.disabled = false;
     }
 
     // ========== SHOP ==========
