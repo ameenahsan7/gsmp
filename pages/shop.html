@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GSMP Essentials | Shop</title>
+  <link rel="stylesheet" href="../css/style.css?v=8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    .shop-hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #0F1B33 60%, var(--burgundy) 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 100px 20px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .shop-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=1400&q=80') center/cover no-repeat;
+      opacity: 0.15;
+    }
+    .shop-hero > * { position: relative; z-index: 1; }
+    .shop-hero h1 { font-family: 'Playfair Display', serif; font-size: 42px; margin-bottom: 12px; }
+    .shop-hero p { font-size: 17px; color: rgba(255,255,255,0.7); max-width: 520px; margin: 0 auto; line-height: 1.6; }
+
+    .shop-nav {
+      display: flex; justify-content: center; gap: 8px; padding: 20px;
+      background: var(--white); border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 50;
+    }
+    .shop-nav a {
+      font-size: 13px; font-weight: 600; color: var(--gray-600); text-decoration: none;
+      padding: 8px 16px; border-radius: 20px; border: 1px solid #e5e7eb; transition: all 0.2s;
+    }
+    .shop-nav a:hover, .shop-nav a.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+    .shop-section { padding: 60px 20px; max-width: 1200px; margin: 0 auto; }
+    .shop-section:nth-child(even) { background: #f9fafb; max-width: 100%; }
+    .shop-section:nth-child(even) .shop-inner { max-width: 1200px; margin: 0 auto; }
+    .shop-section-header { margin-bottom: 32px; }
+    .shop-section-header h2 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); margin-bottom: 8px; }
+    .shop-section-header p { font-size: 15px; color: var(--gray-500); line-height: 1.5; }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .shop-card {
+      background: var(--white);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      transition: all 0.25s;
+      position: relative;
+    }
+    .shop-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .shop-card-img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      display: block;
+      background: #f3f4f6;
+    }
+    .shop-card-body { padding: 16px 18px; }
+    .shop-card-body h3 { font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+    .shop-card-body p { font-size: 13px; color: var(--gray-500); line-height: 1.5; margin-bottom: 12px; }
+    .shop-card-footer { display: flex; justify-content: space-between; align-items: center; }
+    .shop-price { font-size: 16px; font-weight: 700; color: var(--navy); }
+    .shop-price span { font-size: 12px; font-weight: 400; color: var(--gray-400); }
+
+    .btn-inquiry {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; font-size: 13px; font-weight: 600;
+      background: var(--navy); color: var(--white); border: none; border-radius: 6px;
+      cursor: pointer; text-decoration: none; transition: opacity 0.2s;
+    }
+    .btn-inquiry:hover { opacity: 0.9; }
+
+    .shop-back {
+      position: fixed; top: 16px; left: 16px; z-index: 100;
+      text-decoration: none; color: var(--white); font-size: 14px; font-weight: 500;
+      display: flex; align-items: center; gap: 6px; opacity: 0.8;
+    }
+    .shop-back:hover { opacity: 1; }
+
+    .shop-footer-note {
+      text-align: center; padding: 40px 20px; font-size: 14px; color: var(--gray-400); line-height: 1.6;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    @media (max-width: 768px) {
+      .shop-hero { padding: 80px 16px 40px; }
+      .shop-hero h1 { font-size: 28px; }
+      .shop-hero p { font-size: 14px; }
+      .shop-nav { flex-wrap: wrap; gap: 6px; padding: 12px; }
+      .shop-nav a { font-size: 12px; padding: 6px 12px; }
+      .shop-section { padding: 40px 16px; }
+      .shop-section-header h2 { font-size: 22px; }
+      .shop-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .shop-card-img { height: 180px; }
+      .shop-card-body { padding: 12px 14px; }
+      .shop-card-body h3 { font-size: 14px; }
+      .shop-price { font-size: 14px; }
+      .btn-inquiry { padding: 6px 12px; font-size: 12px; }
+    }
+    @media (max-width: 380px) {
+      .shop-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="../index.html" class="shop-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to GSMP
+  </a>
+
+  <div class="shop-hero">
+    <h1>GSMP Essentials</h1>
+    <p>Curated gear for medical professionals. From clinical tools to everyday carry, built for the community.</p>
+  </div>
+
+  <nav class="shop-nav">
+    <a href="#scrubs" class="active">Scrubs</a>
+    <a href="#compression">Compression</a>
+    <a href="#tools">Clinical Tools</a>
+    <a href="#tech">Tech &amp; Stationery</a>
+    <a href="#merch">Branded Gear</a>
+  </nav>
+
+  <!-- SCRUBS -->
+  <div class="shop-section" id="scrubs">
+    <div class="shop-section-header">
+      <h2>Scrubs</h2>
+      <p>Professional-grade scrubs designed for long shifts and everyday comfort.</p>
+    </div>
+    <div class="shop-grid">
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?w=600&q=80" alt="Classic Fit Scrub Set" loading="lazy">
+        <div class="shop-card-body">
+          <h3>Classic Fit Scrub Set</h3>
+          <p>Breathable, anti-microbial fabric. Tailored fit with deep pockets.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$65 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20Classic%20Fit%20Scrub%20Set" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600&q=80" alt="Slim Fit Scrub Top" loading="lazy">
+        <div class="shop-card-body">
+          <h3>Slim Fit Scrub Top</h3>
+          <p>Modern cut with stretch panels. Perfect for residents on the move.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$38 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20Slim%20Fit%20Scrub%20Top" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1585842378054-ee2e52f94ba2?w=600&q=80" alt="Jogger Scrub Pants" loading="lazy">
+        <div class="shop-card-body">
+          <h3>Jogger Scrub Pants</h3>
+          <p>Tapered leg with elastic cuffs. Six pockets for all your essentials.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$42 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20Jogger%20Scrub%20Pants" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPRESSION -->
+  <div class="shop-section" id="compression">
+    <div class="shop-inner">
+      <div class="shop-section-header">
+        <h2>Compression Wear</h2>
+        <p>Support for long hours on your feet. Medical-grade compression for everyday performance.</p>
+      </div>
+      <div class="shop-grid">
+        <div class="shop-card">
+          <img class="shop-card-img" src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80" alt="Compression Socks" loading="lazy">
+          <div class="shop-card-body">
+            <h3>Graduated Compression Socks</h3>
+            <p>20-30 mmHg. Moisture-wicking, anti-odor fabric. Knee-high cut.</p>
+            <div class="shop-card-footer">
+              <div class="shop-price">$24 <span>USD</span></div>
+              <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20Compression%20Socks" class="btn-inquiry" target="_blank">Inquire</a>
+            </div>
+          </div>
+        </div>
+        <div class="shop-card">
+          <img class="shop-card-img" src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80" alt="Compression Arm Sleeves" loading="lazy">
+          <div class="shop-card-body">
+            <h3>Compression Arm Sleeves</h3>
+            <p>UV-protective, breathable. Ideal for long procedures and outdoor clinics.</p>
+            <div class="shop-card-footer">
+              <div class="shop-price">$18 <span>USD</span></div>
+              <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20Compression%20Arm%20Sleeves" class="btn-inquiry" target="_blank">Inquire</a>
+            </div>
+          </div>
+        </div>
+        <div class="shop-card">
+          <img class="shop-card-img" src="https://images.unsplash.com/photo-1594882645126-14020914d58d?w=600&q=80" alt="Compression Stockings" loading="lazy">
+          <div class="shop-card-body">
+            <h3>Full-Length Compression Stockings</h3>
+            <p>Medical-grade 15-20 mmHg. Sheer finish, all-day comfort.</p>
+            <div class="shop-card-footer">
+              <div class="shop-price">$32 <span>USD</span></div>
+              <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20Compression%20Stockings" class="btn-inquiry" target="_blank">Inquire</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLINICAL TOOLS -->
+  <div class="shop-section" id="tools">
+    <div class="shop-section-header">
+      <h2>Medical Utility &amp; Diagnostic Tools</h2>
+      <p>Essential instruments for clinical practice, rotations, and everyday carry.</p>
+    </div>
+    <div class="shop-grid">
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=600&q=80" alt="Stethoscope" loading="lazy">
+        <div class="shop-card-body">
+          <h3>Dual-Head Stethoscope</h3>
+          <p>Acoustic precision with soft-seal eartips. Lightweight titanium chest piece.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$85 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20Stethoscope" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1583912267550-d974311a9a6e?w=600&q=80" alt="Penlight" loading="lazy">
+        <div class="shop-card-body">
+          <h3>LED Diagnostic Penlight</h3>
+          <p>Pupil gauge printed. Reusable, pocket-clip design.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$12 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20Penlight" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=600&q=80" alt="Suture Kit" loading="lazy">
+        <div class="shop-card-body">
+          <h3>Student Suture Practice Kit</h3>
+          <p>Silicone pad, needle drivers, forceps, scissors, and 12 sutures included.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$35 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20Suture%20Kit" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80" alt="Trauma Shears" loading="lazy">
+        <div class="shop-card-body">
+          <h3>Trauma Shears</h3>
+          <p>Fluoride-coated stainless steel. Serrated edge with oxygen tank wrench.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$14 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20Trauma%20Shears" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TECH & STATIONERY -->
+  <div class="shop-section" id="tech">
+    <div class="shop-inner">
+      <div class="shop-section-header">
+        <h2>Organized Tech &amp; Stationery</h2>
+        <p>Stay organized from ward rounds to study sessions.</p>
+      </div>
+      <div class="shop-grid">
+        <div class="shop-card">
+          <img class="shop-card-img" src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&q=80" alt="Medical Clipboard" loading="lazy">
+          <div class="shop-card-body">
+            <h3>Foldable Medical Clipboard</h3>
+            <p>Storage compartment inside. Quick-reference charts printed on cover.</p>
+            <div class="shop-card-footer">
+              <div class="shop-price">$22 <span>USD</span></div>
+              <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20Medical%20Clipboard" class="btn-inquiry" target="_blank">Inquire</a>
+            </div>
+          </div>
+        </div>
+        <div class="shop-card">
+          <img class="shop-card-img" src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80" alt="Badge Reel" loading="lazy">
+          <div class="shop-card-body">
+            <h3>Retractable Badge Reel</h3>
+            <p>GSMP-branded. Heavy-duty carabiner clip with 24" cord.</p>
+            <div class="shop-card-footer">
+              <div class="shop-price">$8 <span>USD</span></div>
+              <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20Badge%20Reel" class="btn-inquiry" target="_blank">Inquire</a>
+            </div>
+          </div>
+        </div>
+        <div class="shop-card">
+          <img class="shop-card-img" src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&q=80" alt="Tech Pouch" loading="lazy">
+          <div class="shop-card-body">
+            <h3>EDC Tech Pouch</h3>
+            <p>Water-resistant. Fits penlights, chargers, pens, and small instruments.</p>
+            <div class="shop-card-footer">
+              <div class="shop-price">$28 <span>USD</span></div>
+              <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20Tech%20Pouch" class="btn-inquiry" target="_blank">Inquire</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRANDED GEAR -->
+  <div class="shop-section" id="merch">
+    <div class="shop-section-header">
+      <h2>Branded Gear &amp; Merchandise</h2>
+      <p>Represent GSMP on and off the clock.</p>
+    </div>
+    <div class="shop-grid">
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=600&q=80" alt="Insulated Mug" loading="lazy">
+        <div class="shop-card-body">
+          <h3>GSMP Insulated Travel Mug</h3>
+          <p>Double-wall vacuum. Keeps coffee hot for 6+ hours. Matte navy finish.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$26 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20GSMP%20Travel%20Mug" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80" alt="Water Bottle" loading="lazy">
+        <div class="shop-card-body">
+          <h3>GSMP Water Bottle</h3>
+          <p>1L capacity. BPA-free, leak-proof cap. GSMP laser-etched logo.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$20 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20GSMP%20Water%20Bottle" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80" alt="Off-Duty Tee" loading="lazy">
+        <div class="shop-card-body">
+          <h3>Off-Duty GSMP Tee</h3>
+          <p>Premium cotton. Subtle chest logo. Available in navy, white, and heather gray.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$30 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20GSMP%20Tee" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+      <div class="shop-card">
+        <img class="shop-card-img" src="https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=600&q=80" alt="Notebook" loading="lazy">
+        <div class="shop-card-body">
+          <h3>GSMP Clinical Notebook</h3>
+          <p>Dot-grid, 200 pages. Lay-flat binding. Pocket-sized for coat pockets.</p>
+          <div class="shop-card-footer">
+            <div class="shop-price">$15 <span>USD</span></div>
+            <a href="https://wa.me/971000000000?text=Hi%2C%20I'm%20interested%20in%20the%20GSMP%20Notebook" class="btn-inquiry" target="_blank">Inquire</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="shop-footer-note">
+    All items are fulfilled by GSMP. Tap <strong>Inquire</strong> to reach us directly via WhatsApp.<br>
+    Prices may vary by region and availability. Bulk orders welcome for chapters and events.
+  </div>
+
+</body>
+</html>
