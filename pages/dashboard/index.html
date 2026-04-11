@@ -143,7 +143,7 @@
       const { data: events } = await sb
         .from('events')
         .select('*')
-        .eq('show_in_portal', true)
+        .neq('show_in_portal', false)
         .gte('event_date', new Date().toISOString())
         .order('event_date', { ascending: true })
         .limit(5);
