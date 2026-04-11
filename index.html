@@ -361,8 +361,9 @@
           const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
           const excerpt = a.excerpt || (a.content ? a.content.substring(0, 200) : '');
           const cls = (i === 0 && allNews.length > 2) ? 'article-featured' : (allNews.length === 1 ? 'article-featured' : 'article-card');
+          const link = 'pages/article?id=' + a.id;
           return `
-            <div class="${cls}">
+            <a href="${link}" class="${cls}" style="text-decoration:none;color:inherit;cursor:pointer;">
               ${a.image_url ? `<div class="article-img"><img src="${a.image_url}" alt="${a.title}" loading="lazy"></div>` : ''}
               <div class="article-body">
                 ${a.tag ? `<span class="article-tag">${a.tag}</span>` : '<span class="article-tag">News</span>'}
@@ -374,7 +375,7 @@
                   <span>${date}</span>
                 </div>
               </div>
-            </div>`;
+            </a>`;
         }).join('');
       } else {
         newsGrid.innerHTML = '<p class="article-empty">No articles published yet. Stay tuned!</p>';
@@ -386,15 +387,16 @@
         spotGrid.innerHTML = community.slice(0, 4).map(a => {
           const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
           const excerpt = a.excerpt || (a.content ? a.content.substring(0, 180) : '');
+          const link = 'pages/article?id=' + a.id;
           return `
-            <div class="spotlight-card">
+            <a href="${link}" class="spotlight-card" style="text-decoration:none;color:inherit;cursor:pointer;">
               ${a.image_url ? `<div class="spotlight-img"><img src="${a.image_url}" alt="${a.title}" loading="lazy"></div>` : ''}
               <div class="spotlight-body">
                 <h4>${a.title}</h4>
                 <p>${excerpt}</p>
                 <span class="spotlight-date">${a.author || 'GSMP'} &middot; ${date}</span>
               </div>
-            </div>`;
+            </a>`;
         }).join('');
       } else {
         spotGrid.innerHTML = '<p class="article-empty">No community updates yet. Check back soon!</p>';

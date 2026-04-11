@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article — GSMP</title>
+  <link rel="stylesheet" href="../../css/style.css?v=8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body { background: #fff; }
+
+    .article-hero {
+      position: relative;
+      width: 100%;
+      min-height: 420px;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+    }
+    .article-hero-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .article-hero-overlay {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 60px 40px 40px;
+      background: linear-gradient(transparent 0%, rgba(27,42,74,0.85) 50%, rgba(27,42,74,0.95) 100%);
+    }
+    .article-hero-inner { max-width: 780px; }
+    .article-hero-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      margin-bottom: 14px;
+    }
+    .article-hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 40px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .article-hero-meta {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .article-hero-meta strong { color: rgba(255,255,255,0.9); }
+
+    .article-body-wrap {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .article-content {
+      font-size: 17px;
+      line-height: 1.85;
+      color: #374151;
+    }
+    .article-content p { margin-bottom: 20px; }
+    .article-content h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: var(--navy);
+      margin: 36px 0 16px;
+    }
+    .article-content h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--navy);
+      margin: 28px 0 12px;
+    }
+    .article-content blockquote {
+      border-left: 3px solid var(--gold);
+      padding: 12px 20px;
+      margin: 24px 0;
+      font-style: italic;
+      color: #6b7280;
+      background: #f9fafb;
+    }
+
+    .article-back {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0.8;
+      background: rgba(27,42,74,0.5);
+      padding: 8px 14px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+    }
+    .article-back:hover { opacity: 1; }
+
+    .article-share {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-top: 32px;
+      margin-top: 32px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .article-share-label { font-size: 13px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
+    .article-share a {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; background: #f3f4f6; color: var(--navy);
+      text-decoration: none; transition: background 0.2s;
+    }
+    .article-share a:hover { background: var(--navy); color: #fff; }
+
+    .article-loading {
+      text-align: center;
+      padding: 120px 20px;
+      color: #9ca3af;
+      font-size: 16px;
+    }
+
+    .article-not-found {
+      text-align: center;
+      padding: 120px 20px;
+    }
+    .article-not-found h2 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); margin-bottom: 12px; }
+    .article-not-found p { color: #9ca3af; margin-bottom: 24px; }
+
+    /* No hero image fallback */
+    .article-hero-noimg {
+      background: linear-gradient(135deg, var(--navy) 0%, #0F1B33 60%, var(--burgundy) 100%);
+      min-height: 300px;
+      display: flex;
+      align-items: flex-end;
+      padding: 60px 40px 40px;
+    }
+
+    @media (max-width: 768px) {
+      .article-hero { min-height: 320px; }
+      .article-hero-overlay { padding: 40px 20px 28px; }
+      .article-hero-title { font-size: 26px; }
+      .article-hero-meta { font-size: 13px; flex-wrap: wrap; }
+      .article-body-wrap { padding: 32px 18px 60px; }
+      .article-content { font-size: 16px; line-height: 1.75; }
+      .article-back { top: 10px; left: 10px; font-size: 13px; padding: 6px 12px; }
+      .article-hero-noimg { min-height: 240px; padding: 32px 20px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="../../" class="article-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    GSMP
+  </a>
+
+  <div id="articleLoading" class="article-loading">Loading article...</div>
+
+  <div id="articlePage" style="display:none;">
+    <!-- Hero (filled by JS) -->
+    <div id="articleHero"></div>
+
+    <!-- Body -->
+    <div class="article-body-wrap">
+      <div class="article-content" id="articleContent"></div>
+
+      <div class="article-share">
+        <span class="article-share-label">Share</span>
+        <a href="#" id="shareTwitter" title="Share on X" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="#" id="shareLinkedIn" title="Share on LinkedIn" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="#" id="shareCopy" title="Copy link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+
+      if (!id) { showNotFound(); return; }
+
+      const { data: article, error } = await sb
+        .from('articles')
+        .select('*')
+        .eq('id', id)
+        .eq('published', true)
+        .single();
+
+      if (error || !article) { showNotFound(); return; }
+
+      // Set page title
+      document.title = article.title + ' — GSMP';
+
+      // Build hero
+      const date = new Date(article.created_at).toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric' });
+      const heroEl = document.getElementById('articleHero');
+
+      if (article.image_url) {
+        heroEl.innerHTML = `
+          <div class="article-hero">
+            <img class="article-hero-img" src="${article.image_url}" alt="${article.title}">
+            <div class="article-hero-overlay">
+              <div class="article-hero-inner">
+                ${article.tag ? `<span class="article-hero-tag">${article.tag}</span>` : ''}
+                <h1 class="article-hero-title">${article.title}</h1>
+                <div class="article-hero-meta">
+                  <strong>${article.author || 'GSMP'}</strong>
+                  <span>&middot;</span>
+                  <span>${date}</span>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      } else {
+        heroEl.innerHTML = `
+          <div class="article-hero-noimg">
+            <div class="article-hero-inner">
+              ${article.tag ? `<span class="article-hero-tag">${article.tag}</span>` : ''}
+              <h1 class="article-hero-title">${article.title}</h1>
+              <div class="article-hero-meta">
+                <strong>${article.author || 'GSMP'}</strong>
+                <span>&middot;</span>
+                <span>${date}</span>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // Build content
+      const contentEl = document.getElementById('articleContent');
+      // Use full content if available, otherwise use excerpt
+      const rawContent = article.content || article.excerpt || '';
+      // Simple markdown-ish: split by double newlines into paragraphs
+      const paragraphs = rawContent.split(/\n\n+/).filter(p => p.trim());
+      if (paragraphs.length > 0) {
+        contentEl.innerHTML = paragraphs.map(p => {
+          p = p.trim();
+          if (p.startsWith('## ')) return `<h2>${p.slice(3)}</h2>`;
+          if (p.startsWith('### ')) return `<h3>${p.slice(4)}</h3>`;
+          if (p.startsWith('> ')) return `<blockquote>${p.slice(2)}</blockquote>`;
+          return `<p>${p}</p>`;
+        }).join('');
+      } else {
+        contentEl.innerHTML = `<p>${article.excerpt || 'No content available.'}</p>`;
+      }
+
+      // Share links
+      const url = window.location.href;
+      const title = encodeURIComponent(article.title);
+      document.getElementById('shareTwitter').href = `https://twitter.com/intent/tweet?text=${title}&url=${encodeURIComponent(url)}`;
+      document.getElementById('shareLinkedIn').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+      document.getElementById('shareCopy').addEventListener('click', (e) => {
+        e.preventDefault();
+        navigator.clipboard.writeText(url).then(() => {
+          const btn = e.currentTarget;
+          btn.style.background = 'var(--navy)';
+          btn.style.color = '#fff';
+          setTimeout(() => { btn.style.background = ''; btn.style.color = ''; }, 1500);
+        });
+      });
+
+      // Show page
+      document.getElementById('articleLoading').style.display = 'none';
+      document.getElementById('articlePage').style.display = 'block';
+    })();
+
+    function showNotFound() {
+      document.getElementById('articleLoading').innerHTML = `
+        <div class="article-not-found">
+          <h2>Article Not Found</h2>
+          <p>This article may have been removed or is no longer available.</p>
+          <a href="../../" class="btn btn-primary">Back to GSMP</a>
+        </div>`;
+    }
+  </script>
+</body>
+</html>

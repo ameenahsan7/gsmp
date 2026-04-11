@@ -296,7 +296,11 @@
           <textarea id="articleExcerpt" placeholder="Short summary shown on cards (2-3 sentences)" rows="3" maxlength="600"></textarea>
           <span style="font-size:11px;color:#484f58;">Featured news cards show up to ~500 chars. Community cards show ~300 chars. Write 3-5 sentences for best results.</span>
         </div>
-        <textarea id="articleContent" style="display:none;"></textarea>
+        <div class="form-group">
+          <label>Full Article Content</label>
+          <textarea id="articleContent" rows="8" placeholder="Full article body. Use double line breaks for paragraphs. Start a line with ## for headings or > for quotes."></textarea>
+          <span style="font-size:11px;color:#484f58;">This is shown on the dedicated article page. Excerpt is used for homepage cards.</span>
+        </div>
         <div class="form-group">
           <label>Image URL</label>
           <input type="text" id="articleImage" placeholder="https://images.unsplash.com/... or any image URL">
