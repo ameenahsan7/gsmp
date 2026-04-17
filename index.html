@@ -27,8 +27,7 @@
         <li><a href="#pillars">What We Do</a></li>
         <li><a href="#events">Events</a></li>
         <li><a href="#faq">FAQ</a></li>
-        <li><a href="pages/shop">Shop</a></li>
-        <li><a href="pages/login" class="nav-btn-primary">Member Login</a></li>
+        <li id="navShopLink"><a href="pages/shop">Shop</a></li>
       </ul>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -327,9 +326,6 @@
       </div>
       <div class="footer-links">
         <h4>Connect</h4>
-        <a href="#">Instagram</a>
-        <a href="#">LinkedIn</a>
-        <a href="#">Discord</a>
         <a href="mailto:hello@gsmp.org">hello@gsmp.org</a>
       </div>
     </div>
@@ -338,6 +334,15 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-config.js"></script>
   <script>
+    // ── Check shop visibility setting ──
+    (async () => {
+      const { data } = await sb.from('site_settings').select('value').eq('key', 'shop_enabled').single();
+      if (data && data.value === 'false') {
+        const shopLink = document.getElementById('navShopLink');
+        if (shopLink) shopLink.style.display = 'none';
+      }
+    })();
+
     // ── Load Articles (News & Insights + Community Spotlight) ──
     (async () => {
       const { data: articles } = await sb
@@ -416,6 +421,7 @@
       const { data: events } = await sb
         .from('events')
         .select('*')
+        .neq('show_in_portal', false)
         .gte('event_date', new Date().toISOString())
         .order('event_date', { ascending: true })
         .limit(10);

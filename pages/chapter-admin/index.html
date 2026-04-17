@@ -194,6 +194,10 @@
           <label>Description</label>
           <textarea id="eventDesc" placeholder="What is this event about?"></textarea>
         </div>
+        <div class="form-group">
+          <label>Image URL</label>
+          <input type="text" id="eventImage" placeholder="https://images.unsplash.com/... (optional)">
+        </div>
         <div class="form-group" style="display:flex;align-items:center;gap:8px;">
           <input type="checkbox" id="eventPortal" checked>
           <label for="eventPortal" style="margin:0;">Show in member portal</label>
@@ -203,7 +207,7 @@
 
       <table class="admin-table">
         <thead>
-          <tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>RSVPs</th><th>Created By</th><th>Portal</th><th></th></tr>
+          <tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>Img</th><th>RSVPs</th><th>Created By</th><th>Portal</th><th></th></tr>
         </thead>
         <tbody id="eventsTable">
           <tr><td colspan="6" class="loading-text">Loading...</td></tr>
@@ -437,18 +441,20 @@
         const creator = ev.created_by ? ev.created_by.split('@')[0] : '—';
         const count = rsvpCounts[ev.id] || 0;
         const names = (rsvpMemberIds[ev.id] || []).map(id => memberNames[id] || 'Unknown').join(', ');
+        const imgThumb = ev.image_url ? `<img src="${ev.image_url}" style="width:32px;height:32px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">` : '<span style="color:#9ca3af;">—</span>';
         return `
           <tr>
             <td><strong>${ev.title}</strong></td>
             <td>${ev.event_type || '—'}</td>
             <td>${d}</td>
             <td>${ev.location || '—'}</td>
+            <td>${imgThumb}</td>
             <td style="text-align:center;" title="${names}"><strong style="color:${count > 0 ? '#059669' : '#9ca3af'}">${count}</strong></td>
             <td style="font-size:12px;color:#6b7280;">${creator}</td>
             <td><input type="checkbox" ${portalChecked} onchange="togglePortal('${ev.id}', this.checked)"></td>
             <td class="admin-actions">
               <button class="btn-sm btn-csv" onclick="exportEventReport('${ev.id}','${ev.title.replace(/'/g,"\\'")}')" title="Download attendee report">&#x2B73;</button>
-              <button class="btn-sm btn-edit" onclick="editEvent('${ev.id}','${ev.title.replace(/'/g,"\\'")}','${ev.event_type || ''}','${ev.event_date || ''}','${(ev.location||'').replace(/'/g,"\\'")}','${(ev.description||'').replace(/'/g,"\\'")}',${ev.show_in_portal !== false})">Edit</button>
+              <button class="btn-sm btn-edit" onclick="editEvent('${ev.id}','${ev.title.replace(/'/g,"\\'")}','${ev.event_type || ''}','${ev.event_date || ''}','${(ev.location||'').replace(/'/g,"\\'")}','${(ev.description||'').replace(/'/g,"\\'")}','${(ev.image_url||'').replace(/'/g,"\\'")}',${ev.show_in_portal !== false})">Edit</button>
               <button class="btn-sm btn-danger" onclick="deleteEvent('${ev.id}')">Delete</button>
             </td>
           </tr>
@@ -456,13 +462,14 @@
       }).join('');
     }
 
-    function editEvent(id, title, type, date, loc, desc, portal) {
+    function editEvent(id, title, type, date, loc, desc, img, portal) {
       editingEventId = id;
       document.getElementById('eventTitle').value = title;
       document.getElementById('eventType').value = type;
       document.getElementById('eventDate').value = date ? date.slice(0, 16) : '';
       document.getElementById('eventLocation').value = loc;
       document.getElementById('eventDesc').value = desc;
+      document.getElementById('eventImage').value = img || '';
       document.getElementById('eventPortal').checked = portal;
       document.getElementById('eventFormTitle').textContent = 'Edit Event';
       document.getElementById('eventSubmitBtn').textContent = 'Update Event';
@@ -478,6 +485,7 @@
       document.getElementById('eventDate').value = '';
       document.getElementById('eventLocation').value = '';
       document.getElementById('eventDesc').value = '';
+      document.getElementById('eventImage').value = '';
       document.getElementById('eventFormTitle').textContent = 'Add Event';
       document.getElementById('eventSubmitBtn').textContent = 'Add Event';
       const cancelBtn = document.getElementById('eventCancelBtn');
@@ -490,17 +498,18 @@
       const event_date = document.getElementById('eventDate').value;
       const location = document.getElementById('eventLocation').value.trim();
       const description = document.getElementById('eventDesc').value.trim();
+      const image_url = document.getElementById('eventImage').value.trim() || null;
       if (!title || !event_date) { showMsg('Title and date are required.', 'error'); return; }
       const show_in_portal = document.getElementById('eventPortal').checked;
 
       if (editingEventId) {
-        const { error } = await sb.from('events').update({ title, event_type, event_date, location, description, show_in_portal }).eq('id', editingEventId).eq('created_by', currentUserEmail);
+        const { error } = await sb.from('events').update({ title, event_type, event_date, location, description, image_url, show_in_portal }).eq('id', editingEventId).eq('created_by', currentUserEmail);
         if (error) { showMsg('Error: ' + error.message, 'error'); return; }
         logAction('event', 'Updated event', title);
         showMsg('Event updated!', 'success');
         cancelEventEdit();
       } else {
-        const { error } = await sb.from('events').insert({ title, event_type, event_date, location, description, show_in_portal, created_by: currentUserEmail });
+        const { error } = await sb.from('events').insert({ title, event_type, event_date, location, description, image_url, show_in_portal, created_by: currentUserEmail });
         if (error) { showMsg('Error: ' + error.message, 'error'); return; }
         logAction('event', 'Created event', title + ' on ' + event_date);
         showMsg('Event added!', 'success');
@@ -508,6 +517,7 @@
         document.getElementById('eventDate').value = '';
         document.getElementById('eventLocation').value = '';
         document.getElementById('eventDesc').value = '';
+        document.getElementById('eventImage').value = '';
       }
       loadEvents();
     }

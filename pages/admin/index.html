@@ -228,6 +228,10 @@
           <label>Description</label>
           <textarea id="eventDesc" placeholder="What is this event about?"></textarea>
         </div>
+        <div class="form-group">
+          <label>Image URL</label>
+          <input type="text" id="eventImage" placeholder="https://images.unsplash.com/... (optional)">
+        </div>
         <div class="form-group" style="display:flex;align-items:center;gap:8px;">
           <input type="checkbox" id="eventPortal" checked>
           <label for="eventPortal" style="margin:0;">Show in member portal</label>
@@ -237,7 +241,7 @@
 
       <table class="admin-table">
         <thead>
-          <tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>RSVPs</th><th>Created By</th><th>Portal</th><th></th></tr>
+          <tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>Img</th><th>RSVPs</th><th>Created By</th><th>Portal</th><th></th></tr>
         </thead>
         <tbody id="eventsTable">
           <tr><td colspan="6" class="loading-text">Loading...</td></tr>
@@ -344,6 +348,11 @@
 
     <!-- SHOP TAB -->
     <div class="tab-content" id="tab-shop">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 14px;background:#161b22;border:1px solid #30363d;border-radius:6px;">
+        <span style="font-size:13px;color:#8b949e;">Shop Page:</span>
+        <button id="shopToggleBtn" class="btn-sm" onclick="toggleShopVisibility()" style="min-width:80px;">...</button>
+        <span id="shopToggleStatus" style="font-size:12px;color:#484f58;"></span>
+      </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <button class="btn-sm btn-add" onclick="toggleShopForm()">+ Add Item</button>
         <div style="display:flex;gap:6px;">
@@ -731,13 +740,14 @@
     }
 
     // ========== EVENTS ==========
-    function editEvent(id, title, type, date, loc, desc, portal) {
+    function editEvent(id, title, type, date, loc, desc, img, portal) {
       editingEventId = id;
       document.getElementById('eventTitle').value = title;
       document.getElementById('eventType').value = type;
       document.getElementById('eventDate').value = date ? date.slice(0, 16) : '';
       document.getElementById('eventLocation').value = loc;
       document.getElementById('eventDesc').value = desc;
+      document.getElementById('eventImage').value = img || '';
       document.getElementById('eventPortal').checked = portal;
       document.getElementById('eventFormTitle').textContent = 'Edit Event';
       document.getElementById('eventSubmitBtn').textContent = 'Update Event';
@@ -753,6 +763,7 @@
       document.getElementById('eventDate').value = '';
       document.getElementById('eventLocation').value = '';
       document.getElementById('eventDesc').value = '';
+      document.getElementById('eventImage').value = '';
       document.getElementById('eventFormTitle').textContent = 'Add Event';
       document.getElementById('eventSubmitBtn').textContent = 'Add Event';
       const cancelBtn = document.getElementById('eventCancelBtn');
@@ -791,18 +802,20 @@
         const creator = ev.created_by ? ev.created_by.split('@')[0] : '—';
         const count = rsvpCounts[ev.id] || 0;
         const names = (rsvpMemberIds[ev.id] || []).map(id => memberNames[id] || 'Unknown').join(', ');
+        const imgThumb = ev.image_url ? `<img src="${ev.image_url}" style="width:32px;height:32px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">` : '<span style="color:#484f58;">—</span>';
         return `
           <tr>
             <td><strong>${ev.title}</strong></td>
             <td>${ev.event_type || '—'}</td>
             <td>${d}</td>
             <td>${ev.location || '—'}</td>
+            <td>${imgThumb}</td>
             <td style="text-align:center;" title="${names}"><strong style="color:${count > 0 ? '#059669' : '#9ca3af'}">${count}</strong></td>
-            <td style="font-size:12px;color:#6b7280;">${creator}</td>
+            <td style="font-size:12px;color:#6b7680;">${creator}</td>
             <td><input type="checkbox" ${portalChecked} onchange="togglePortal('${ev.id}', this.checked)" title="Show in member portal"></td>
             <td class="admin-actions">
               <button class="btn-sm btn-csv" onclick="exportEventReport('${ev.id}','${ev.title.replace(/'/g,"\\'")}')" title="Download attendee report">&#x2B73;</button>
-              <button class="btn-sm btn-edit" onclick="editEvent('${ev.id}','${ev.title.replace(/'/g,"\\'")}','${ev.event_type || ''}','${ev.event_date || ''}','${(ev.location||'').replace(/'/g,"\\'")}','${(ev.description||'').replace(/'/g,"\\'")}',${ev.show_in_portal !== false})">Edit</button>
+              <button class="btn-sm btn-edit" onclick="editEvent('${ev.id}','${ev.title.replace(/'/g,"\\'")}','${ev.event_type || ''}','${ev.event_date || ''}','${(ev.location||'').replace(/'/g,"\\'")}','${(ev.description||'').replace(/'/g,"\\'")}','${(ev.image_url||'').replace(/'/g,"\\'")}',${ev.show_in_portal !== false})">Edit</button>
               <button class="btn-sm btn-danger" onclick="deleteEvent('${ev.id}')">Delete</button>
             </td>
           </tr>
@@ -816,18 +829,19 @@
       const event_date = document.getElementById('eventDate').value;
       const location = document.getElementById('eventLocation').value.trim();
       const description = document.getElementById('eventDesc').value.trim();
+      const image_url = document.getElementById('eventImage').value.trim() || null;
       if (!title || !event_date) { showMsg('Title and date are required.', 'error'); return; }
 
       const show_in_portal = document.getElementById('eventPortal').checked;
 
       if (editingEventId) {
-        const { error } = await sb.from('events').update({ title, event_type, event_date, location, description, show_in_portal }).eq('id', editingEventId);
+        const { error } = await sb.from('events').update({ title, event_type, event_date, location, description, image_url, show_in_portal }).eq('id', editingEventId);
         if (error) { showMsg('Error: ' + error.message, 'error'); return; }
         logAction('event', 'Updated event', title);
         showMsg('Event updated!', 'success');
         cancelEventEdit();
       } else {
-        const { error } = await sb.from('events').insert({ title, event_type, event_date, location, description, show_in_portal, created_by: currentUserEmail });
+        const { error } = await sb.from('events').insert({ title, event_type, event_date, location, description, image_url, show_in_portal, created_by: currentUserEmail });
         if (error) { showMsg('Error: ' + error.message, 'error'); return; }
         logAction('event', 'Created event', title + ' on ' + event_date);
         showMsg('Event added!', 'success');
@@ -835,6 +849,7 @@
         document.getElementById('eventDate').value = '';
         document.getElementById('eventLocation').value = '';
         document.getElementById('eventDesc').value = '';
+        document.getElementById('eventImage').value = '';
       }
       loadEvents();
       loadAnalytics();
@@ -1413,6 +1428,42 @@
       showMsg('Shop items exported!', 'success');
     }
 
+    // ========== SHOP VISIBILITY TOGGLE ==========
+    let shopVisible = true;
+
+    async function loadShopSetting() {
+      const { data } = await sb.from('site_settings').select('value').eq('key', 'shop_enabled').single();
+      shopVisible = data ? data.value !== 'false' : true;
+      updateShopToggleUI();
+    }
+
+    function updateShopToggleUI() {
+      const btn = document.getElementById('shopToggleBtn');
+      const status = document.getElementById('shopToggleStatus');
+      if (shopVisible) {
+        btn.textContent = 'Visible';
+        btn.style.background = '#238636'; btn.style.borderColor = '#238636'; btn.style.color = '#fff';
+        status.textContent = 'Shop page is live on the website';
+      } else {
+        btn.textContent = 'Hidden';
+        btn.style.background = '#da3633'; btn.style.borderColor = '#da3633'; btn.style.color = '#fff';
+        status.textContent = 'Shop page is hidden from the website';
+      }
+    }
+
+    async function toggleShopVisibility() {
+      shopVisible = !shopVisible;
+      const { data: existing } = await sb.from('site_settings').select('key').eq('key', 'shop_enabled').single();
+      if (existing) {
+        await sb.from('site_settings').update({ value: String(shopVisible) }).eq('key', 'shop_enabled');
+      } else {
+        await sb.from('site_settings').insert({ key: 'shop_enabled', value: String(shopVisible) });
+      }
+      updateShopToggleUI();
+      logAction('shop', shopVisible ? 'Enabled shop page' : 'Disabled shop page', '');
+      showMsg(shopVisible ? 'Shop is now visible on the website.' : 'Shop is now hidden from the website.', 'success');
+    }
+
     // ========== SHOP CSV IMPORT ==========
     let pendingShopImport = [];
 
@@ -1579,6 +1630,7 @@
       loadMembers();
       loadArticles();
       loadShopItems();
+      loadShopSetting();
       loadAnalytics();
       loadLogs();
       logAction('auth', 'Admin portal opened', currentUserEmail);

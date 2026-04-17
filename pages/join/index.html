@@ -302,7 +302,7 @@
         await sb.from('referral_codes').update({ times_used: (codeData.times_used || 0) + 1 }).eq('id', codeData.id);
 
         if (authData.session) {
-          window.location.href = '../dashboard';
+          window.location.href = '../welcome';
         } else {
           successMsg.textContent = 'Account created! Check your email to confirm, then log in.';
           successMsg.style.display = 'block';
