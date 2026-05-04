@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join GSMP — Create Your Account</title>
+  <link rel="stylesheet" href="../../css/style.css?v=7">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <a href="../../" class="nav-logo">
+        <img src="../../images/logo.jpeg" alt="GSMP" class="logo-icon">
+        <span class="logo-text">GSMP</span>
+      </a>
+      <h1>Join GSMP</h1>
+      <p class="auth-sub">Membership is by referral only. Enter your code to get started.</p>
+
+      <div id="errorMsg" style="display:none; background:#FEE2E2; color:#991B1B; padding:12px 16px; border-radius:6px; font-size:14px; margin-bottom:16px;"></div>
+      <div id="successMsg" style="display:none; background:#D1FAE5; color:#065F46; padding:12px 16px; border-radius:6px; font-size:14px; margin-bottom:16px;"></div>
+
+      <form id="joinForm">
+        <div class="form-group">
+          <label for="referralCode">Referral Code</label>
+          <input type="text" id="referralCode" placeholder="Enter your referral code" required style="text-transform:uppercase;">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" placeholder="Galen" required autocomplete="given-name">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" placeholder="of Pergamon" required autocomplete="family-name">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@medschool.edu" required inputmode="email" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Min 8 characters" minlength="8" required autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Re-enter your password" minlength="8" required autocomplete="new-password">
+          <span id="passwordMatch" style="font-size:12px;display:none;margin-top:4px;"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" required>
+              <option value="" disabled selected>Select</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Prefer not to say</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="country">Country</label>
+            <input type="text" id="country" placeholder="e.g. USA, UK, India" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="city">City</label>
+          <input type="text" id="city" placeholder="e.g. Dubai, Mumbai, London" required>
+        </div>
+
+        <div class="form-group">
+          <label for="school">Institution</label>
+          <input type="text" id="school" placeholder="e.g. Johns Hopkins, UCL, AIIMS" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="degree">Degree</label>
+            <select id="degree" required>
+              <option value="" disabled selected>Select</option>
+              <option>MBBS</option>
+              <option>MD</option>
+              <option>DO</option>
+              <option>BDS</option>
+              <option>MDS</option>
+              <option>BPharm</option>
+              <option>DPharm</option>
+              <option>PharmD</option>
+              <option>BAMS</option>
+              <option>BHMS</option>
+              <option>BPT</option>
+              <option>BSc Nursing</option>
+              <option>MSc</option>
+              <option>PhD</option>
+              <option>MPH</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="year">Year / Role</label>
+            <select id="year" required>
+              <option value="" disabled selected>Select</option>
+              <option>Pre-Med</option>
+              <option>Year 1</option>
+              <option>Year 2</option>
+              <option>Year 3</option>
+              <option>Year 4</option>
+              <option>Year 5+</option>
+              <option>Intern / Resident</option>
+              <option>Practicing Physician</option>
+              <option>Researcher</option>
+              <option>Allied Health</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="field">Field</label>
+            <select id="field" required>
+              <option value="" disabled selected>Select</option>
+              <option>Medicine</option>
+              <option>Surgery</option>
+              <option>Dentistry</option>
+              <option>Pharmacy</option>
+              <option>Nursing</option>
+              <option>Physiotherapy</option>
+              <option>Public Health</option>
+              <option>Research</option>
+              <option>Allied Health</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="specialty">Specialty</label>
+            <input type="text" id="specialty" placeholder="e.g. Cardiology, Radiology, Oncology">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone (with country code)</label>
+          <input type="tel" id="phone" placeholder="e.g. +971501234567" required inputmode="tel" autocomplete="tel">
+        </div>
+
+        <div class="form-group">
+          <label for="interests">Interests (optional)</label>
+          <input type="text" id="interests" placeholder="e.g. Surgery, Research, Global Health">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Create My Account</button>
+      </form>
+
+      <p class="auth-footer">
+        Already a member? <a href="../login">Log in</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    const form = document.getElementById('joinForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Real-time password match feedback
+    const pwField = document.getElementById('password');
+    const confirmPw = document.getElementById('confirmPassword');
+    const matchHint = document.getElementById('passwordMatch');
+    function checkPasswordMatch() {
+      const pw = pwField.value;
+      const cpw = confirmPw.value;
+      if (!cpw) { matchHint.style.display = 'none'; return; }
+      matchHint.style.display = 'block';
+      if (pw === cpw) {
+        matchHint.textContent = 'Passwords match';
+        matchHint.style.color = '#059669';
+      } else {
+        matchHint.textContent = 'Passwords do not match';
+        matchHint.style.color = '#dc2626';
+      }
+    }
+    pwField.addEventListener('input', checkPasswordMatch);
+    confirmPw.addEventListener('input', checkPasswordMatch);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.style.display = 'none';
+      successMsg.style.display = 'none';
+      submitBtn.textContent = 'Creating account...';
+      submitBtn.disabled = true;
+
+      const referralCode = document.getElementById('referralCode').value.trim().toUpperCase();
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      if (password !== confirmPassword) {
+        errorMsg.textContent = 'Passwords do not match.';
+        errorMsg.style.display = 'block';
+        submitBtn.textContent = 'Join GSMP';
+        submitBtn.disabled = false;
+        return;
+      }
+      const school = document.getElementById('school').value.trim();
+      const year = document.getElementById('year').value;
+      const country = document.getElementById('country').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const gender = document.getElementById('gender').value;
+      const degree = document.getElementById('degree').value;
+      const field = document.getElementById('field').value;
+      const specialty = document.getElementById('specialty').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const interests = document.getElementById('interests').value.trim();
+
+      try {
+        // Validate + atomically consume referral code via secure RPC.
+        // Returns { is_valid, chapter_id, error_message }. RLS-safe.
+        const { data: rpcResult, error: rpcError } = await sb.rpc('validate_and_use_referral_code', { p_code: referralCode });
+        if (rpcError) throw new Error('Could not validate referral code: ' + rpcError.message);
+
+        const validation = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult;
+        if (!validation || !validation.is_valid) {
+          throw new Error((validation && validation.error_message) || 'Invalid or expired referral code.');
+        }
+        const chapterId = validation.chapter_id || null;
+
+        const { data: authData, error: authError } = await sb.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { first_name: firstName, last_name: lastName }
+          }
+        });
+
+        if (authError) throw authError;
+
+        if (authData.user) {
+          // Personal referral code is auto-created by a DB trigger when this member row is inserted.
+          const personalCode = (firstName.substring(0,4) + '-' + Math.random().toString(36).substring(2,6)).toUpperCase();
+
+          const { error: profileError } = await sb.from('members').insert({
+            id: authData.user.id,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            school: school,
+            year: year,
+            country: country,
+            city: city,
+            gender: gender,
+            degree: degree,
+            field: field,
+            specialty: specialty || null,
+            phone: phone,
+            interests: interests,
+            referred_by: referralCode,
+            referral_code: personalCode,
+            chapter_id: chapterId,
+          });
+
+          if (profileError) console.error('Profile insert error:', profileError);
+          // No client-side referral_codes insert here — handled by the
+          // members_create_personal_code trigger (SECURITY DEFINER).
+        }
+
+        if (authData.session) {
+          window.location.href = '../welcome';
+        } else {
+          successMsg.textContent = 'Account created! Check your email to confirm, then log in.';
+          successMsg.style.display = 'block';
+          submitBtn.textContent = 'Account Created';
+        }
+
+      } catch (err) {
+        errorMsg.textContent = err.message || 'Something went wrong. Please try again.';
+        errorMsg.style.display = 'block';
+        submitBtn.textContent = 'Create My Account';
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

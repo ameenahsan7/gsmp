@@ -1,0 +1,9 @@
+audit-repo.sh
+secure-repo.sh
+fix-git-author.sh
+scrub-docx.sh
+scrub-history.sh
+fix-local-author.sh
+cleanup-and-push.sh
+.DS_Store
+wipe-history.sh

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GSMP Essentials | Shop</title>
+  <link rel="stylesheet" href="../../css/style.css?v=8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    .shop-hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #0F1B33 60%, var(--burgundy) 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 100px 20px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .shop-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=1400&q=80') center/cover no-repeat;
+      opacity: 0.15;
+    }
+    .shop-hero > * { position: relative; z-index: 1; }
+    .shop-hero h1 { font-family: 'Playfair Display', serif; font-size: 42px; margin-bottom: 12px; }
+    .shop-hero p { font-size: 17px; color: rgba(255,255,255,0.7); max-width: 520px; margin: 0 auto; line-height: 1.6; }
+
+    .shop-nav {
+      display: flex; justify-content: center; gap: 8px; padding: 20px;
+      background: var(--white); border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 50;
+    }
+    .shop-nav a {
+      font-size: 13px; font-weight: 600; color: var(--gray-600); text-decoration: none;
+      padding: 8px 16px; border-radius: 20px; border: 1px solid #e5e7eb; transition: all 0.2s;
+    }
+    .shop-nav a:hover, .shop-nav a.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+    .shop-section { padding: 60px 20px; max-width: 1200px; margin: 0 auto; }
+    .shop-section:nth-child(even) { background: #f9fafb; max-width: 100%; }
+    .shop-section:nth-child(even) .shop-inner { max-width: 1200px; margin: 0 auto; }
+    .shop-section-header { margin-bottom: 32px; }
+    .shop-section-header h2 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); margin-bottom: 8px; }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .shop-card {
+      background: var(--white);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      transition: all 0.25s;
+      position: relative;
+    }
+    .shop-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .shop-card-img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      display: block;
+      background: #f3f4f6;
+    }
+    .shop-card-body { padding: 16px 18px; }
+    .shop-card-body h3 { font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+    .shop-card-body p { font-size: 13px; color: var(--gray-500); line-height: 1.5; margin-bottom: 12px; }
+    .shop-card-footer { display: flex; justify-content: space-between; align-items: center; }
+    .shop-price { font-size: 16px; font-weight: 700; color: var(--navy); }
+    .shop-price span { font-size: 12px; font-weight: 400; color: var(--gray-400); }
+
+    .btn-inquiry {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; font-size: 13px; font-weight: 600;
+      background: var(--navy); color: var(--white); border: none; border-radius: 6px;
+      cursor: pointer; text-decoration: none; transition: opacity 0.2s;
+    }
+    .btn-inquiry:hover { opacity: 0.9; }
+
+    .shop-back {
+      position: fixed; top: 16px; left: 16px; z-index: 100;
+      text-decoration: none; color: var(--white); font-size: 14px; font-weight: 500;
+      display: flex; align-items: center; gap: 6px; opacity: 0.8;
+    }
+    .shop-back:hover { opacity: 1; }
+
+    .shop-footer-note {
+      text-align: center; padding: 40px 20px; font-size: 14px; color: var(--gray-400); line-height: 1.6;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .shop-empty { text-align: center; padding: 80px 20px; color: var(--gray-400); font-size: 16px; }
+
+    @media (max-width: 768px) {
+      .shop-hero { padding: 80px 16px 40px; }
+      .shop-hero h1 { font-size: 28px; }
+      .shop-hero p { font-size: 14px; }
+      .shop-nav { flex-wrap: wrap; gap: 6px; padding: 12px; }
+      .shop-nav a { font-size: 12px; padding: 6px 12px; }
+      .shop-section { padding: 40px 16px; }
+      .shop-section-header h2 { font-size: 22px; }
+      .shop-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .shop-card-img { height: 180px; }
+      .shop-card-body { padding: 12px 14px; }
+      .shop-card-body h3 { font-size: 14px; }
+      .shop-price { font-size: 14px; }
+      .btn-inquiry { padding: 6px 12px; font-size: 12px; }
+    }
+    @media (max-width: 380px) {
+      .shop-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="../../" class="shop-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to GSMP
+  </a>
+
+  <div class="shop-hero">
+    <h1>GSMP Essentials</h1>
+    <p>Curated gear for medical professionals. From clinical tools to everyday carry, built for the community.</p>
+  </div>
+
+  <nav class="shop-nav" id="shopNav"></nav>
+
+  <div id="shopContent">
+    <div class="shop-empty">Loading shop...</div>
+  </div>
+
+  <div class="shop-footer-note">
+    All items are fulfilled by GSMP. Tap <strong>Inquire</strong> to reach us directly via WhatsApp.<br>
+    Prices may vary by region and availability. Bulk orders welcome for chapters and events.
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    const WA_NUMBER = '971551552698';
+
+    // Category display order + anchor IDs
+    const CAT_META = {
+      'Scrubs':            { anchor: 'scrubs',      label: 'Scrubs' },
+      'Compression':       { anchor: 'compression', label: 'Compression' },
+      'Clinical Tools':    { anchor: 'tools',       label: 'Clinical Tools' },
+      'Tech & Stationery': { anchor: 'tech',        label: 'Tech & Stationery' },
+      'Branded Gear':      { anchor: 'merch',       label: 'Branded Gear' },
+    };
+
+    (async () => {
+      const { data: items, error } = await sb.from('shop_items').select('*').eq('active', true).order('sort_order').order('name');
+
+      if (error || !items || !items.length) {
+        document.getElementById('shopContent').innerHTML = '<div class="shop-empty">No items available right now. Check back soon!</div>';
+        document.getElementById('shopNav').style.display = 'none';
+        return;
+      }
+
+      // Group by category, preserving CAT_META order
+      const grouped = {};
+      items.forEach(item => {
+        const cat = item.category || 'Other';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(item);
+      });
+
+      // Build nav
+      const categories = Object.keys(CAT_META).filter(c => grouped[c]);
+      // Add any extra categories not in CAT_META
+      Object.keys(grouped).forEach(c => { if (!categories.includes(c)) categories.push(c); });
+
+      document.getElementById('shopNav').innerHTML = categories.map((cat, i) => {
+        const meta = CAT_META[cat] || { anchor: cat.toLowerCase().replace(/[^a-z0-9]+/g, '-'), label: cat };
+        return `<a href="#${meta.anchor}" ${i === 0 ? 'class="active"' : ''}>${meta.label}</a>`;
+      }).join('');
+
+      // Build sections
+      document.getElementById('shopContent').innerHTML = categories.map((cat, i) => {
+        const meta = CAT_META[cat] || { anchor: cat.toLowerCase().replace(/[^a-z0-9]+/g, '-'), label: cat };
+        const cardsHTML = grouped[cat].map(item => {
+          const imgSrc = item.image_url || 'https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=600&q=80';
+          const waText = encodeURIComponent("Hi, I'm interested in the " + item.name);
+          const priceHTML = item.price ? `<div class="shop-price">$${item.price} <span>USD</span></div>` : '';
+          return `
+            <div class="shop-card">
+              <img class="shop-card-img" src="${imgSrc}" alt="${item.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=600&q=80'">
+              <div class="shop-card-body">
+                <h3>${item.name}</h3>
+                ${item.description ? '<p>' + item.description + '</p>' : ''}
+                <div class="shop-card-footer">
+                  ${priceHTML}
+                  <a href="https://wa.me/${WA_NUMBER}?text=${waText}" class="btn-inquiry" target="_blank">Inquire</a>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+
+        const wrapStart = i % 2 !== 0 ? '<div class="shop-inner">' : '';
+        const wrapEnd = i % 2 !== 0 ? '</div>' : '';
+
+        return `
+          <div class="shop-section" id="${meta.anchor}">
+            ${wrapStart}
+            <div class="shop-section-header">
+              <h2>${meta.label}</h2>
+            </div>
+            <div class="shop-grid">${cardsHTML}</div>
+            ${wrapEnd}
+          </div>`;
+      }).join('');
+
+      // Sticky nav active state on scroll
+      const navLinks = document.querySelectorAll('.shop-nav a');
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            navLinks.forEach(a => a.classList.remove('active'));
+            const link = document.querySelector('.shop-nav a[href="#' + entry.target.id + '"]');
+            if (link) link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-20% 0px -60% 0px' });
+
+      document.querySelectorAll('.shop-section').forEach(sec => observer.observe(sec));
+    })();
+  </script>
+</body>
+</html>

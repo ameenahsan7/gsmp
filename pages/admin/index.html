@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Admin — GSMP</title>
+  <link rel="stylesheet" href="../../css/style.css?v=9">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body { background: #0d1117; color: #c9d1d9; }
+    .admin-page { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .admin-header h1 { font-family: 'Playfair Display', serif; color: #58a6ff; font-size: 22px; }
+    .admin-tabs { display: flex; gap: 0; border-bottom: 1px solid #30363d; margin-bottom: 16px; }
+    .admin-tab { padding: 8px 18px; background: none; border: none; font-size: 13px; font-weight: 600; color: #8b949e; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .admin-tab.active { color: #3fb950; border-bottom-color: #3fb950; }
+    .admin-tab:hover { color: #c9d1d9; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .admin-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .admin-table th { text-align: left; padding: 6px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #8b949e; border-bottom: 1px solid #30363d; }
+    .admin-table td { padding: 6px 10px; border-bottom: 1px solid #21262d; font-size: 13px; color: #c9d1d9; }
+    .admin-table tr:hover { background: #161b22; }
+    .admin-form { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 14px 16px; margin-bottom: 16px; }
+    .admin-form h3 { margin-bottom: 10px; font-size: 14px; color: #3fb950; }
+    .admin-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .admin-form .form-group { margin-bottom: 8px; }
+    .admin-form label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 2px; color: #8b949e; }
+    .admin-form input, .admin-form select, .admin-form textarea { width: 100%; padding: 5px 10px; border: 1px solid #30363d; border-radius: 5px; font-size: 13px; font-family: 'Inter', sans-serif; background: #0d1117; color: #c9d1d9; }
+    .admin-form textarea { resize: vertical; min-height: 48px; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 5px; border: 1px solid #30363d; cursor: pointer; font-weight: 600; background: #21262d; color: #c9d1d9; transition: all 0.15s; }
+    .btn-sm:hover { background: #30363d; }
+    .btn-add { background: #238636; color: #fff; border-color: #238636; }
+    .btn-add:hover { opacity: 0.9; background: #2ea043; }
+    .btn-danger { background: #21262d; color: #f85149; border-color: #f85149; }
+    .btn-danger:hover { background: #2d1215; }
+    .admin-actions { display: flex; gap: 6px; }
+    .admin-msg { padding: 6px 12px; border-radius: 5px; font-size: 12px; margin-bottom: 10px; display: none; }
+    .admin-back { text-decoration: none; color: #58a6ff; font-size: 13px; font-weight: 500; }
+    .admin-back:hover { text-decoration: underline; }
+    .member-chapter-select { padding: 4px 8px; font-size: 12px; border: 1px solid #30363d; border-radius: 4px; background: #0d1117; color: #c9d1d9; }
+    .loading-text { color: #484f58; font-style: italic; padding: 10px 0; font-size: 12px; }
+    .btn-csv { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+    .btn-csv:hover { background: #30363d; }
+    .admin-msg.success { display: block; background: #0d2818; color: #3fb950; border: 1px solid #238636; }
+    .admin-msg.error { display: block; background: #2d1215; color: #f85149; border: 1px solid #f85149; }
+    .chapter-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .chapter-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .chapter-card-header h4 { font-size: 14px; color: #58a6ff; margin: 0; }
+    .chapter-meta { font-size: 12px; color: #8b949e; }
+    .chapter-codes { margin-top: 8px; padding-top: 8px; border-top: 1px solid #21262d; }
+    .chapter-codes h5 { font-size: 12px; font-weight: 600; color: #8b949e; margin-bottom: 5px; }
+    .code-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 12px; }
+    .code-badge { font-family: monospace; font-weight: 700; letter-spacing: 1px; background: #0d1117; padding: 2px 8px; border-radius: 4px; color: #3fb950; font-size: 12px; }
+    .code-meta { color: #8b949e; }
+    .add-code-inline { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+    .add-code-inline input { padding: 4px 8px; border: 1px solid #30363d; border-radius: 5px; font-size: 12px; font-family: 'Inter', sans-serif; text-transform: uppercase; width: 130px; background: #0d1117; color: #c9d1d9; }
+    .add-code-inline input[type="number"] { width: 60px; }
+    .btn-edit { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+    .btn-edit:hover { background: #30363d; }
+    .edit-inline { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 10px 12px; margin-top: 8px; }
+    .edit-inline .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .edit-inline .form-group { margin-bottom: 6px; }
+    .edit-inline label { display: block; font-size: 11px; font-weight: 600; color: #8b949e; margin-bottom: 2px; }
+    .edit-inline input, .edit-inline select, .edit-inline textarea { width: 100%; padding: 5px 8px; border: 1px solid #30363d; border-radius: 5px; font-size: 12px; font-family: 'Inter', sans-serif; background: #161b22; color: #c9d1d9; }
+    .edit-inline textarea { resize: vertical; min-height: 40px; }
+    .edit-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+    @media (max-width: 768px) {
+      .admin-page { padding: 16px 10px; }
+      .admin-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .admin-header h1 { font-size: 22px; }
+      .admin-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      .admin-tabs::-webkit-scrollbar { display: none; }
+      .admin-tab { padding: 12px 16px; font-size: 13px; white-space: nowrap; min-height: 44px; }
+      .admin-stats-grid {
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 8px !important;
+      }
+      .admin-form { padding: 16px; }
+      .admin-form .form-row { grid-template-columns: 1fr; }
+      .admin-form input, .admin-form select, .admin-form textarea { padding: 10px 12px; font-size: 16px; }
+      .admin-table { font-size: 12px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .admin-table th, .admin-table td { padding: 8px 8px; white-space: nowrap; }
+      .member-chapter-select { font-size: 14px; padding: 6px 8px; min-height: 36px; }
+      .btn-sm { min-height: 40px; min-width: 40px; padding: 8px 14px; font-size: 13px; }
+      .btn-csv { min-height: 40px; padding: 8px 12px; font-size: 12px; }
+      .admin-actions { gap: 8px; flex-wrap: wrap; }
+      .chapter-card { padding: 14px; }
+      .chapter-card-header { flex-direction: column; gap: 8px; }
+      .add-code-inline { flex-wrap: wrap; }
+      .add-code-inline input { width: 100% !important; font-size: 16px; padding: 10px; }
+      .code-row { flex-wrap: wrap; gap: 6px; }
+      .edit-inline { padding: 12px; }
+      .edit-inline .form-row { grid-template-columns: 1fr; }
+      .edit-inline input, .edit-inline select, .edit-inline textarea { padding: 10px; font-size: 16px; }
+      .edit-actions { flex-wrap: wrap; }
+      .admin-back { font-size: 13px; min-height: 44px; display: inline-flex; align-items: center; }
+      /* Articles list cards on mobile */
+      #articlesListContainer > div { flex-direction: column !important; }
+      #articlesListContainer > div img { width: 100% !important; height: 160px !important; border-radius: 8px !important; }
+      #articlesListContainer .admin-actions { flex-direction: row !important; width: 100% !important; justify-content: flex-start; }
+    }
+    @media (max-width: 380px) {
+      .admin-page { padding: 12px 8px; }
+      .admin-header h1 { font-size: 20px; }
+      .admin-tab { padding: 10px 12px; font-size: 12px; }
+      .admin-stats-grid { grid-template-columns: 1fr !important; }
+      .admin-form { padding: 12px; }
+      .chapter-card { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-page">
+    <div class="admin-header">
+      <div>
+        <a href="../dashboard" class="admin-back">&larr; Back to Dashboard</a>
+        <h1>SaaS Admin</h1>
+      </div>
+      <a href="#" id="logoutBtn" class="btn btn-ghost" style="font-size:14px;">Log Out</a>
+    </div>
+
+    <div id="adminMsg" class="admin-msg"></div>
+
+    <!-- ANALYTICS -->
+    <div class="admin-stats-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+      <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-size:24px;font-weight:700;color:#3fb950;" id="statMembers">-</div>
+        <div style="font-size:11px;color:#8b949e;margin-top:2px;">Members</div>
+      </div>
+      <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-size:24px;font-weight:700;color:#3fb950;" id="statChapters">-</div>
+        <div style="font-size:11px;color:#8b949e;margin-top:2px;">Chapters</div>
+      </div>
+      <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-size:24px;font-weight:700;color:#3fb950;" id="statEvents">-</div>
+        <div style="font-size:11px;color:#8b949e;margin-top:2px;">Events</div>
+      </div>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="chapters">Chapters</button>
+      <button class="admin-tab" data-tab="notices">Notices</button>
+      <button class="admin-tab" data-tab="events">Events</button>
+      <button class="admin-tab" data-tab="members">Members</button>
+      <button class="admin-tab" data-tab="articles">Articles</button>
+      <button class="admin-tab" data-tab="shop">Shop</button>
+      <button class="admin-tab" data-tab="logs">Logs</button>
+    </div>
+
+    <!-- CHAPTERS TAB -->
+    <div class="tab-content active" id="tab-chapters">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="btn-sm btn-csv" onclick="exportChaptersCSV()">&#x2B73; Export CSV</button>
+      </div>
+      <div class="admin-form">
+        <h3>Add Chapter</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Chapter Name</label>
+            <input type="text" id="chapterName" placeholder="e.g. Johns Hopkins Chapter">
+          </div>
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" id="chapterCity" placeholder="e.g. Baltimore">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Country</label>
+            <input type="text" id="chapterCountry" placeholder="e.g. USA">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="chapterStatus">
+              <option value="active">Active</option>
+              <option value="forming">Forming</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="chapterDesc" placeholder="Brief description of the chapter"></textarea>
+        </div>
+        <button class="btn-sm btn-add" onclick="addChapter()">Add Chapter</button>
+      </div>
+
+      <div id="chapterCards">
+        <p class="loading-text">Loading chapters...</p>
+      </div>
+    </div>
+
+    <!-- NOTICES TAB -->
+    <div class="tab-content" id="tab-notices">
+      <div class="admin-form">
+        <h3 id="noticeFormTitle">Post Announcement</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Scope *</label>
+            <select id="noticeScope">
+              <option value="__global__">Network — all members</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Auto-hide after (optional)</label>
+            <input type="datetime-local" id="noticeExpiry">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="noticeTitle" placeholder="What's happening?" maxlength="160">
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea id="noticeBody" rows="4" placeholder="Add details, links, or context..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Image (optional)</label>
+          <input type="file" id="noticeImage" accept="image/*">
+          <div id="noticeImagePreview" style="margin-top:6px;display:none;"></div>
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="noticePinned">
+          <label for="noticePinned" style="margin:0;">Pin to top</label>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sm btn-add" id="noticeSubmitBtn" onclick="submitNotice()">Post</button>
+          <button class="btn-sm btn-edit" id="noticeCancelBtn" onclick="resetNoticeForm()" style="display:none;">Cancel</button>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0 8px 0;">
+        <label style="font-size:12px;color:#8b949e;">Filter:</label>
+        <select id="noticeFilter" class="member-chapter-select" onchange="loadNotices()">
+          <option value="all">All scopes</option>
+          <option value="__global__">Global only</option>
+        </select>
+      </div>
+
+      <div id="noticesList">
+        <p class="loading-text">Loading notices...</p>
+      </div>
+    </div>
+
+    <!-- EVENTS TAB -->
+    <div class="tab-content" id="tab-events">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="btn-sm btn-csv" onclick="exportEventsCSV()">&#x2B73; Export CSV</button>
+      </div>
+      <div class="admin-form">
+        <h3 id="eventFormTitle">Add Event</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Event Title</label>
+            <input type="text" id="eventTitle" placeholder="e.g. Clinical Research Workshop">
+          </div>
+          <div class="form-group">
+            <label>Event Type</label>
+            <select id="eventType">
+              <option value="Workshop">Workshop</option>
+              <option value="Panel">Panel</option>
+              <option value="Social">Social</option>
+              <option value="Webinar">Webinar</option>
+              <option value="Conference">Conference</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date & Time</label>
+            <input type="datetime-local" id="eventDate">
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="eventLocation" placeholder="e.g. Virtual or city name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="eventDesc" placeholder="What is this event about?"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Upload image (optional)</label>
+          <input type="file" id="eventImageFile" accept="image/*">
+          <div id="eventImagePreview" style="margin-top:6px;display:none;"></div>
+        </div>
+        <div class="form-group">
+          <label>...or paste an image URL</label>
+          <input type="text" id="eventImage" placeholder="https://images.unsplash.com/... (used if no file uploaded)">
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="eventPortal" checked>
+          <label for="eventPortal" style="margin:0;">Show in member portal</label>
+        </div>
+        <button class="btn-sm btn-add" id="eventSubmitBtn" onclick="addEvent()">Add Event</button>
+      </div>
+
+      <table class="admin-table">
+        <thead>
+          <tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>Img</th><th>RSVPs</th><th>Created By</th><th>Portal</th><th></th></tr>
+        </thead>
+        <tbody id="eventsTable">
+          <tr><td colspan="6" class="loading-text">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MEMBERS TAB -->
+    <div class="tab-content" id="tab-members">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="btn-sm btn-csv" onclick="exportMembersCSV()">&#x2B73; Export CSV</button>
+      </div>
+      <table class="admin-table">
+        <thead>
+          <tr><th>Name</th><th>Email</th><th>Institution</th><th>Chapter</th><th>Title</th><th>Referred By</th><th></th></tr>
+        </thead>
+        <tbody id="membersTable">
+          <tr><td colspan="6" class="loading-text">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ARTICLES TAB -->
+    <div class="tab-content" id="tab-articles">
+      <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:8px;">
+        <label class="btn-sm btn-csv" style="cursor:pointer;margin:0;">
+          &#x2B71; Import CSV
+          <input type="file" accept=".csv" onchange="importArticlesCSV(this)" style="display:none;">
+        </label>
+        <button class="btn-sm btn-csv" onclick="exportArticlesCSV()">&#x2B73; Export CSV</button>
+      </div>
+      <div id="articleImportPreview" style="display:none;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:12px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:13px;font-weight:600;color:#58a6ff;" id="articleImportInfo">Preview</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-sm btn-add" onclick="confirmArticleImport()">Confirm Import</button>
+            <button class="btn-sm btn-edit" onclick="cancelArticleImport()">Cancel</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table" id="articleImportTable"><thead></thead><tbody></tbody></table>
+        </div>
+      </div>
+      <div class="admin-form">
+        <h3 id="articleFormTitle">Add Article</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Title *</label>
+            <input type="text" id="articleTitle" placeholder="Article title" maxlength="80">
+            <span style="font-size:11px;color:#484f58;">Max 80 characters</span>
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="articleCategory">
+              <option value="news">News &amp; Insights</option>
+              <option value="community">Community Spotlight</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tag Label</label>
+            <input type="text" id="articleTag" placeholder="e.g. Research, Opinion, Event Recap" maxlength="20">
+            <span style="font-size:11px;color:#484f58;">1–2 words (e.g. Research, Opinion)</span>
+          </div>
+          <div class="form-group">
+            <label>Author</label>
+            <input type="text" id="articleAuthor" placeholder="Author name (default: GSMP)">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Excerpt / Summary *</label>
+          <textarea id="articleExcerpt" placeholder="Short summary shown on cards (2-3 sentences)" rows="3" maxlength="600"></textarea>
+          <span style="font-size:11px;color:#484f58;">Featured news cards show up to ~500 chars. Community cards show ~300 chars. Write 3-5 sentences for best results.</span>
+        </div>
+        <div class="form-group">
+          <label>Full Article Content</label>
+          <textarea id="articleContent" rows="8" placeholder="Full article body. Use double line breaks for paragraphs. Start a line with ## for headings or > for quotes."></textarea>
+          <span style="font-size:11px;color:#484f58;">This is shown on the dedicated article page. Excerpt is used for homepage cards.</span>
+        </div>
+        <div class="form-group">
+          <label>Image URL</label>
+          <input type="text" id="articleImage" placeholder="https://images.unsplash.com/... or any image URL">
+          <span style="font-size:11px;color:#484f58;">Image auto-fits any size. Best results with 600px+ wide images. Use Unsplash, Pexels or any direct image link.</span>
+        </div>
+        <div class="form-group">
+          <label>Publish Date</label>
+          <input type="date" id="articleDate" style="max-width:220px;">
+          <span style="font-size:11px;color:#484f58;">Override the publish date. Defaults to today if left empty.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#8b949e;cursor:pointer;">
+            <input type="checkbox" id="articlePublished" checked> Published (visible on homepage)
+          </label>
+        </div>
+        <div style="margin-top:12px;">
+          <button class="btn-sm btn-add" id="articleSubmitBtn" onclick="addArticle()">Add Article</button>
+        </div>
+      </div>
+      <div id="articlesListContainer">
+        <p class="loading-text">Loading articles...</p>
+      </div>
+    </div>
+
+    <!-- SHOP TAB -->
+    <div class="tab-content" id="tab-shop">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 14px;background:#161b22;border:1px solid #30363d;border-radius:6px;">
+        <span style="font-size:13px;color:#8b949e;">Shop Page:</span>
+        <button id="shopToggleBtn" class="btn-sm" onclick="toggleShopVisibility()" style="min-width:80px;">...</button>
+        <span id="shopToggleStatus" style="font-size:12px;color:#484f58;"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <button class="btn-sm btn-add" onclick="toggleShopForm()">+ Add Item</button>
+        <div style="display:flex;gap:6px;">
+          <label class="btn-sm btn-csv" style="cursor:pointer;margin:0;">
+            &#x2B71; Import CSV
+            <input type="file" accept=".csv" onchange="importShopCSV(this)" style="display:none;">
+          </label>
+          <button class="btn-sm btn-csv" onclick="exportShopCSV()">&#x2B73; Export CSV</button>
+        </div>
+      </div>
+      <div id="shopImportPreview" style="display:none;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:12px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:13px;font-weight:600;color:#58a6ff;" id="importInfo">Preview</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-sm btn-add" onclick="confirmShopImport()">Confirm Import</button>
+            <button class="btn-sm btn-edit" onclick="cancelShopImport()">Cancel</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table" id="importPreviewTable"><thead></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <!-- Inline add/edit form (hidden by default) -->
+      <div id="shopFormWrap" style="display:none;" class="admin-form">
+        <h3 id="shopFormTitle">Add Shop Item</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input type="text" id="shopName" placeholder="e.g. Classic Navy Scrub Set">
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="shopCategory">
+              <option value="Scrubs">Scrubs</option>
+              <option value="Compression">Compression</option>
+              <option value="Clinical Tools">Clinical Tools</option>
+              <option value="Tech & Stationery">Tech & Stationery</option>
+              <option value="Branded Gear">Branded Gear</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price (USD)</label>
+            <input type="text" id="shopPrice" placeholder="e.g. 89 or 45-65">
+          </div>
+          <div class="form-group">
+            <label>Image URL</label>
+            <input type="text" id="shopImage" placeholder="https://...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Short Description</label>
+          <textarea id="shopDesc" rows="2" placeholder="One-liner shown on card"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sort Order</label>
+            <input type="number" id="shopSort" value="0" min="0" style="max-width:80px;" title="Lower = shown first">
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-end;gap:12px;padding-bottom:2px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="checkbox" id="shopActive" checked> Active (visible in shop)
+            </label>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:6px;">
+          <button class="btn-sm btn-add" id="shopSubmitBtn" onclick="saveShopItem()">Add Item</button>
+          <button class="btn-sm btn-edit" onclick="cancelShopEdit()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Excel-style flat table -->
+      <div style="overflow-x:auto;">
+        <table class="admin-table" id="shopTable">
+          <thead>
+            <tr>
+              <th style="width:30px;">#</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Image</th>
+              <th>Active</th>
+              <th>Sort</th>
+              <th style="width:110px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="shopTableBody">
+            <tr><td colspan="8" class="loading-text">Loading shop items...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LOGS TAB -->
+    <div class="tab-content" id="tab-logs">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <select id="logFilter" style="background:#0d1117;color:#8b949e;border:1px solid #30363d;border-radius:4px;padding:4px 8px;font-size:12px;font-family:'Courier New',monospace;">
+            <option value="all">All Actions</option>
+            <option value="member">Members</option>
+            <option value="event">Events</option>
+            <option value="article">Articles</option>
+            <option value="chapter">Chapters</option>
+            <option value="shop">Shop</option>
+            <option value="auth">Auth</option>
+          </select>
+          <span id="logCount" style="font-size:11px;color:#484f58;font-family:'Courier New',monospace;">0 entries</span>
+        </div>
+        <button class="btn-sm" onclick="loadLogs()" style="background:transparent;color:#58a6ff;border-color:#30363d;font-size:11px;font-family:'Courier New',monospace;">&#x21bb; Refresh</button>
+      </div>
+      <div id="logTerminal" style="
+        background: #010409;
+        border: 1px solid #21262d;
+        border-radius: 6px;
+        padding: 16px;
+        font-family: 'Courier New', 'Fira Code', monospace;
+        font-size: 12px;
+        line-height: 1.7;
+        max-height: 600px;
+        overflow-y: auto;
+        color: #7ee787;
+      ">
+        <span style="color:#484f58;">Loading logs...</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    // Admin check is sourced from public.app_admins via the is_saas_admin() RPC.
+    // See window.checkIsSaasAdmin() in js/supabase-config.js.
+
+    // Breakglass: ?bg=YOUR_PASSPHRASE bypasses email check
+    // Hash of the passphrase stored here so it's not plaintext in source
+    const BG_HASH = '09593112ce6122a0c7ebc7de7b87f1ad0f63b7b826c85b3ea7ad4b304a541f66';
+    async function checkBreakglass() {
+      const bg = new URLSearchParams(window.location.search).get('bg');
+      if (!bg) return false;
+      const encoded = new TextEncoder().encode(bg);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
+      const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashHex === BG_HASH;
+    }
+
+    let chapters = [];
+    let allCodes = [];
+    let editingEventId = null;
+    let currentUserEmail = '';
+
+    // Tab switching
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    function showMsg(text, type) {
+      const msg = document.getElementById('adminMsg');
+      msg.textContent = text;
+      msg.className = 'admin-msg ' + type;
+      setTimeout(() => { msg.className = 'admin-msg'; }, 4000);
+    }
+
+    // ========== ACTIVITY LOGGING ==========
+    async function logAction(category, action, details) {
+      try {
+        await sb.from('activity_logs').insert({
+          user_email: currentUserEmail,
+          category: category,
+          action: action,
+          details: details || null
+        });
+      } catch (e) { console.warn('Log write failed:', e); }
+    }
+
+    async function loadLogs() {
+      const filter = document.getElementById('logFilter').value;
+      let query = sb.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(200);
+      if (filter !== 'all') query = query.eq('category', filter);
+      const { data, error } = await query;
+      const terminal = document.getElementById('logTerminal');
+      const countEl = document.getElementById('logCount');
+      if (error) { terminal.innerHTML = '<span style="color:#f85149;">ERROR: ' + error.message + '</span>'; return; }
+      if (!data || !data.length) {
+        terminal.innerHTML = '<span style="color:#484f58;">No logs found.</span>';
+        countEl.textContent = '0 entries';
+        return;
+      }
+      countEl.textContent = data.length + ' entries';
+      const COLORS = { member: '#58a6ff', event: '#d2a8ff', article: '#79c0ff', chapter: '#f0883e', shop: '#3fb950', auth: '#f778ba', code: '#ffa657' };
+      terminal.innerHTML = data.map(log => {
+        const ts = new Date(log.created_at);
+        const time = ts.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+        const catColor = COLORS[log.category] || '#8b949e';
+        const user = (log.user_email || 'system').split('@')[0];
+        return `<div style="border-bottom:1px solid #161b22;padding:3px 0;">` +
+          `<span style="color:#484f58;">${time}</span> ` +
+          `<span style="color:${catColor};font-weight:bold;">[${log.category.toUpperCase()}]</span> ` +
+          `<span style="color:#c9d1d9;">${log.action}</span>` +
+          (log.details ? ` <span style="color:#6e7681;">— ${log.details}</span>` : '') +
+          ` <span style="color:#30363d;">by</span> <span style="color:#ffa657;">${user}</span>` +
+          `</div>`;
+      }).join('');
+      // auto-scroll to top
+      terminal.scrollTop = 0;
+    }
+
+    // Filter change triggers reload
+    document.getElementById('logFilter')?.addEventListener('change', loadLogs);
+
+    // ========== CHAPTERS (with inline codes) ==========
+    async function loadChapters() {
+      const [chapRes, codeRes] = await Promise.all([
+        sb.from('chapters').select('*').order('name'),
+        sb.from('referral_codes').select('*').order('code')
+      ]);
+      if (chapRes.error) { showMsg('Error loading chapters: ' + chapRes.error.message, 'error'); return; }
+      chapters = chapRes.data || [];
+      allCodes = codeRes.data || [];
+
+      const container = document.getElementById('chapterCards');
+      if (!chapters.length) {
+        container.innerHTML = '<p style="color:#9ca3af;">No chapters yet. Add one above.</p>';
+        return;
+      }
+
+      container.innerHTML = chapters.map(ch => {
+        const chapterCodes = allCodes.filter(c => c.chapter_id === ch.id);
+        const codesHTML = chapterCodes.length
+          ? chapterCodes.map(c => `
+              <div class="code-row">
+                <span class="code-badge">${c.code}</span>
+                <span class="code-meta">Used: ${c.times_used || 0}${c.max_uses ? '/' + c.max_uses : ''}</span>
+                <span class="code-meta">${c.note || ''}</span>
+                ${c.created_by ? '<span class="code-meta" style="font-size:11px;opacity:0.7;">by ' + c.created_by.split('@')[0] + '</span>' : ''}
+                <span style="margin-left:auto;display:flex;gap:4px;align-items:center;">
+                  <input type="checkbox" ${c.active ? 'checked' : ''} onchange="toggleCode('${c.id}', this.checked)" title="Active">
+                  <button class="btn-sm btn-danger" style="padding:3px 8px;font-size:11px;" onclick="deleteCode('${c.id}')">×</button>
+                </span>
+              </div>
+            `).join('')
+          : '<p style="color:#9ca3af;font-size:13px;margin:0;">No codes yet for this chapter.</p>';
+
+        return `
+          <div class="chapter-card">
+            <div class="chapter-card-header">
+              <div>
+                <h4>${ch.name}</h4>
+                <div class="chapter-meta">${ch.city || ''}${ch.city && ch.country ? ', ' : ''}${ch.country || ''} · ${ch.status || 'active'}</div>
+                ${ch.description ? '<div class="chapter-meta" style="margin-top:4px;">' + ch.description + '</div>' : ''}
+                ${ch.created_by ? '<div class="chapter-meta" style="margin-top:4px;font-size:11px;opacity:0.7;">Created by: ' + ch.created_by + '</div>' : ''}
+              </div>
+              <div class="admin-actions">
+                <button class="btn-sm btn-edit" onclick="toggleEditChapter('${ch.id}')">Edit</button>
+                <button class="btn-sm btn-danger" onclick="deleteChapter('${ch.id}')">Delete</button>
+              </div>
+            </div>
+            <div id="editCh-${ch.id}" style="display:none;" class="edit-inline">
+              <div class="form-row">
+                <div class="form-group"><label>Chapter Name</label><input type="text" id="editChName-${ch.id}" value="${ch.name || ''}"></div>
+                <div class="form-group"><label>City</label><input type="text" id="editChCity-${ch.id}" value="${ch.city || ''}"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Country</label><input type="text" id="editChCountry-${ch.id}" value="${ch.country || ''}"></div>
+                <div class="form-group"><label>Status</label>
+                  <select id="editChStatus-${ch.id}">
+                    <option value="active" ${ch.status === 'active' ? 'selected' : ''}>Active</option>
+                    <option value="forming" ${ch.status === 'forming' ? 'selected' : ''}>Forming</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group"><label>Description</label><textarea id="editChDesc-${ch.id}">${ch.description || ''}</textarea></div>
+              <div class="edit-actions">
+                <button class="btn-sm btn-add" onclick="saveChapterEdit('${ch.id}')">Save</button>
+                <button class="btn-sm btn-edit" onclick="toggleEditChapter('${ch.id}')">Cancel</button>
+              </div>
+            </div>
+            <div class="chapter-codes">
+              <h5>Referral Codes</h5>
+              ${codesHTML}
+              <div class="add-code-inline">
+                <input type="text" id="newCode-${ch.id}" placeholder="CODE" maxlength="20">
+                <input type="number" id="newCodeMax-${ch.id}" placeholder="Max" min="0" value="0" title="Max uses (0 = unlimited)">
+                <input type="text" id="newCodeNote-${ch.id}" placeholder="Note" style="width:160px;">
+                <button class="btn-sm btn-add" onclick="addCodeToChapter('${ch.id}')">+ Add</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function addChapter() {
+      const name = document.getElementById('chapterName').value.trim();
+      const city = document.getElementById('chapterCity').value.trim();
+      const country = document.getElementById('chapterCountry').value.trim();
+      const status = document.getElementById('chapterStatus').value;
+      const description = document.getElementById('chapterDesc').value.trim();
+      if (!name) { showMsg('Chapter name is required.', 'error'); return; }
+
+      const { error } = await sb.from('chapters').insert({ name, city, country, status, description, created_by: currentUserEmail });
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('chapter', 'Created chapter', name + ' (' + city + ', ' + country + ')');
+      showMsg('Chapter added!', 'success');
+      document.getElementById('chapterName').value = '';
+      document.getElementById('chapterCity').value = '';
+      document.getElementById('chapterCountry').value = '';
+      document.getElementById('chapterDesc').value = '';
+      loadChapters();
+      loadAnalytics();
+    }
+
+    async function deleteChapter(id) {
+      // Check if members are assigned to this chapter
+      const { count } = await sb.from('members').select('id', { count: 'exact', head: true }).eq('chapter_id', id);
+      const memberWarning = count > 0 ? `\n\n⚠️ ${count} member(s) are assigned to this chapter. They will be unassigned.` : '';
+      if (!confirm('Delete this chapter and all its referral codes?' + memberWarning)) return;
+      // Unassign members from this chapter
+      if (count > 0) {
+        await sb.from('members').update({ chapter_id: null }).eq('chapter_id', id);
+      }
+      // Delete codes for this chapter first
+      await sb.from('referral_codes').delete().eq('chapter_id', id);
+      const { error } = await sb.from('chapters').delete().eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('chapter', 'Deleted chapter', 'ID: ' + id);
+      showMsg('Chapter deleted.', 'success');
+      loadChapters();
+      loadAnalytics();
+    }
+
+    function toggleEditChapter(id) {
+      const form = document.getElementById('editCh-' + id);
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function saveChapterEdit(id) {
+      const name = document.getElementById('editChName-' + id).value.trim();
+      const city = document.getElementById('editChCity-' + id).value.trim();
+      const country = document.getElementById('editChCountry-' + id).value.trim();
+      const status = document.getElementById('editChStatus-' + id).value;
+      const description = document.getElementById('editChDesc-' + id).value.trim();
+      if (!name) { showMsg('Chapter name is required.', 'error'); return; }
+
+      const { error } = await sb.from('chapters').update({ name, city, country, status, description }).eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('chapter', 'Updated chapter', name);
+      showMsg('Chapter updated!', 'success');
+      loadChapters();
+    }
+
+    // ========== CODES (inline in chapters) ==========
+    async function addCodeToChapter(chapterId) {
+      const code = document.getElementById('newCode-' + chapterId).value.trim().toUpperCase();
+      const max_uses = parseInt(document.getElementById('newCodeMax-' + chapterId).value) || 0;
+      const note = document.getElementById('newCodeNote-' + chapterId).value.trim();
+      if (!code) { showMsg('Code is required.', 'error'); return; }
+
+      const { error } = await sb.from('referral_codes').insert({ code, max_uses, note, chapter_id: chapterId, active: true, times_used: 0, created_by: currentUserEmail });
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('code', 'Created referral code', code + ' (max: ' + max_uses + ')');
+      showMsg('Code added!', 'success');
+      loadChapters();
+    }
+
+    async function toggleCode(id, active) {
+      const { error } = await sb.from('referral_codes').update({ active }).eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('code', active ? 'Activated referral code' : 'Deactivated referral code', 'ID: ' + id);
+      showMsg(active ? 'Code activated.' : 'Code deactivated.', 'success');
+    }
+
+    async function deleteCode(id) {
+      if (!confirm('Delete this code?')) return;
+      const { error } = await sb.from('referral_codes').delete().eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('code', 'Deleted referral code', 'ID: ' + id);
+      showMsg('Code deleted.', 'success');
+      loadChapters();
+    }
+
+    // ========== EVENTS ==========
+    async function uploadEventImage(file) {
+      if (!file) return null;
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const path = `${myAdminUserId}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const { error: upErr } = await sb.storage.from('event-images').upload(path, file, { cacheControl: '3600', upsert: false });
+      if (upErr) { showMsg('Image upload failed: ' + upErr.message, 'error'); return null; }
+      const { data } = sb.storage.from('event-images').getPublicUrl(path);
+      return data.publicUrl;
+    }
+
+    function editEvent(id, title, type, date, loc, desc, img, portal) {
+      editingEventId = id;
+      document.getElementById('eventTitle').value = title;
+      document.getElementById('eventType').value = type;
+      document.getElementById('eventDate').value = date ? date.slice(0, 16) : '';
+      document.getElementById('eventLocation').value = loc;
+      document.getElementById('eventDesc').value = desc;
+      document.getElementById('eventImage').value = img || '';
+      document.getElementById('eventImageFile').value = '';
+      const prev = document.getElementById('eventImagePreview');
+      if (img) {
+        prev.style.display = 'block';
+        prev.innerHTML = `<img src="${img}" alt="" style="max-width:200px;max-height:120px;border-radius:6px;border:1px solid #30363d;"><div style="font-size:12px;color:#8b949e;margin-top:4px;">Current image. Choose a new file to replace, or paste a different URL.</div>`;
+      } else {
+        prev.style.display = 'none';
+        prev.innerHTML = '';
+      }
+      document.getElementById('eventPortal').checked = portal;
+      document.getElementById('eventFormTitle').textContent = 'Edit Event';
+      document.getElementById('eventSubmitBtn').textContent = 'Update Event';
+      if (!document.getElementById('eventCancelBtn')) {
+        document.getElementById('eventSubmitBtn').insertAdjacentHTML('afterend',
+          ' <button class="btn-sm btn-edit" id="eventCancelBtn" onclick="cancelEventEdit()">Cancel</button>');
+      }
+    }
+
+    function cancelEventEdit() {
+      editingEventId = null;
+      document.getElementById('eventTitle').value = '';
+      document.getElementById('eventDate').value = '';
+      document.getElementById('eventLocation').value = '';
+      document.getElementById('eventDesc').value = '';
+      document.getElementById('eventImage').value = '';
+      document.getElementById('eventImageFile').value = '';
+      const prev = document.getElementById('eventImagePreview');
+      prev.style.display = 'none';
+      prev.innerHTML = '';
+      document.getElementById('eventFormTitle').textContent = 'Add Event';
+      document.getElementById('eventSubmitBtn').textContent = 'Add Event';
+      const cancelBtn = document.getElementById('eventCancelBtn');
+      if (cancelBtn) cancelBtn.remove();
+    }
+
+    async function loadEvents() {
+      const { data, error } = await sb.from('events').select('*').order('event_date', { ascending: true });
+      if (error) { showMsg('Error loading events: ' + error.message, 'error'); return; }
+      const tbody = document.getElementById('eventsTable');
+      if (!data || !data.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="color:#9ca3af;">No events yet.</td></tr>';
+        return;
+      }
+      // Fetch RSVP counts + names
+      const eventIds = data.map(e => e.id);
+      const { data: rsvps } = await sb.from('event_rsvps').select('event_id, member_id').in('event_id', eventIds);
+      const rsvpCounts = {};
+      const rsvpMemberIds = {};
+      if (rsvps) rsvps.forEach(r => {
+        rsvpCounts[r.event_id] = (rsvpCounts[r.event_id] || 0) + 1;
+        if (!rsvpMemberIds[r.event_id]) rsvpMemberIds[r.event_id] = [];
+        rsvpMemberIds[r.event_id].push(r.member_id);
+      });
+      // Fetch member names for RSVP tooltips
+      const allMemberIds = [...new Set((rsvps || []).map(r => r.member_id))];
+      let memberNames = {};
+      if (allMemberIds.length > 0) {
+        const { data: members } = await sb.from('members').select('id, first_name, last_name').in('id', allMemberIds);
+        if (members) members.forEach(m => { memberNames[m.id] = m.first_name + ' ' + m.last_name; });
+      }
+
+      tbody.innerHTML = data.map(ev => {
+        const d = ev.event_date ? new Date(ev.event_date).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
+        const portalChecked = ev.show_in_portal !== false ? 'checked' : '';
+        const creator = ev.created_by ? ev.created_by.split('@')[0] : '—';
+        const count = rsvpCounts[ev.id] || 0;
+        const names = (rsvpMemberIds[ev.id] || []).map(id => memberNames[id] || 'Unknown').join(', ');
+        const imgThumb = ev.image_url ? `<img src="${ev.image_url}" style="width:32px;height:32px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">` : '<span style="color:#484f58;">—</span>';
+        return `
+          <tr>
+            <td><strong>${ev.title}</strong></td>
+            <td>${ev.event_type || '—'}</td>
+            <td>${d}</td>
+            <td>${ev.location || '—'}</td>
+            <td>${imgThumb}</td>
+            <td style="text-align:center;" title="${names}"><strong style="color:${count > 0 ? '#059669' : '#9ca3af'}">${count}</strong></td>
+            <td style="font-size:12px;color:#6b7680;">${creator}</td>
+            <td><input type="checkbox" ${portalChecked} onchange="togglePortal('${ev.id}', this.checked)" title="Show in member portal"></td>
+            <td class="admin-actions">
+              <button class="btn-sm btn-csv" onclick="exportEventReport('${ev.id}','${ev.title.replace(/'/g,"\\'")}')" title="Download attendee report">&#x2B73;</button>
+              <button class="btn-sm btn-edit" onclick="editEvent('${ev.id}','${ev.title.replace(/'/g,"\\'")}','${ev.event_type || ''}','${ev.event_date || ''}','${(ev.location||'').replace(/'/g,"\\'")}','${(ev.description||'').replace(/'/g,"\\'")}','${(ev.image_url||'').replace(/'/g,"\\'")}',${ev.show_in_portal !== false})">Edit</button>
+              <button class="btn-sm btn-danger" onclick="deleteEvent('${ev.id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function addEvent() {
+      const title = document.getElementById('eventTitle').value.trim();
+      const event_type = document.getElementById('eventType').value;
+      const event_date = document.getElementById('eventDate').value;
+      const location = document.getElementById('eventLocation').value.trim();
+      const description = document.getElementById('eventDesc').value.trim();
+      const fileInput = document.getElementById('eventImageFile');
+      const file = fileInput && fileInput.files && fileInput.files[0];
+      let image_url = document.getElementById('eventImage').value.trim() || null;
+      if (!title || !event_date) { showMsg('Title and date are required.', 'error'); return; }
+
+      const show_in_portal = document.getElementById('eventPortal').checked;
+
+      const submitBtn = document.getElementById('eventSubmitBtn');
+      submitBtn.disabled = true;
+      const originalLabel = submitBtn.textContent;
+      submitBtn.textContent = 'Saving...';
+
+      if (file) {
+        const uploaded = await uploadEventImage(file);
+        if (!uploaded) { submitBtn.disabled = false; submitBtn.textContent = originalLabel; return; }
+        image_url = uploaded;
+      }
+
+      if (editingEventId) {
+        const { error } = await sb.from('events').update({ title, event_type, event_date, location, description, image_url, show_in_portal }).eq('id', editingEventId);
+        submitBtn.disabled = false;
+        if (error) { showMsg('Error: ' + error.message, 'error'); submitBtn.textContent = originalLabel; return; }
+        logAction('event', 'Updated event', title);
+        showMsg('Event updated!', 'success');
+        cancelEventEdit();
+      } else {
+        const { error } = await sb.from('events').insert({ title, event_type, event_date, location, description, image_url, show_in_portal, created_by: currentUserEmail });
+        submitBtn.disabled = false;
+        if (error) { showMsg('Error: ' + error.message, 'error'); submitBtn.textContent = originalLabel; return; }
+        logAction('event', 'Created event', title + ' on ' + event_date);
+        showMsg('Event added!', 'success');
+        document.getElementById('eventTitle').value = '';
+        document.getElementById('eventDate').value = '';
+        document.getElementById('eventLocation').value = '';
+        document.getElementById('eventDesc').value = '';
+        document.getElementById('eventImage').value = '';
+        document.getElementById('eventImageFile').value = '';
+        const prev = document.getElementById('eventImagePreview');
+        prev.style.display = 'none';
+        prev.innerHTML = '';
+        submitBtn.textContent = 'Add Event';
+      }
+      loadEvents();
+      loadAnalytics();
+    }
+
+    async function togglePortal(id, checked) {
+      const { error } = await sb.from('events').update({ show_in_portal: checked }).eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('event', checked ? 'Showed event in portal' : 'Hid event from portal', 'ID: ' + id);
+      showMsg(checked ? 'Event visible in portal.' : 'Event hidden from portal.', 'success');
+    }
+
+    async function deleteEvent(id) {
+      if (!confirm('Delete this event?')) return;
+      const { error } = await sb.from('events').delete().eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('event', 'Deleted event', 'ID: ' + id);
+      showMsg('Event deleted.', 'success');
+      loadEvents();
+      loadAnalytics();
+    }
+
+    // ========== MEMBERS ==========
+    async function loadMembers() {
+      const { data, error } = await sb.from('members').select('*').order('first_name');
+      if (error) { showMsg('Error loading members: ' + error.message, 'error'); return; }
+      const tbody = document.getElementById('membersTable');
+      if (!data || !data.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="color:#9ca3af;">No members yet.</td></tr>';
+        return;
+      }
+      const TITLE_OPTIONS = ['Member','Active Member','Senior Member','Ambassador','Chapter Lead','Fellow'];
+      tbody.innerHTML = data.map(m => {
+        const selectedChapter = m.chapter_id || '';
+        const currentTitle = m.member_title || 'Member';
+        return `
+        <tr>
+          <td><strong>${m.first_name || ''} ${m.last_name || ''}</strong></td>
+          <td>${m.email || '—'}</td>
+          <td>${m.school || '—'}</td>
+          <td>
+            <select class="member-chapter-select" onchange="assignChapter('${m.id}', this.value)">
+              <option value="">— None —</option>
+              ${chapters.map(ch => `<option value="${ch.id}" ${ch.id === selectedChapter ? 'selected' : ''}>${ch.name}</option>`).join('')}
+            </select>
+          </td>
+          <td>
+            <select class="member-chapter-select" onchange="assignTitle('${m.id}', this.value)">
+              ${TITLE_OPTIONS.map(t => `<option value="${t}" ${t === currentTitle ? 'selected' : ''}>${t}</option>`).join('')}
+            </select>
+          </td>
+          <td><span style="font-family:monospace;font-size:12px;">${m.referred_by || '—'}</span></td>
+          <td class="admin-actions">
+            <button class="btn-sm" onclick="viewAsMember('${m.id}')" title="View dashboard as this user">Dashboard</button>
+            <button class="btn-sm" onclick="viewProfileAs('${m.id}')" title="View profile as this user">Profile</button>
+            <button class="btn-sm btn-danger" onclick="deleteMember('${m.id}')">Remove</button>
+          </td>
+        </tr>
+      `}).join('');
+    }
+
+    async function assignChapter(memberId, chapterId) {
+      const value = chapterId || null;
+      const { error } = await sb.from('members').update({ chapter_id: value }).eq('id', memberId);
+      if (error) { showMsg('Error assigning chapter: ' + error.message, 'error'); return; }
+      const chName = chapters.find(c => c.id === chapterId)?.name || 'None';
+      logAction('member', 'Assigned chapter', 'Member ' + memberId.slice(0,8) + '… → ' + chName);
+      showMsg('Chapter assigned!', 'success');
+    }
+
+    async function assignTitle(memberId, title) {
+      const { error } = await sb.from('members').update({ member_title: title }).eq('id', memberId);
+      if (error) { showMsg('Error assigning title: ' + error.message, 'error'); return; }
+      logAction('member', 'Changed member title', 'Member ' + memberId.slice(0,8) + '… → ' + title);
+      showMsg('Title updated to ' + title + '!', 'success');
+    }
+
+    async function deleteMember(id) {
+      if (!confirm('Remove this member? This only removes their profile, not their auth account.')) return;
+      const { error } = await sb.from('members').delete().eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('member', 'Deleted member', 'ID: ' + id);
+      showMsg('Member removed.', 'success');
+      loadMembers();
+    }
+
+    // ========== VIEW AS (IMPERSONATION) ==========
+    function viewAsMember(memberId) {
+      window.open('../dashboard?view_as=' + memberId, '_blank');
+    }
+    function viewProfileAs(memberId) {
+      window.open('../my-profile?view_as=' + memberId, '_blank');
+    }
+
+    // ========== CSV EXPORT ==========
+    function downloadCSV(rows, filename) {
+      const csv = rows.map(r => r.map(c => '"' + String(c ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function exportChaptersCSV() {
+      if (!chapters.length) { showMsg('No chapters to export.', 'error'); return; }
+      const rows = [['Chapter Name', 'City', 'Country', 'Status', 'Description', 'Referral Codes']];
+      chapters.forEach(ch => {
+        const chCodes = allCodes.filter(c => c.chapter_id === ch.id).map(c => c.code).join('; ');
+        rows.push([ch.name, ch.city || '', ch.country || '', ch.status || '', ch.description || '', chCodes]);
+      });
+      downloadCSV(rows, 'gsmp_chapters.csv');
+      showMsg('Chapters exported!', 'success');
+    }
+
+    async function exportEventsCSV() {
+      const { data } = await sb.from('events').select('*').order('event_date', { ascending: true });
+      if (!data || !data.length) { showMsg('No events to export.', 'error'); return; }
+      // Fetch all RSVPs with member details
+      const eventIds = data.map(e => e.id);
+      const { data: rsvps } = await sb.from('event_rsvps').select('event_id, member_id').in('event_id', eventIds);
+      const rsvpCounts = {};
+      if (rsvps) rsvps.forEach(r => { rsvpCounts[r.event_id] = (rsvpCounts[r.event_id] || 0) + 1; });
+      const rows = [['Title', 'Type', 'Date', 'Location', 'Description', 'Portal', 'RSVPs', 'Created By']];
+      data.forEach(ev => rows.push([
+        ev.title, ev.event_type || '', ev.event_date || '', ev.location || '',
+        ev.description || '', ev.show_in_portal !== false ? 'Yes' : 'No',
+        rsvpCounts[ev.id] || 0, ev.created_by || ''
+      ]));
+      downloadCSV(rows, 'gsmp_events.csv');
+      showMsg('Events exported!', 'success');
+    }
+
+    async function exportEventReport(eventId, eventTitle) {
+      // Fetch event details
+      const { data: ev } = await sb.from('events').select('*').eq('id', eventId).single();
+      if (!ev) { showMsg('Event not found.', 'error'); return; }
+      // Fetch RSVPs for this event
+      const { data: rsvps } = await sb.from('event_rsvps').select('member_id, created_at').eq('event_id', eventId);
+      if (!rsvps || !rsvps.length) { showMsg('No RSVPs for this event yet.', 'error'); return; }
+      // Fetch member details
+      const memberIds = rsvps.map(r => r.member_id);
+      const { data: members } = await sb.from('members').select('id, first_name, last_name, email, phone, school, country, city, degree, specialty, member_title, chapter_id').in('id', memberIds);
+      const memberMap = {};
+      if (members) members.forEach(m => { memberMap[m.id] = m; });
+      // Build CSV
+      const rows = [
+        ['Event Report: ' + ev.title],
+        ['Type: ' + (ev.event_type || ''), 'Date: ' + (ev.event_date || ''), 'Location: ' + (ev.location || '')],
+        ['Total RSVPs: ' + rsvps.length, 'Created By: ' + (ev.created_by || '')],
+        [],
+        ['Name', 'Email', 'Phone', 'Institution', 'Country', 'City', 'Degree', 'Specialty', 'Title', 'RSVP Date']
+      ];
+      rsvps.forEach(r => {
+        const m = memberMap[r.member_id] || {};
+        rows.push([
+          ((m.first_name || '') + ' ' + (m.last_name || '')).trim() || 'Unknown',
+          m.email || '', m.phone || '', m.school || '', m.country || '', m.city || '',
+          m.degree || '', m.specialty || '', m.member_title || 'Member',
+          r.created_at ? new Date(r.created_at).toLocaleDateString() : ''
+        ]);
+      });
+      const safeName = eventTitle.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+      downloadCSV(rows, 'event_report_' + safeName + '.csv');
+      showMsg('Event report downloaded!', 'success');
+    }
+
+    async function exportMembersCSV() {
+      const { data } = await sb.from('members').select('*').order('first_name');
+      if (!data || !data.length) { showMsg('No members to export.', 'error'); return; }
+      const rows = [['Name', 'Email', 'Institution', 'Chapter', 'Title', 'Referred By', 'Joined']];
+      data.forEach(m => {
+        const ch = chapters.find(c => c.id === m.chapter_id);
+        rows.push([
+          (m.first_name || '') + ' ' + (m.last_name || ''),
+          m.email || '', m.school || '', ch ? ch.name : '', m.member_title || 'Member',
+          m.referred_by || '', m.created_at ? new Date(m.created_at).toLocaleDateString() : ''
+        ]);
+      });
+      downloadCSV(rows, 'gsmp_all_members.csv');
+      showMsg('Members exported!', 'success');
+    }
+
+    // ========== ARTICLES ==========
+    let editingArticleId = null;
+
+    async function loadArticles() {
+      const { data, error } = await sb.from('articles').select('*').order('created_at', { ascending: false });
+      const container = document.getElementById('articlesListContainer');
+      if (error) { showMsg('Error loading articles: ' + error.message, 'error'); return; }
+      if (!data || !data.length) {
+        container.innerHTML = '<p style="color:#484f58;">No articles yet. Add one above.</p>';
+        return;
+      }
+      container.innerHTML = data.map(a => {
+        const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+        const statusBadge = a.published
+          ? '<span style="background:#0d2818;color:#3fb950;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid #238636;">Published</span>'
+          : '<span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid #30363d;">Draft</span>';
+        const catLabel = a.category === 'community' ? 'Community' : 'News';
+        const imgPreview = a.image_url
+          ? `<img src="${a.image_url}" style="width:50px;height:50px;object-fit:cover;border-radius:5px;flex-shrink:0;" onerror="this.style.display='none'">`
+          : '<div style="width:50px;height:50px;background:#21262d;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#484f58;font-size:10px;">No img</div>';
+        return `
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 14px;background:#161b22;border:1px solid #30363d;border-radius:8px;margin-bottom:8px;">
+            ${imgPreview}
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+                <strong style="font-size:13px;color:#c9d1d9;">${a.title}</strong>
+                ${statusBadge}
+                <span style="font-size:10px;color:#8b949e;background:#21262d;padding:2px 8px;border-radius:10px;">${catLabel}</span>
+              </div>
+              <p style="font-size:12px;color:#8b949e;margin:0 0 4px;line-height:1.4;">${a.excerpt || (a.content ? a.content.substring(0, 100) + '...' : 'No content')}</p>
+              <div style="font-size:11px;color:#484f58;">By ${a.author || 'GSMP'} · ${date}${a.tag ? ' · ' + a.tag : ''}</div>
+            </div>
+            <div class="admin-actions" style="flex-shrink:0;">
+              <button class="btn-sm btn-edit" onclick="editArticle('${a.id}')">Edit</button>
+              <button class="btn-sm" onclick="toggleArticlePublish('${a.id}', ${!a.published})">${a.published ? 'Unpublish' : 'Publish'}</button>
+              <button class="btn-sm btn-danger" onclick="deleteArticle('${a.id}')">Delete</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function addArticle() {
+      const title = document.getElementById('articleTitle').value.trim();
+      const category = document.getElementById('articleCategory').value;
+      const tag = document.getElementById('articleTag').value.trim();
+      const author = document.getElementById('articleAuthor').value.trim();
+      const excerpt = document.getElementById('articleExcerpt').value.trim();
+      const content = document.getElementById('articleContent').value.trim();
+      const image_url = document.getElementById('articleImage').value.trim();
+      const published = document.getElementById('articlePublished').checked;
+      const dateVal = document.getElementById('articleDate').value;
+
+      if (!title || !excerpt) { showMsg('Title and excerpt are required.', 'error'); return; }
+
+      const payload = { title, category, tag: tag || null, author: author || 'GSMP', excerpt, content: content || null, image_url: image_url || null, published, created_by: currentUserEmail };
+      if (dateVal) payload.created_at = new Date(dateVal).toISOString();
+
+      if (editingArticleId) {
+        const { error } = await sb.from('articles').update(payload).eq('id', editingArticleId);
+        if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+        logAction('article', 'Updated article', title);
+        showMsg('Article updated!', 'success');
+        cancelArticleEdit();
+      } else {
+        const { error } = await sb.from('articles').insert(payload);
+        if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+        logAction('article', 'Created article', title + ' [' + category + ']');
+        showMsg('Article added!', 'success');
+        clearArticleForm();
+      }
+      loadArticles();
+    }
+
+    function clearArticleForm() {
+      document.getElementById('articleTitle').value = '';
+      document.getElementById('articleTag').value = '';
+      document.getElementById('articleAuthor').value = '';
+      document.getElementById('articleExcerpt').value = '';
+      document.getElementById('articleContent').value = '';
+      document.getElementById('articleImage').value = '';
+      document.getElementById('articlePublished').checked = true;
+      document.getElementById('articleCategory').value = 'news';
+      document.getElementById('articleDate').value = '';
+    }
+
+    async function editArticle(id) {
+      const { data: a } = await sb.from('articles').select('*').eq('id', id).single();
+      if (!a) { showMsg('Article not found.', 'error'); return; }
+      editingArticleId = id;
+      document.getElementById('articleTitle').value = a.title || '';
+      document.getElementById('articleCategory').value = a.category || 'news';
+      document.getElementById('articleTag').value = a.tag || '';
+      document.getElementById('articleAuthor').value = a.author || '';
+      document.getElementById('articleExcerpt').value = a.excerpt || '';
+      document.getElementById('articleContent').value = a.content || '';
+      document.getElementById('articleImage').value = a.image_url || '';
+      document.getElementById('articlePublished').checked = a.published !== false;
+      document.getElementById('articleDate').value = a.created_at ? a.created_at.slice(0,10) : '';
+      document.getElementById('articleFormTitle').textContent = 'Edit Article';
+      document.getElementById('articleSubmitBtn').textContent = 'Update Article';
+      if (!document.getElementById('articleCancelBtn')) {
+        document.getElementById('articleSubmitBtn').insertAdjacentHTML('afterend',
+          ' <button class="btn-sm btn-edit" id="articleCancelBtn" onclick="cancelArticleEdit()">Cancel</button>');
+      }
+      // Scroll to form
+      document.getElementById('articleFormTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelArticleEdit() {
+      editingArticleId = null;
+      clearArticleForm();
+      document.getElementById('articleFormTitle').textContent = 'Add Article';
+      document.getElementById('articleSubmitBtn').textContent = 'Add Article';
+      const cancelBtn = document.getElementById('articleCancelBtn');
+      if (cancelBtn) cancelBtn.remove();
+    }
+
+    async function toggleArticlePublish(id, published) {
+      const { error } = await sb.from('articles').update({ published }).eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('article', published ? 'Published article' : 'Unpublished article', 'ID: ' + id);
+      showMsg(published ? 'Article published!' : 'Article unpublished.', 'success');
+      loadArticles();
+    }
+
+    async function deleteArticle(id) {
+      if (!confirm('Delete this article? This cannot be undone.')) return;
+      const { error } = await sb.from('articles').delete().eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('article', 'Deleted article', 'ID: ' + id);
+      showMsg('Article deleted.', 'success');
+      loadArticles();
+    }
+
+    async function exportArticlesCSV() {
+      const { data } = await sb.from('articles').select('*').order('created_at', { ascending: false });
+      if (!data || !data.length) { showMsg('No articles to export.', 'error'); return; }
+      const rows = [['Title', 'Category', 'Tag', 'Author', 'Excerpt', 'Content', 'Published', 'Image URL', 'Created At', 'Created By']];
+      data.forEach(a => rows.push([
+        a.title, a.category || '', a.tag || '', a.author || '', a.excerpt || '', a.content || '',
+        a.published ? 'Yes' : 'No', a.image_url || '',
+        a.created_at ? new Date(a.created_at).toLocaleDateString() : '', a.created_by || ''
+      ]));
+      downloadCSV(rows, 'gsmp_articles.csv');
+      showMsg('Articles exported!', 'success');
+    }
+
+    // ========== ARTICLE CSV IMPORT ==========
+    let pendingArticleImport = [];
+
+    function importArticlesCSV(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const rows = parseCSV(e.target.result);
+        if (rows.length < 2) { showMsg('CSV is empty or has no data rows.', 'error'); input.value = ''; return; }
+
+        const header = rows[0].map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+        const colMap = {};
+        const fields = [
+          { key: 'title', aliases: ['title'] },
+          { key: 'category', aliases: ['category', 'cat'] },
+          { key: 'tag', aliases: ['tag', 'taglabel'] },
+          { key: 'author', aliases: ['author'] },
+          { key: 'excerpt', aliases: ['excerpt', 'excerptsummary', 'summary'] },
+          { key: 'content', aliases: ['content', 'fullarticlecontent', 'body', 'fullcontent'] },
+          { key: 'published', aliases: ['published', 'visible'] },
+          { key: 'image_url', aliases: ['imageurl', 'image', 'img'] },
+          { key: 'created_at', aliases: ['createdat', 'publishdate', 'date'] },
+          { key: 'created_by', aliases: ['createdby'] },
+        ];
+        fields.forEach(f => {
+          const idx = header.findIndex(h => f.aliases.includes(h));
+          if (idx !== -1) colMap[f.key] = idx;
+        });
+
+        if (colMap.title === undefined) { showMsg('CSV must have a "Title" column.', 'error'); input.value = ''; return; }
+
+        const items = [];
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i];
+          const title = r[colMap.title] || '';
+          if (!title) continue;
+          const pubVal = colMap.published !== undefined ? r[colMap.published] : 'Yes';
+          const dateVal = colMap.created_at !== undefined ? r[colMap.created_at] : '';
+          items.push({
+            title,
+            category: colMap.category !== undefined ? r[colMap.category] || 'news' : 'news',
+            tag: colMap.tag !== undefined ? r[colMap.tag] || null : null,
+            author: colMap.author !== undefined ? r[colMap.author] || 'GSMP' : 'GSMP',
+            excerpt: colMap.excerpt !== undefined ? r[colMap.excerpt] || null : null,
+            content: colMap.content !== undefined ? r[colMap.content] || null : null,
+            published: !pubVal || pubVal.toLowerCase() === 'yes' || pubVal === '1' || pubVal.toLowerCase() === 'true',
+            image_url: colMap.image_url !== undefined ? r[colMap.image_url] || null : null,
+            created_at: dateVal ? new Date(dateVal).toISOString() : null,
+          });
+        }
+
+        if (!items.length) { showMsg('No valid rows found in CSV.', 'error'); input.value = ''; return; }
+
+        pendingArticleImport = items;
+
+        const preview = document.getElementById('articleImportPreview');
+        document.getElementById('articleImportInfo').textContent = items.length + ' article' + (items.length > 1 ? 's' : '') + ' found in CSV';
+        const thead = document.querySelector('#articleImportTable thead');
+        const tbody = document.querySelector('#articleImportTable tbody');
+        thead.innerHTML = '<tr><th>#</th><th>Title</th><th>Category</th><th>Tag</th><th>Content</th><th>Published</th></tr>';
+        tbody.innerHTML = items.map((item, i) => {
+          const hasContent = item.content ? '<span style="color:#3fb950;">Yes (' + item.content.length + ' chars)</span>' : '<span style="color:#8b949e;">No</span>';
+          return `
+            <tr>
+              <td style="color:#484f58;">${i + 1}</td>
+              <td><strong>${item.title}</strong>${item.excerpt ? '<br><span style="font-size:11px;color:#8b949e;">' + item.excerpt.substring(0, 60) + '...</span>' : ''}</td>
+              <td>${item.category}</td>
+              <td>${item.tag || '—'}</td>
+              <td>${hasContent}</td>
+              <td style="color:${item.published ? '#3fb950' : '#f85149'}">${item.published ? 'Yes' : 'No'}</td>
+            </tr>`;
+        }).join('');
+        preview.style.display = 'block';
+        input.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    async function confirmArticleImport() {
+      if (!pendingArticleImport.length) return;
+      const btn = document.querySelector('#articleImportPreview .btn-add');
+      btn.textContent = 'Importing...';
+      btn.disabled = true;
+
+      let updated = 0, inserted = 0, errors = 0;
+      for (const item of pendingArticleImport) {
+        const { data: existing } = await sb.from('articles').select('id').eq('title', item.title).limit(1);
+        const payload = { ...item, created_by: item.created_by || currentUserEmail };
+        if (!payload.created_at) delete payload.created_at;
+
+        if (existing && existing.length > 0) {
+          delete payload.created_by;
+          const { error } = await sb.from('articles').update(payload).eq('id', existing[0].id);
+          if (error) { errors++; } else { updated++; }
+        } else {
+          if (!payload.created_at) payload.created_at = new Date().toISOString();
+          const { error } = await sb.from('articles').insert(payload);
+          if (error) { errors++; } else { inserted++; }
+        }
+      }
+
+      let msg = '';
+      if (inserted) msg += inserted + ' added';
+      if (updated) msg += (msg ? ', ' : '') + updated + ' updated';
+      if (errors) msg += (msg ? ', ' : '') + errors + ' failed';
+      logAction('article', 'CSV import', msg);
+      showMsg('Import done: ' + msg, errors ? 'error' : 'success');
+
+      cancelArticleImport();
+      loadArticles();
+    }
+
+    function cancelArticleImport() {
+      pendingArticleImport = [];
+      document.getElementById('articleImportPreview').style.display = 'none';
+      const btn = document.querySelector('#articleImportPreview .btn-add');
+      btn.textContent = 'Confirm Import';
+      btn.disabled = false;
+    }
+
+    // ========== SHOP ==========
+    let editingShopId = null;
+
+    function toggleShopForm() {
+      const wrap = document.getElementById('shopFormWrap');
+      wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function loadShopItems() {
+      const { data, error } = await sb.from('shop_items').select('*').order('sort_order').order('category').order('name');
+      const tbody = document.getElementById('shopTableBody');
+      if (error) {
+        tbody.innerHTML = '<tr><td colspan="8" style="color:#f85149;">Error: ' + error.message + '</td></tr>';
+        return;
+      }
+      if (!data || !data.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="color:#484f58;">No shop items yet. Click "+ Add Item" above.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map((item, i) => {
+        const imgCell = item.image_url
+          ? `<img src="${item.image_url}" style="width:32px;height:32px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">`
+          : '<span style="color:#484f58;">—</span>';
+        const activeColor = item.active ? '#3fb950' : '#f85149';
+        const activeLabel = item.active ? 'Yes' : 'No';
+        return `
+          <tr>
+            <td style="color:#484f58;">${i + 1}</td>
+            <td><strong>${item.name}</strong>${item.description ? '<br><span style="font-size:11px;color:#8b949e;">' + item.description.substring(0, 60) + (item.description.length > 60 ? '...' : '') + '</span>' : ''}</td>
+            <td>${item.category || '—'}</td>
+            <td>${item.price || '—'}</td>
+            <td>${imgCell}</td>
+            <td><span style="color:${activeColor};font-weight:600;">${activeLabel}</span></td>
+            <td>${item.sort_order ?? 0}</td>
+            <td class="admin-actions">
+              <button class="btn-sm btn-edit" onclick="editShopItem('${item.id}')">Edit</button>
+              <button class="btn-sm btn-danger" onclick="deleteShopItem('${item.id}')">Del</button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    async function saveShopItem() {
+      const name = document.getElementById('shopName').value.trim();
+      const category = document.getElementById('shopCategory').value;
+      const price = document.getElementById('shopPrice').value.trim();
+      const image_url = document.getElementById('shopImage').value.trim() || null;
+      const description = document.getElementById('shopDesc').value.trim() || null;
+      const sort_order = parseInt(document.getElementById('shopSort').value) || 0;
+      const active = document.getElementById('shopActive').checked;
+
+      if (!name) { showMsg('Product name is required.', 'error'); return; }
+
+      const payload = { name, category, price: price || null, image_url, description, sort_order, active };
+
+      if (editingShopId) {
+        const { error } = await sb.from('shop_items').update(payload).eq('id', editingShopId);
+        if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+        logAction('shop', 'Updated shop item', name);
+        showMsg('Item updated!', 'success');
+        cancelShopEdit();
+      } else {
+        payload.created_by = currentUserEmail;
+        const { error } = await sb.from('shop_items').insert(payload);
+        if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+        logAction('shop', 'Added shop item', name + ' [' + category + '] ' + (price || 'no price'));
+        showMsg('Item added!', 'success');
+        clearShopForm();
+      }
+      loadShopItems();
+    }
+
+    async function editShopItem(id) {
+      const { data: item } = await sb.from('shop_items').select('*').eq('id', id).single();
+      if (!item) { showMsg('Item not found.', 'error'); return; }
+      editingShopId = id;
+      document.getElementById('shopName').value = item.name || '';
+      document.getElementById('shopCategory').value = item.category || 'Scrubs';
+      document.getElementById('shopPrice').value = item.price || '';
+      document.getElementById('shopImage').value = item.image_url || '';
+      document.getElementById('shopDesc').value = item.description || '';
+      document.getElementById('shopSort').value = item.sort_order ?? 0;
+      document.getElementById('shopActive').checked = item.active !== false;
+      document.getElementById('shopFormTitle').textContent = 'Edit Item';
+      document.getElementById('shopSubmitBtn').textContent = 'Update Item';
+      document.getElementById('shopFormWrap').style.display = 'block';
+      document.getElementById('shopFormTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelShopEdit() {
+      editingShopId = null;
+      clearShopForm();
+      document.getElementById('shopFormTitle').textContent = 'Add Shop Item';
+      document.getElementById('shopSubmitBtn').textContent = 'Add Item';
+      document.getElementById('shopFormWrap').style.display = 'none';
+    }
+
+    function clearShopForm() {
+      document.getElementById('shopName').value = '';
+      document.getElementById('shopPrice').value = '';
+      document.getElementById('shopImage').value = '';
+      document.getElementById('shopDesc').value = '';
+      document.getElementById('shopSort').value = '0';
+      document.getElementById('shopActive').checked = true;
+      document.getElementById('shopCategory').value = 'Scrubs';
+    }
+
+    async function deleteShopItem(id) {
+      if (!confirm('Delete this shop item?')) return;
+      const { error } = await sb.from('shop_items').delete().eq('id', id);
+      if (error) { showMsg('Error: ' + error.message, 'error'); return; }
+      logAction('shop', 'Deleted shop item', 'ID: ' + id);
+      showMsg('Item deleted.', 'success');
+      loadShopItems();
+    }
+
+    async function exportShopCSV() {
+      const { data } = await sb.from('shop_items').select('*').order('sort_order').order('category');
+      if (!data || !data.length) { showMsg('No shop items to export.', 'error'); return; }
+      const rows = [['Name', 'Category', 'Price', 'Description', 'Image URL', 'Active', 'Sort Order']];
+      data.forEach(item => rows.push([
+        item.name, item.category || '', item.price || '', item.description || '',
+        item.image_url || '', item.active ? 'Yes' : 'No', item.sort_order ?? 0
+      ]));
+      downloadCSV(rows, 'gsmp_shop_items.csv');
+      showMsg('Shop items exported!', 'success');
+    }
+
+    // ========== SHOP VISIBILITY TOGGLE ==========
+    let shopVisible = true;
+
+    async function loadShopSetting() {
+      const { data } = await sb.from('site_settings').select('value').eq('key', 'shop_enabled').single();
+      shopVisible = data ? data.value !== 'false' : true;
+      updateShopToggleUI();
+    }
+
+    function updateShopToggleUI() {
+      const btn = document.getElementById('shopToggleBtn');
+      const status = document.getElementById('shopToggleStatus');
+      if (shopVisible) {
+        btn.textContent = 'Visible';
+        btn.style.background = '#238636'; btn.style.borderColor = '#238636'; btn.style.color = '#fff';
+        status.textContent = 'Shop page is live on the website';
+      } else {
+        btn.textContent = 'Hidden';
+        btn.style.background = '#da3633'; btn.style.borderColor = '#da3633'; btn.style.color = '#fff';
+        status.textContent = 'Shop page is hidden from the website';
+      }
+    }
+
+    async function toggleShopVisibility() {
+      shopVisible = !shopVisible;
+      const { data: existing } = await sb.from('site_settings').select('key').eq('key', 'shop_enabled').single();
+      if (existing) {
+        await sb.from('site_settings').update({ value: String(shopVisible) }).eq('key', 'shop_enabled');
+      } else {
+        await sb.from('site_settings').insert({ key: 'shop_enabled', value: String(shopVisible) });
+      }
+      updateShopToggleUI();
+      logAction('shop', shopVisible ? 'Enabled shop page' : 'Disabled shop page', '');
+      showMsg(shopVisible ? 'Shop is now visible on the website.' : 'Shop is now hidden from the website.', 'success');
+    }
+
+    // ========== SHOP CSV IMPORT ==========
+    let pendingShopImport = [];
+
+    function parseCSV(text) {
+      const rows = [];
+      let current = '', inQuotes = false, row = [];
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i], next = text[i + 1];
+        if (inQuotes) {
+          if (ch === '"' && next === '"') { current += '"'; i++; }
+          else if (ch === '"') { inQuotes = false; }
+          else { current += ch; }
+        } else {
+          if (ch === '"') { inQuotes = true; }
+          else if (ch === ',') { row.push(current.trim()); current = ''; }
+          else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+            row.push(current.trim()); current = '';
+            if (row.some(c => c)) rows.push(row);
+            row = [];
+            if (ch === '\r') i++;
+          } else { current += ch; }
+        }
+      }
+      row.push(current.trim());
+      if (row.some(c => c)) rows.push(row);
+      return rows;
+    }
+
+    function importShopCSV(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const rows = parseCSV(e.target.result);
+        if (rows.length < 2) { showMsg('CSV is empty or has no data rows.', 'error'); input.value = ''; return; }
+
+        // Expected columns: Name, Category, Price, Description, Image URL, Active, Sort Order
+        const header = rows[0].map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+        const colMap = {};
+        const fields = [
+          { key: 'name', aliases: ['name', 'productname'] },
+          { key: 'category', aliases: ['category', 'cat'] },
+          { key: 'price', aliases: ['price', 'priceusd'] },
+          { key: 'description', aliases: ['description', 'shortdescription', 'desc'] },
+          { key: 'image_url', aliases: ['imageurl', 'image', 'img'] },
+          { key: 'active', aliases: ['active', 'visible'] },
+          { key: 'sort_order', aliases: ['sortorder', 'sort', 'order'] },
+        ];
+        fields.forEach(f => {
+          const idx = header.findIndex(h => f.aliases.includes(h));
+          if (idx !== -1) colMap[f.key] = idx;
+        });
+
+        if (colMap.name === undefined) { showMsg('CSV must have a "Name" column.', 'error'); input.value = ''; return; }
+
+        const items = [];
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i];
+          const name = r[colMap.name] || '';
+          if (!name) continue;
+          const activeVal = colMap.active !== undefined ? r[colMap.active] : 'Yes';
+          items.push({
+            name,
+            category: colMap.category !== undefined ? r[colMap.category] || 'Branded Gear' : 'Branded Gear',
+            price: colMap.price !== undefined ? r[colMap.price] || null : null,
+            description: colMap.description !== undefined ? r[colMap.description] || null : null,
+            image_url: colMap.image_url !== undefined ? r[colMap.image_url] || null : null,
+            active: !activeVal || activeVal.toLowerCase() === 'yes' || activeVal === '1' || activeVal.toLowerCase() === 'true',
+            sort_order: colMap.sort_order !== undefined ? parseInt(r[colMap.sort_order]) || 0 : 0,
+          });
+        }
+
+        if (!items.length) { showMsg('No valid rows found in CSV.', 'error'); input.value = ''; return; }
+
+        pendingShopImport = items;
+
+        // Show preview
+        const preview = document.getElementById('shopImportPreview');
+        document.getElementById('importInfo').textContent = items.length + ' item' + (items.length > 1 ? 's' : '') + ' found in CSV';
+        const thead = document.querySelector('#importPreviewTable thead');
+        const tbody = document.querySelector('#importPreviewTable tbody');
+        thead.innerHTML = '<tr><th>#</th><th>Name</th><th>Category</th><th>Price</th><th>Active</th><th>Sort</th></tr>';
+        tbody.innerHTML = items.map((item, i) => `
+          <tr>
+            <td style="color:#484f58;">${i + 1}</td>
+            <td><strong>${item.name}</strong>${item.description ? '<br><span style="font-size:11px;color:#8b949e;">' + item.description.substring(0, 50) + '</span>' : ''}</td>
+            <td>${item.category}</td>
+            <td>${item.price || '—'}</td>
+            <td style="color:${item.active ? '#3fb950' : '#f85149'}">${item.active ? 'Yes' : 'No'}</td>
+            <td>${item.sort_order}</td>
+          </tr>`).join('');
+        preview.style.display = 'block';
+        input.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    async function confirmShopImport() {
+      if (!pendingShopImport.length) return;
+      const btn = document.querySelector('#shopImportPreview .btn-add');
+      btn.textContent = 'Importing...';
+      btn.disabled = true;
+
+      // Upsert: match by name, update existing or insert new
+      let updated = 0, inserted = 0, errors = 0;
+      for (const item of pendingShopImport) {
+        // Check if item with same name exists
+        const { data: existing } = await sb.from('shop_items').select('id').eq('name', item.name).limit(1);
+        if (existing && existing.length > 0) {
+          const { error } = await sb.from('shop_items').update(item).eq('id', existing[0].id);
+          if (error) { errors++; } else { updated++; }
+        } else {
+          item.created_by = currentUserEmail;
+          const { error } = await sb.from('shop_items').insert(item);
+          if (error) { errors++; } else { inserted++; }
+        }
+      }
+
+      let msg = '';
+      if (inserted) msg += inserted + ' added';
+      if (updated) msg += (msg ? ', ' : '') + updated + ' updated';
+      if (errors) msg += (msg ? ', ' : '') + errors + ' failed';
+      logAction('shop', 'CSV import', msg);
+      showMsg('Import done: ' + msg, errors ? 'error' : 'success');
+
+      cancelShopImport();
+      loadShopItems();
+    }
+
+    function cancelShopImport() {
+      pendingShopImport = [];
+      document.getElementById('shopImportPreview').style.display = 'none';
+      const btn = document.querySelector('#shopImportPreview .btn-add');
+      btn.textContent = 'Confirm Import';
+      btn.disabled = false;
+    }
+
+    // ========== ANALYTICS ==========
+    async function loadAnalytics() {
+      const [members, chaps, evts] = await Promise.all([
+        sb.from('members').select('id', { count: 'exact', head: true }),
+        sb.from('chapters').select('id', { count: 'exact', head: true }),
+        sb.from('events').select('id', { count: 'exact', head: true }),
+      ]);
+      document.getElementById('statMembers').textContent = members.count || 0;
+      document.getElementById('statChapters').textContent = chaps.count || 0;
+      document.getElementById('statEvents').textContent = evts.count || 0;
+    }
+
+    // ========== NOTICES (announcements) ==========
+    let editingNoticeId = null;
+    let myAdminUserId = null;
+
+    function escNoticeHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function populateNoticeChapterSelects() {
+      // Scope dropdown (compose form): Global + every chapter
+      const scope = document.getElementById('noticeScope');
+      const filter = document.getElementById('noticeFilter');
+      if (!scope || !filter) return;
+      const scopeOpts = ['<option value="__global__">Network — all members</option>'];
+      const filterOpts = ['<option value="all">All scopes</option>', '<option value="__global__">Network only</option>'];
+      (chapters || []).forEach(c => {
+        scopeOpts.push(`<option value="${c.id}">${escNoticeHtml(c.name)}</option>`);
+        filterOpts.push(`<option value="${c.id}">${escNoticeHtml(c.name)}</option>`);
+      });
+      // Preserve current selection
+      const prevScope = scope.value;
+      const prevFilter = filter.value;
+      scope.innerHTML = scopeOpts.join('');
+      filter.innerHTML = filterOpts.join('');
+      if (prevScope) scope.value = prevScope;
+      if (prevFilter) filter.value = prevFilter;
+    }
+
+    function resetNoticeForm() {
+      editingNoticeId = null;
+      document.getElementById('noticeFormTitle').textContent = 'Post Announcement';
+      document.getElementById('noticeScope').value = '__global__';
+      document.getElementById('noticeTitle').value = '';
+      document.getElementById('noticeBody').value = '';
+      document.getElementById('noticeImage').value = '';
+      document.getElementById('noticeImagePreview').style.display = 'none';
+      document.getElementById('noticeImagePreview').innerHTML = '';
+      document.getElementById('noticeExpiry').value = '';
+      document.getElementById('noticePinned').checked = false;
+      document.getElementById('noticeSubmitBtn').textContent = 'Post';
+      document.getElementById('noticeCancelBtn').style.display = 'none';
+    }
+
+    async function loadNotices() {
+      const list = document.getElementById('noticesList');
+      const filter = document.getElementById('noticeFilter').value;
+      let q = sb.from('announcements').select('*').order('is_pinned', { ascending: false }).order('created_at', { ascending: false });
+      if (filter === '__global__') q = q.is('chapter_id', null);
+      else if (filter && filter !== 'all') q = q.eq('chapter_id', filter);
+
+      const { data, error } = await q;
+      if (error) { list.innerHTML = '<p class="loading-text">Could not load notices: ' + escNoticeHtml(error.message) + '</p>'; return; }
+      if (!data || !data.length) { list.innerHTML = '<p class="loading-text">No notices found.</p>'; return; }
+
+      const chapterById = {};
+      (chapters || []).forEach(c => { chapterById[c.id] = c.name; });
+
+      list.innerHTML = data.map(n => {
+        const d = new Date(n.created_at);
+        const dateStr = d.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+        const expiryStr = n.expires_at ? new Date(n.expires_at).toLocaleString('en', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+        const scopeLabel = n.chapter_id ? (chapterById[n.chapter_id] || 'Chapter') : 'Network';
+        return `
+          <div class="chapter-card" style="${n.is_pinned ? 'background:#1d2330;' : ''}">
+            <div class="chapter-card-header">
+              <div>
+                <h4>${escNoticeHtml(n.title)}</h4>
+                <div class="chapter-meta">${n.is_pinned ? '<span style="color:#c49a3c;font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:11px;margin-right:8px;">Pinned</span>' : ''}${escNoticeHtml(scopeLabel)} · ${dateStr}${expiryStr ? ' · expires ' + escNoticeHtml(expiryStr) : ''}</div>
+              </div>
+              <div class="admin-actions">
+                <button class="btn-sm btn-edit" onclick="startEditNotice('${n.id}')">Edit</button>
+                <button class="btn-sm btn-danger" onclick="deleteNotice('${n.id}')">Delete</button>
+              </div>
+            </div>
+            ${n.image_url ? `<img src="${escNoticeHtml(n.image_url)}" alt="" style="display:block;width:100%;max-height:240px;object-fit:cover;border-radius:6px;margin:8px 0;">` : ''}
+            ${n.body ? `<div style="font-size:13px;color:#c9d1d9;white-space:pre-wrap;">${escNoticeHtml(n.body)}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function startEditNotice(id) {
+      const { data: n, error } = await sb.from('announcements').select('*').eq('id', id).single();
+      if (error || !n) { showMsg('Could not load notice.', 'error'); return; }
+      editingNoticeId = id;
+      document.getElementById('noticeFormTitle').textContent = 'Edit Announcement';
+      document.getElementById('noticeScope').value = n.chapter_id || '__global__';
+      document.getElementById('noticeTitle').value = n.title || '';
+      document.getElementById('noticeBody').value = n.body || '';
+      document.getElementById('noticeExpiry').value = n.expires_at ? new Date(n.expires_at).toISOString().slice(0,16) : '';
+      document.getElementById('noticePinned').checked = !!n.is_pinned;
+      const prev = document.getElementById('noticeImagePreview');
+      if (n.image_url) {
+        prev.style.display = 'block';
+        prev.innerHTML = `<img src="${escNoticeHtml(n.image_url)}" alt="" style="max-width:200px;max-height:120px;border-radius:6px;border:1px solid #30363d;"><div style="font-size:12px;color:#8b949e;margin-top:4px;">Current image. Choose a new file to replace.</div>`;
+      } else {
+        prev.style.display = 'none';
+        prev.innerHTML = '';
+      }
+      document.getElementById('noticeSubmitBtn').textContent = 'Save Changes';
+      document.getElementById('noticeCancelBtn').style.display = '';
+      document.querySelector('[data-tab="notices"]').click();
+      document.querySelector('#tab-notices').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function uploadNoticeImage(file) {
+      if (!file) return null;
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const path = `${myAdminUserId}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const { error: upErr } = await sb.storage.from('announcement-images').upload(path, file, { cacheControl: '3600', upsert: false });
+      if (upErr) { showMsg('Image upload failed: ' + upErr.message, 'error'); return null; }
+      const { data } = sb.storage.from('announcement-images').getPublicUrl(path);
+      return data.publicUrl;
+    }
+
+    async function submitNotice() {
+      const scope = document.getElementById('noticeScope').value;
+      const title = document.getElementById('noticeTitle').value.trim();
+      const body = document.getElementById('noticeBody').value.trim();
+      const expiryRaw = document.getElementById('noticeExpiry').value;
+      const isPinned = document.getElementById('noticePinned').checked;
+      const fileInput = document.getElementById('noticeImage');
+      const file = fileInput.files && fileInput.files[0];
+      if (!title) { showMsg('Title is required.', 'error'); return; }
+
+      const submitBtn = document.getElementById('noticeSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+
+      let imageUrl = null;
+      if (file) {
+        imageUrl = await uploadNoticeImage(file);
+        if (!imageUrl) { submitBtn.disabled = false; submitBtn.textContent = editingNoticeId ? 'Save Changes' : 'Post'; return; }
+      }
+
+      const payload = {
+        title,
+        body,
+        is_pinned: isPinned,
+        expires_at: expiryRaw ? new Date(expiryRaw).toISOString() : null,
+        chapter_id: scope === '__global__' ? null : scope,
+      };
+      if (imageUrl) payload.image_url = imageUrl;
+
+      let error;
+      if (editingNoticeId) {
+        ({ error } = await sb.from('announcements').update(payload).eq('id', editingNoticeId));
+      } else {
+        payload.author_id = myAdminUserId;
+        ({ error } = await sb.from('announcements').insert(payload));
+      }
+      submitBtn.disabled = false;
+
+      if (error) {
+        showMsg('Save failed: ' + error.message, 'error');
+        submitBtn.textContent = editingNoticeId ? 'Save Changes' : 'Post';
+        return;
+      }
+
+      logAction('notice', editingNoticeId ? 'Updated announcement' : 'Posted announcement', `${title} [${scope === '__global__' ? 'Global' : scope}]`);
+      showMsg(editingNoticeId ? 'Notice updated.' : 'Notice posted.', 'success');
+      resetNoticeForm();
+      loadNotices();
+    }
+
+    async function deleteNotice(id) {
+      if (!confirm('Delete this announcement?')) return;
+      const { error } = await sb.from('announcements').delete().eq('id', id);
+      if (error) { showMsg('Delete failed: ' + error.message, 'error'); return; }
+      logAction('notice', 'Deleted announcement', id);
+      showMsg('Notice deleted.', 'success');
+      loadNotices();
+    }
+
+    // ========== INIT ==========
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { window.location.href = '../login'; return; }
+
+      currentUserEmail = session.user.email;
+      myAdminUserId = session.user.id;
+      const isBreakglass = await checkBreakglass();
+      const isSaasAdmin = await checkIsSaasAdmin();
+      if (!isSaasAdmin && !isBreakglass) {
+        document.querySelector('.admin-page').innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2 style="color:#991B1B;">Access Denied</h2><p>You do not have admin privileges.</p><a href="../dashboard">Back to Dashboard</a></div>';
+        return;
+      }
+
+      await loadChapters();
+      populateNoticeChapterSelects();
+      loadNotices();
+      loadEvents();
+      loadMembers();
+      loadArticles();
+      loadShopItems();
+      loadShopSetting();
+      loadAnalytics();
+      loadLogs();
+      logAction('auth', 'Admin portal opened', currentUserEmail);
+
+      document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await sb.auth.signOut();
+        window.location.href = '../login';
+      });
+    })();
+  </script>
+</body>
+</html>

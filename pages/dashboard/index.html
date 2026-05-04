@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — GSMP</title>
+  <link rel="stylesheet" href="../../css/style.css?v=11">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- MOBILE TOP BAR -->
+  <div class="mobile-topbar" style="display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--navy);position:sticky;top:0;z-index:100;">
+    <a href="../../" style="display:flex;align-items:center;gap:8px;text-decoration:none;">
+      <img src="../../images/pgcmp_logo_inverted.jpeg" alt="GSMP" style="width:28px;height:28px;border-radius:6px;">
+      <span style="color:#fff;font-weight:700;font-size:16px;">GSMP</span>
+    </a>
+    <a href="#" id="mobileLogoutBtn" style="color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;text-decoration:none;">Log Out</a>
+  </div>
+
+  <div class="dash-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="dash-sidebar">
+      <a href="../../" class="nav-logo">
+        <img src="../../images/pgcmp_logo_inverted.jpeg" alt="GSMP" class="logo-icon">
+        <span class="logo-text">GSMP</span>
+      </a>
+      <nav class="dash-nav">
+        <a href="../dashboard" class="active">
+          <span class="dash-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </span>
+          Dashboard
+        </a>
+        <a href="../my-profile">
+          <span class="dash-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          My Profile
+        </a>
+        <a href="#" id="logoutBtn" style="margin-top: auto; color: rgba(255,255,255,0.4);">
+          <span class="dash-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </span>
+          Log Out
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="dash-main">
+      <div class="dash-header">
+        <h1 id="dashGreeting">Welcome back</h1>
+        <p>Here's what's happening in your GSMP network.</p>
+      </div>
+
+      <!-- NOTICEBOARD -->
+      <div class="dash-section" id="noticeboardSection" style="display:none;">
+        <h2>Noticeboard<span id="noticeboardChapterLabel" class="notice-chapter-label"></span></h2>
+        <div class="dash-notices-list" id="noticesContainer">
+          <p style="color: var(--gray-400);">Loading announcements...</p>
+        </div>
+      </div>
+
+      <!-- UPCOMING EVENTS -->
+      <div class="dash-section">
+        <h2>Upcoming Events</h2>
+        <div class="dash-events-list" id="eventsContainer">
+          <p style="color: var(--gray-400);">Loading events...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { window.location.href = '../login'; return; }
+
+      const isRealAdmin = await checkIsSaasAdmin();
+
+      // ── View-As impersonation (admin only) ──
+      const urlParams = new URLSearchParams(window.location.search);
+      const viewAsId = urlParams.get('view_as');
+      let impersonating = false;
+
+      // Get member data for greeting + admin check
+      let member;
+      if (viewAsId && isRealAdmin) {
+        const { data: m } = await sb.from('members').select('*').eq('id', viewAsId).single();
+        member = m;
+        impersonating = true;
+      } else {
+        const { data: m } = await sb.from('members').select('first_name, member_title, chapter_id').eq('id', session.user.id).single();
+        member = m;
+      }
+
+      if (impersonating && member) {
+        document.getElementById('dashGreeting').textContent = `Viewing as: ${member.first_name} ${member.last_name || ''}`;
+        // Show impersonation banner
+        const banner = document.createElement('div');
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#f85149;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-weight:600;';
+        banner.innerHTML = `Viewing as <strong>${member.first_name} ${member.last_name || ''}</strong> (${member.email || ''}) &nbsp; <a href="../admin" style="color:#fff;text-decoration:underline;">← Back to Admin</a>`;
+        document.body.prepend(banner);
+        document.body.style.paddingTop = '36px';
+        // Persist view_as param on all nav links
+        document.querySelectorAll('.dash-nav a, .mobile-bottomnav a').forEach(link => {
+          if (link.href && !link.href.includes('#') && !link.href.includes('view_as') && link.id !== 'logoutBtn') {
+            const sep = link.href.includes('?') ? '&' : '?';
+            link.href = link.href + sep + 'view_as=' + viewAsId;
+          }
+        });
+      } else if (member) {
+        document.getElementById('dashGreeting').textContent = `Welcome, ${member.first_name}`;
+      } else {
+        const meta = session.user.user_metadata;
+        document.getElementById('dashGreeting').textContent = `Welcome, ${meta.first_name || 'Member'}`;
+      }
+
+      // Show admin link in sidebar + mobile bottom nav
+      const isSaasAdmin = isRealAdmin;
+      const isChapterLead = member && member.member_title === 'Chapter Lead';
+      if (isSaasAdmin || isChapterLead) {
+        const adminUrl = isSaasAdmin ? '../admin' : '../chapter-admin';
+        const adminLabel = 'Admin';
+        const adminIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+        // Sidebar: insert before logout
+        const logoutLink = document.getElementById('logoutBtn');
+        logoutLink.insertAdjacentHTML('beforebegin',
+          `<a href="${adminUrl}"><span class="dash-nav-icon">${adminIcon}</span>${adminLabel}</a>`
+        );
+        // Mobile bottom nav: add admin tab
+        const bottomNav = document.querySelector('.mobile-bottomnav');
+        if (bottomNav) {
+          bottomNav.insertAdjacentHTML('beforeend',
+            `<a href="${adminUrl}" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#9ca3af;font-size:11px;font-weight:600;padding:4px 12px;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Admin
+            </a>`
+          );
+        }
+      }
+
+      const userId = (impersonating && viewAsId) ? viewAsId : session.user.id;
+
+      // ─────────────────────────────────────────────
+      // NOTICEBOARD — chapter notices + global notices
+      // RLS already filters to: (saas_admin) OR (chapter_id IS NULL) OR (chapter_id = my chapter)
+      // We just additionally drop expired ones client-side.
+      // ─────────────────────────────────────────────
+      (async function loadNotices() {
+        const noticeSection = document.getElementById('noticeboardSection');
+        const noticesContainer = document.getElementById('noticesContainer');
+        const chapterLabel = document.getElementById('noticeboardChapterLabel');
+
+        // Look up chapter name for the header (if member has one)
+        let chapterName = '';
+        const memberChapterId = (member && member.chapter_id) ? member.chapter_id : null;
+        if (memberChapterId) {
+          const { data: ch } = await sb.from('chapters').select('name').eq('id', memberChapterId).single();
+          if (ch) chapterName = ch.name;
+        }
+
+        const { data: notices, error } = await sb
+          .from('announcements')
+          .select('id, chapter_id, title, body, image_url, is_pinned, expires_at, created_at, author_id')
+          .order('is_pinned', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (error) {
+          // If table doesn't exist yet, hide silently. Otherwise log.
+          if (!String(error.message || '').toLowerCase().includes('relation')) {
+            console.warn('Notices fetch error:', error.message);
+          }
+          return; // section stays hidden
+        }
+
+        const now = Date.now();
+        const live = (notices || []).filter(n => !n.expires_at || new Date(n.expires_at).getTime() > now);
+
+        if (live.length === 0) {
+          // Nothing to show — keep section hidden so dashboard isn't cluttered.
+          return;
+        }
+
+        noticeSection.style.display = '';
+        chapterLabel.textContent = chapterName || '';
+
+        const escape = s => String(s == null ? '' : s)
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+        const pinSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>';
+        noticesContainer.innerHTML = live.map(n => {
+          const isGlobal = !n.chapter_id;
+          const d = new Date(n.created_at);
+          const dateStr = d.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+          const bodyHtml = escape(n.body).replace(/\n/g, '<br>');
+          return `
+            <div class="notice-card${n.is_pinned ? ' pinned' : ''}">
+              <div class="notice-head">
+                <div class="notice-tags">
+                  ${n.is_pinned ? `<span class="notice-tag tag-pin">${pinSvg}Pinned</span>` : ''}
+                  <span class="notice-tag ${isGlobal ? 'tag-global' : 'tag-chapter'}">${isGlobal ? 'Network' : 'Chapter'}</span>
+                </div>
+                <span class="notice-date">${dateStr}</span>
+              </div>
+              <h4 class="notice-title">${escape(n.title)}</h4>
+              ${n.image_url ? `<img class="notice-img" src="${escape(n.image_url)}" alt="">` : ''}
+              ${n.body ? `<div class="notice-body">${bodyHtml}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+      })();
+
+      // Fetch upcoming events (only those marked show_in_portal)
+      const { data: events } = await sb
+        .from('events')
+        .select('*')
+        .neq('show_in_portal', false)
+        .gte('event_date', new Date().toISOString())
+        .order('event_date', { ascending: true })
+        .limit(5);
+
+      // Fetch all RSVPs for these events
+      let myRsvps = new Set();
+      let rsvpCounts = {};
+      if (events && events.length > 0) {
+        const eventIds = events.map(e => e.id);
+        // Get my RSVPs
+        const { data: myR } = await sb.from('event_rsvps').select('event_id').eq('member_id', userId).in('event_id', eventIds);
+        if (myR) myR.forEach(r => myRsvps.add(r.event_id));
+        // Get counts per event
+        const { data: allR } = await sb.from('event_rsvps').select('event_id').in('event_id', eventIds);
+        if (allR) allR.forEach(r => { rsvpCounts[r.event_id] = (rsvpCounts[r.event_id] || 0) + 1; });
+      }
+
+      // RSVP toggle function
+      window.toggleRsvp = async function(eventId, btn) {
+        btn.disabled = true;
+        const hasRsvp = myRsvps.has(eventId);
+        if (hasRsvp) {
+          await sb.from('event_rsvps').delete().eq('member_id', userId).eq('event_id', eventId);
+          myRsvps.delete(eventId);
+          rsvpCounts[eventId] = Math.max(0, (rsvpCounts[eventId] || 1) - 1);
+          btn.classList.remove('rsvpd');
+          btn.innerHTML = '<span class="rsvp-label">RSVP</span>';
+        } else {
+          await sb.from('event_rsvps').insert({ event_id: eventId, member_id: userId });
+          myRsvps.add(eventId);
+          rsvpCounts[eventId] = (rsvpCounts[eventId] || 0) + 1;
+          btn.classList.add('rsvpd');
+          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span class="rsvp-label">Going</span>';
+        }
+        // Update count display
+        const countEl = btn.parentElement.querySelector('.rsvp-count');
+        const c = rsvpCounts[eventId] || 0;
+        if (countEl) countEl.innerHTML = c > 0 ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> ${c} going` : '';
+        btn.disabled = false;
+      };
+
+      const eventsContainer = document.getElementById('eventsContainer');
+      if (events && events.length > 0) {
+        eventsContainer.innerHTML = events.map(ev => {
+          const d = new Date(ev.event_date);
+          const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+          const day = d.getDate();
+          const time = d.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+          const rawDesc = ev.description || '';
+          const desc = rawDesc.length > 280 ? rawDesc.substring(0, 280) + '...' : rawDesc;
+          const isRsvpd = myRsvps.has(ev.id);
+          const count = rsvpCounts[ev.id] || 0;
+          return `
+            <div class="event-card${desc ? ' has-desc' : ''}">
+              <button class="rsvp-btn${isRsvpd ? ' rsvpd' : ''}" onclick="event.stopPropagation(); toggleRsvp('${ev.id}', this)">
+                ${isRsvpd
+                  ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span class="rsvp-label">Going</span>'
+                  : '<span class="rsvp-label">RSVP</span>'}
+              </button>
+              <div class="event-date">
+                <span class="event-month">${month}</span>
+                <span class="event-day">${day}</span>
+              </div>
+              <div class="event-info">
+                <span class="event-type">${ev.event_type}</span>
+                <h4>${ev.title}</h4>
+                <span class="event-meta">${ev.location || ''} &middot; ${time}</span>
+                <div class="rsvp-count">${count > 0 ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> ${count} going` : ''}</div>
+                ${desc ? `<div class="event-desc">${desc}</div>` : ''}
+              </div>
+              ${desc ? '<svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' : ''}
+            </div>
+          `;
+        }).join('');
+        // Re-attach expand toggle
+        document.querySelectorAll('.event-card.has-desc').forEach(card => {
+          card.addEventListener('click', () => card.classList.toggle('expanded'));
+        });
+      } else {
+        eventsContainer.innerHTML = '<p style="color: var(--gray-400);">No upcoming events yet.</p>';
+      }
+
+      // Logout (desktop + mobile)
+      async function doLogout(e) {
+        e.preventDefault();
+        await sb.auth.signOut();
+        window.location.href = '../login';
+      }
+      document.getElementById('logoutBtn').addEventListener('click', doLogout);
+      const mobileLogout = document.getElementById('mobileLogoutBtn');
+      if (mobileLogout) mobileLogout.addEventListener('click', doLogout);
+    })();
+  </script>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <nav class="mobile-bottomnav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7eb;padding:8px 0 env(safe-area-inset-bottom, 8px);z-index:100;justify-content:space-around;">
+    <a href="../dashboard" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--navy);font-size:11px;font-weight:600;padding:4px 12px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Home
+    </a>
+    <a href="../my-profile" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#9ca3af;font-size:11px;font-weight:600;padding:4px 12px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </nav>
+</body>
+</html>
