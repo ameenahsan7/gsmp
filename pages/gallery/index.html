@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery — GSMP</title>
+  <meta name="description" content="Moments from GSMP chapters around the world. Workshops, panels, conferences, and community.">
+  <link rel="stylesheet" href="../../css/style.css?v=12">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar scrolled" id="navbar">
+    <div class="container nav-container">
+      <a href="/" class="nav-logo">
+        <img src="../../images/logo.jpeg" alt="GSMP" class="logo-icon">
+        <span class="logo-text">GSMP</span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#pillars">What We Do</a></li>
+        <li><a href="/#events">Events</a></li>
+        <li><a href="/pages/gallery" style="color:var(--burgundy);">Gallery</a></li>
+        <li><a href="/#faq">FAQ</a></li>
+        <li id="navShopLink"><a href="../shop">Shop</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <section class="section" style="padding-top:120px;">
+    <div class="container">
+      <!-- LIST VIEW -->
+      <div id="listView">
+        <div class="section-header">
+          <p class="section-tag">Gallery</p>
+          <h2>Moments From Across GSMP</h2>
+          <p class="section-sub">Workshops, panels, conferences, and the people behind them.</p>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
+          <select id="chapterFilter" style="padding:8px 14px;border:1px solid var(--gray-300);border-radius:6px;font-size:14px;font-family:'Inter',sans-serif;background:#fff;color:var(--navy);">
+            <option value="">All chapters</option>
+            <option value="__global__">Global only</option>
+          </select>
+        </div>
+
+        <div class="gallery-grid" id="albumsGrid">
+          <p style="color:var(--gray-400);">Loading gallery...</p>
+        </div>
+      </div>
+
+      <!-- DETAIL VIEW -->
+      <div id="detailView" style="display:none;">
+        <a href="#" class="album-detail-back" onclick="showList(event)">&larr; Back to gallery</a>
+        <div class="album-detail-header">
+          <div id="detailTags" style="margin-bottom:10px;"></div>
+          <h1 class="album-detail-title" id="detailTitle">Loading...</h1>
+          <div class="album-detail-meta" id="detailMeta"></div>
+          <div class="album-detail-desc" id="detailDesc"></div>
+        </div>
+        <div class="photo-grid" id="photoGrid">
+          <p style="color:var(--gray-400);">Loading photos...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightboxIfBackdrop(event)">
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+    <button class="lightbox-prev" onclick="prevPhoto()" aria-label="Previous">&larr;</button>
+    <img class="lightbox-img" id="lightboxImg" alt="">
+    <button class="lightbox-next" onclick="nextPhoto()" aria-label="Next">&rarr;</button>
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+
+  <footer style="background:var(--navy); color:var(--cream); padding:32px 0; text-align:center; font-size:13px;">
+    <div class="container">
+      &copy; <span id="footerYear"></span> Galen Society of Medical Professionals
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+    let allAlbums = [];
+    let chaptersById = {};
+    let currentPhotos = [];
+    let currentPhotoIdx = 0;
+
+    function escHtml(s) {
+      return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function formatDate(d) {
+      if (!d) return '';
+      const dt = new Date(d);
+      if (isNaN(dt)) return '';
+      return dt.toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
+    async function loadGallery() {
+      // Fetch albums + chapters in parallel
+      const [albumsRes, chaptersRes] = await Promise.all([
+        sb.from('gallery_albums').select('*').order('event_date', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false }),
+        sb.from('chapters').select('id, name')
+      ]);
+
+      if (chaptersRes.data) {
+        chaptersRes.data.forEach(c => { chaptersById[c.id] = c.name; });
+        const sel = document.getElementById('chapterFilter');
+        chaptersRes.data
+          .slice()
+          .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+          .forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.name;
+            sel.appendChild(opt);
+          });
+      }
+
+      allAlbums = albumsRes.data || [];
+
+      // Fetch photo counts for badges (one query)
+      if (allAlbums.length) {
+        const albumIds = allAlbums.map(a => a.id);
+        const { data: photos } = await sb.from('gallery_photos').select('album_id').in('album_id', albumIds);
+        const counts = {};
+        (photos || []).forEach(p => { counts[p.album_id] = (counts[p.album_id] || 0) + 1; });
+        allAlbums.forEach(a => { a._photoCount = counts[a.id] || 0; });
+      }
+
+      renderAlbums();
+
+      // Handle deep link: ?album=<id>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('album')) {
+        showAlbum(params.get('album'));
+      }
+    }
+
+    function renderAlbums() {
+      const grid = document.getElementById('albumsGrid');
+      const filter = document.getElementById('chapterFilter').value;
+      let list = allAlbums;
+      if (filter === '__global__') list = list.filter(a => !a.chapter_id);
+      else if (filter) list = list.filter(a => a.chapter_id === filter);
+
+      if (!list.length) {
+        grid.innerHTML = '<p style="color:var(--gray-400);grid-column:1/-1;">No albums to show yet.</p>';
+        return;
+      }
+
+      grid.innerHTML = list.map(a => {
+        const isGlobal = !a.chapter_id;
+        const tag = isGlobal
+          ? '<span class="album-tag global">Global</span>'
+          : `<span class="album-tag chapter">${escHtml(chaptersById[a.chapter_id] || 'Chapter')}</span>`;
+        const cover = a.cover_url
+          ? `<img class="album-cover" src="${escHtml(a.cover_url)}" alt="${escHtml(a.title)}" loading="lazy" onerror="this.outerHTML='<div class=&quot;album-cover-placeholder&quot;>GSMP</div>'">`
+          : `<div class="album-cover-placeholder">GSMP</div>`;
+        const dateStr = formatDate(a.event_date);
+        const count = a._photoCount || 0;
+        return `
+          <a href="?album=${a.id}" class="album-card" onclick="event.preventDefault(); showAlbum('${a.id}');">
+            ${cover}
+            <div class="album-body">
+              <div class="album-tags">${tag}</div>
+              <h3 class="album-title">${escHtml(a.title)}</h3>
+              ${dateStr ? `<div class="album-meta">${dateStr}</div>` : ''}
+              ${a.description ? `<p class="album-desc">${escHtml(a.description)}</p>` : ''}
+              <div class="album-photo-count">${count} photo${count === 1 ? '' : 's'}</div>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('chapterFilter').addEventListener('change', renderAlbums);
+
+    async function showAlbum(albumId) {
+      const album = allAlbums.find(a => a.id === albumId);
+      if (!album) {
+        // Direct deep link — fetch standalone
+        const { data } = await sb.from('gallery_albums').select('*').eq('id', albumId).single();
+        if (!data) return;
+        renderAlbumDetail(data);
+      } else {
+        renderAlbumDetail(album);
+      }
+      window.history.pushState({ album: albumId }, '', '?album=' + albumId);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function renderAlbumDetail(album) {
+      document.getElementById('listView').style.display = 'none';
+      document.getElementById('detailView').style.display = 'block';
+
+      const isGlobal = !album.chapter_id;
+      document.getElementById('detailTags').innerHTML = isGlobal
+        ? '<span class="album-tag global">Global</span>'
+        : `<span class="album-tag chapter">${escHtml(chaptersById[album.chapter_id] || 'Chapter')}</span>`;
+      document.getElementById('detailTitle').textContent = album.title;
+      document.getElementById('detailMeta').textContent = formatDate(album.event_date) || '';
+      document.getElementById('detailDesc').textContent = album.description || '';
+
+      const { data: photos, error } = await sb.from('gallery_photos')
+        .select('*')
+        .eq('album_id', album.id)
+        .order('display_order', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      const grid = document.getElementById('photoGrid');
+      if (error || !photos || !photos.length) {
+        grid.innerHTML = '<p style="color:var(--gray-400);grid-column:1/-1;">No photos in this album yet.</p>';
+        currentPhotos = [];
+        return;
+      }
+      currentPhotos = photos;
+      grid.innerHTML = photos.map((p, i) => `
+        <div class="photo-tile" onclick="openLightbox(${i})">
+          <img src="${escHtml(p.image_url)}" alt="${escHtml(p.caption || album.title)}" loading="lazy">
+          ${p.caption ? `<div class="photo-caption">${escHtml(p.caption)}</div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function showList(e) {
+      if (e) e.preventDefault();
+      document.getElementById('detailView').style.display = 'none';
+      document.getElementById('listView').style.display = 'block';
+      window.history.pushState({}, '', window.location.pathname);
+    }
+
+    window.addEventListener('popstate', () => {
+      const params = new URLSearchParams(window.location.search);
+      const albumId = params.get('album');
+      if (albumId) showAlbum(albumId);
+      else showList();
+    });
+
+    // Lightbox
+    function openLightbox(idx) {
+      if (!currentPhotos[idx]) return;
+      currentPhotoIdx = idx;
+      const p = currentPhotos[idx];
+      document.getElementById('lightboxImg').src = p.image_url;
+      document.getElementById('lightboxCaption').textContent = p.caption || '';
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function closeLightboxIfBackdrop(e) {
+      if (e.target.id === 'lightbox') closeLightbox();
+    }
+    function prevPhoto() {
+      if (!currentPhotos.length) return;
+      currentPhotoIdx = (currentPhotoIdx - 1 + currentPhotos.length) % currentPhotos.length;
+      openLightbox(currentPhotoIdx);
+    }
+    function nextPhoto() {
+      if (!currentPhotos.length) return;
+      currentPhotoIdx = (currentPhotoIdx + 1) % currentPhotos.length;
+      openLightbox(currentPhotoIdx);
+    }
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowLeft') prevPhoto();
+      else if (e.key === 'ArrowRight') nextPhoto();
+    });
+
+    // Mobile nav toggle (mirrors homepage)
+    document.getElementById('navToggle').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+
+    // Shop visibility (hide if disabled)
+    (async () => {
+      try {
+        const { data } = await sb.from('site_settings').select('value').eq('key', 'shop_enabled').single();
+        if (data && data.value === 'false') {
+          const link = document.getElementById('navShopLink');
+          if (link) link.style.display = 'none';
+        }
+      } catch (e) {}
+    })();
+
+    loadGallery();
+  </script>
+</body>
+</html>

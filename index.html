@@ -9,7 +9,7 @@
   <meta property="og:title" content="GSMP | Galen Society of Medical Professionals">
   <meta property="og:description" content="Galen Society of Medical Professionals. A curated global network for medical professionals.">
   <meta property="og:type" content="website">
-  <link rel="stylesheet" href="css/style.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=12">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 </head>
@@ -26,6 +26,7 @@
         <li><a href="#about">About</a></li>
         <li><a href="#pillars">What We Do</a></li>
         <li><a href="#events">Events</a></li>
+        <li><a href="#gallery">Gallery</a></li>
         <li><a href="#faq">FAQ</a></li>
         <li id="navShopLink"><a href="pages/shop">Shop</a></li>
       </ul>
@@ -230,6 +231,22 @@
       </div>
       <div class="events-grid" id="homeEventsGrid">
         <p style="color: var(--gray-400);">Loading events...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY TEASER -->
+  <section class="section" id="gallery" style="padding-top:64px;">
+    <div class="container">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;">
+        <div>
+          <p class="section-tag">Moments</p>
+          <h2 style="margin:0;">From The Chapters</h2>
+        </div>
+        <a href="pages/gallery" style="font-size:14px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:2px solid var(--navy);padding-bottom:2px;">View Full Gallery &rarr;</a>
+      </div>
+      <div class="gallery-grid" id="homeGalleryGrid" style="margin-top:24px;">
+        <p style="color:var(--gray-400);grid-column:1/-1;">Loading gallery...</p>
       </div>
     </div>
   </section>
@@ -468,6 +485,65 @@
       } else {
         heroGrid.style.display = 'none';
         lowerGrid.innerHTML = '<p style="color: var(--gray-400);">No upcoming events yet. Check back soon!</p>';
+      }
+    })();
+
+    // GALLERY TEASER — load 4 latest albums
+    (async () => {
+      const grid = document.getElementById('homeGalleryGrid');
+      if (!grid) return;
+      try {
+        const [albumsRes, chaptersRes] = await Promise.all([
+          sb.from('gallery_albums').select('*').order('event_date', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false }).limit(4),
+          sb.from('chapters').select('id, name')
+        ]);
+        const albums = albumsRes.data || [];
+        if (!albums.length) {
+          document.getElementById('gallery').style.display = 'none';
+          return;
+        }
+        const chapterName = {};
+        (chaptersRes.data || []).forEach(c => { chapterName[c.id] = c.name; });
+
+        function esc(s) { return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function fdate(d) {
+          if (!d) return '';
+          const dt = new Date(d);
+          if (isNaN(dt)) return '';
+          return dt.toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+
+        // Get photo counts in one shot
+        const ids = albums.map(a => a.id);
+        const { data: photos } = await sb.from('gallery_photos').select('album_id').in('album_id', ids);
+        const counts = {};
+        (photos || []).forEach(p => { counts[p.album_id] = (counts[p.album_id] || 0) + 1; });
+
+        grid.innerHTML = albums.map(a => {
+          const isGlobal = !a.chapter_id;
+          const tag = isGlobal
+            ? '<span class="album-tag global">Global</span>'
+            : `<span class="album-tag chapter">${esc(chapterName[a.chapter_id] || 'Chapter')}</span>`;
+          const cover = a.cover_url
+            ? `<img class="album-cover" src="${esc(a.cover_url)}" alt="${esc(a.title)}" loading="lazy" onerror="this.outerHTML='<div class=&quot;album-cover-placeholder&quot;>GSMP</div>'">`
+            : `<div class="album-cover-placeholder">GSMP</div>`;
+          const ds = fdate(a.event_date);
+          const c = counts[a.id] || 0;
+          return `
+            <a href="pages/gallery?album=${a.id}" class="album-card">
+              ${cover}
+              <div class="album-body">
+                <div class="album-tags">${tag}</div>
+                <h3 class="album-title">${esc(a.title)}</h3>
+                ${ds ? `<div class="album-meta">${ds}</div>` : ''}
+                ${a.description ? `<p class="album-desc">${esc(a.description)}</p>` : ''}
+                <div class="album-photo-count">${c} photo${c === 1 ? '' : 's'}</div>
+              </div>
+            </a>
+          `;
+        }).join('');
+      } catch (e) {
+        document.getElementById('gallery').style.display = 'none';
       }
     })();
   </script>

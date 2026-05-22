@@ -5,7 +5,7 @@
   <link rel="icon" type="image/png" href="../../images/favicon-white.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SaaS Admin — GSMP</title>
-  <link rel="stylesheet" href="../../css/style.css?v=9">
+  <link rel="stylesheet" href="../../css/style.css?v=12">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <style>
     body { background: #0d1117; color: #c9d1d9; }
@@ -144,6 +144,7 @@
       <button class="admin-tab active" data-tab="chapters">Chapters</button>
       <button class="admin-tab" data-tab="notices">Notices</button>
       <button class="admin-tab" data-tab="events">Events</button>
+      <button class="admin-tab" data-tab="gallery">Gallery</button>
       <button class="admin-tab" data-tab="members">Members</button>
       <button class="admin-tab" data-tab="articles">Articles</button>
       <button class="admin-tab" data-tab="shop">Shop</button>
@@ -305,6 +306,55 @@
           <tr><td colspan="6" class="loading-text">Loading...</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- GALLERY TAB -->
+    <div class="tab-content" id="tab-gallery">
+      <div class="admin-form">
+        <h3 id="albumFormTitle">Create Album</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Title *</label>
+            <input type="text" id="albumTitle" placeholder="e.g. Clinical Research Workshop 2026" maxlength="160">
+          </div>
+          <div class="form-group">
+            <label>Event Date</label>
+            <input type="date" id="albumDate">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Scope *</label>
+            <select id="albumScope">
+              <option value="__global__">Global — visible to everyone</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cover image (optional)</label>
+            <input type="file" id="albumCoverFile" accept="image/*">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="albumDesc" rows="3" placeholder="Short description of the event..."></textarea>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sm btn-add" id="albumSubmitBtn" onclick="submitAlbum()">Create Album</button>
+          <button class="btn-sm btn-edit" id="albumCancelBtn" onclick="resetAlbumForm()" style="display:none;">Cancel</button>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0 8px 0;">
+        <label style="font-size:12px;color:#8b949e;">Filter:</label>
+        <select id="albumFilter" class="member-chapter-select" onchange="loadAlbums()">
+          <option value="all">All scopes</option>
+          <option value="__global__">Global only</option>
+        </select>
+      </div>
+
+      <div id="albumsList">
+        <p class="loading-text">Loading albums...</p>
+      </div>
     </div>
 
     <!-- MEMBERS TAB -->
@@ -1892,6 +1942,244 @@
     }
 
     // ========== INIT ==========
+    // ========== GALLERY (SaaS admin — all chapters + global) ==========
+    let editingAlbumId = null;
+
+    function populateAlbumChapterSelects() {
+      const scope = document.getElementById('albumScope');
+      const filter = document.getElementById('albumFilter');
+      if (!scope || !filter) return;
+      const scopeOpts = ['<option value="__global__">Global — visible to everyone</option>'];
+      const filterOpts = ['<option value="all">All scopes</option>', '<option value="__global__">Global only</option>'];
+      (chapters || []).forEach(c => {
+        scopeOpts.push(`<option value="${c.id}">${escNoticeHtml(c.name)}</option>`);
+        filterOpts.push(`<option value="${c.id}">${escNoticeHtml(c.name)}</option>`);
+      });
+      const prevScope = scope.value, prevFilter = filter.value;
+      scope.innerHTML = scopeOpts.join('');
+      filter.innerHTML = filterOpts.join('');
+      if (prevScope) scope.value = prevScope;
+      if (prevFilter) filter.value = prevFilter;
+    }
+
+    async function uploadGalleryImage(file) {
+      if (!file) return null;
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const path = `${myAdminUserId}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const { error: upErr } = await sb.storage.from('gallery-images').upload(path, file, { cacheControl: '3600', upsert: false });
+      if (upErr) { showMsg('Image upload failed: ' + upErr.message, 'error'); return null; }
+      const { data } = sb.storage.from('gallery-images').getPublicUrl(path);
+      return data.publicUrl;
+    }
+
+    function storagePathFromUrl(url, bucket) {
+      if (!url) return null;
+      const marker = `/storage/v1/object/public/${bucket}/`;
+      const i = url.indexOf(marker);
+      if (i < 0) return null;
+      return decodeURIComponent(url.slice(i + marker.length));
+    }
+    async function removeFromGalleryBucket(urls) {
+      const paths = (urls || []).map(u => storagePathFromUrl(u, 'gallery-images')).filter(Boolean);
+      if (!paths.length) return;
+      try { await sb.storage.from('gallery-images').remove(paths); } catch (e) { console.warn('Storage cleanup failed:', e); }
+    }
+
+    async function submitAlbum() {
+      const title = document.getElementById('albumTitle').value.trim();
+      const description = document.getElementById('albumDesc').value.trim();
+      const event_date = document.getElementById('albumDate').value || null;
+      const scope = document.getElementById('albumScope').value;
+      const chapter_id = scope === '__global__' ? null : scope;
+      const fileInput = document.getElementById('albumCoverFile');
+      const file = fileInput && fileInput.files && fileInput.files[0];
+      if (!title) { showMsg('Title is required.', 'error'); return; }
+
+      const submitBtn = document.getElementById('albumSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+
+      let cover_url = null;
+      if (file) {
+        cover_url = await uploadGalleryImage(file);
+        if (!cover_url) { submitBtn.disabled = false; submitBtn.textContent = editingAlbumId ? 'Save Changes' : 'Create Album'; return; }
+      }
+
+      let error;
+      if (editingAlbumId) {
+        const payload = { title, description, event_date, chapter_id };
+        if (cover_url) payload.cover_url = cover_url;
+        ({ error } = await sb.from('gallery_albums').update(payload).eq('id', editingAlbumId));
+      } else {
+        ({ error } = await sb.from('gallery_albums').insert({
+          title, description, event_date, chapter_id,
+          cover_url, created_by: currentUserEmail
+        }));
+      }
+      submitBtn.disabled = false;
+
+      if (error) {
+        showMsg('Save failed: ' + error.message, 'error');
+        submitBtn.textContent = editingAlbumId ? 'Save Changes' : 'Create Album';
+        return;
+      }
+      logAction('gallery', editingAlbumId ? 'Updated album' : 'Created album', title);
+      showMsg(editingAlbumId ? 'Album updated.' : 'Album created.', 'success');
+      resetAlbumForm();
+      loadAlbums();
+    }
+
+    function resetAlbumForm() {
+      editingAlbumId = null;
+      document.getElementById('albumTitle').value = '';
+      document.getElementById('albumDesc').value = '';
+      document.getElementById('albumDate').value = '';
+      document.getElementById('albumScope').value = '__global__';
+      document.getElementById('albumCoverFile').value = '';
+      document.getElementById('albumFormTitle').textContent = 'Create Album';
+      document.getElementById('albumSubmitBtn').textContent = 'Create Album';
+      document.getElementById('albumCancelBtn').style.display = 'none';
+    }
+
+    async function startEditAlbum(id) {
+      const { data: a, error } = await sb.from('gallery_albums').select('*').eq('id', id).single();
+      if (error || !a) { showMsg('Could not load album.', 'error'); return; }
+      editingAlbumId = id;
+      document.getElementById('albumFormTitle').textContent = 'Edit Album';
+      document.getElementById('albumTitle').value = a.title || '';
+      document.getElementById('albumDesc').value = a.description || '';
+      document.getElementById('albumDate').value = a.event_date || '';
+      document.getElementById('albumScope').value = a.chapter_id || '__global__';
+      document.getElementById('albumSubmitBtn').textContent = 'Save Changes';
+      document.getElementById('albumCancelBtn').style.display = '';
+      document.querySelector('[data-tab="gallery"]').click();
+      document.querySelector('#tab-gallery').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function deleteAlbum(id) {
+      if (!confirm('Delete this album and all its photos? This cannot be undone.')) return;
+      const { data: album } = await sb.from('gallery_albums').select('cover_url').eq('id', id).maybeSingle();
+      const { data: photos } = await sb.from('gallery_photos').select('image_url').eq('album_id', id);
+      const urls = [(album && album.cover_url) ? album.cover_url : null, ...((photos || []).map(p => p.image_url))].filter(Boolean);
+      const { error } = await sb.from('gallery_albums').delete().eq('id', id);
+      if (error) { showMsg('Delete failed: ' + error.message, 'error'); return; }
+      await removeFromGalleryBucket(urls);
+      logAction('gallery', 'Deleted album', id);
+      showMsg('Album deleted.', 'success');
+      loadAlbums();
+    }
+
+    async function uploadPhotosToAlbum(albumId, fileList) {
+      if (!fileList || !fileList.length) return;
+      const status = document.getElementById('upload-status-' + albumId);
+      let done = 0, failed = 0;
+      const total = fileList.length;
+      status.style.display = 'block';
+      status.textContent = `Uploading 0 / ${total}...`;
+      const { data: existing } = await sb.from('gallery_photos').select('display_order').eq('album_id', albumId).order('display_order', { ascending: false }).limit(1);
+      let nextOrder = (existing && existing[0] ? (existing[0].display_order || 0) : 0) + 1;
+      for (const file of fileList) {
+        const url = await uploadGalleryImage(file);
+        if (!url) { failed++; continue; }
+        const { error } = await sb.from('gallery_photos').insert({
+          album_id: albumId, image_url: url, display_order: nextOrder++, created_by: currentUserEmail
+        });
+        if (error) { failed++; } else { done++; }
+        status.textContent = `Uploading ${done + failed} / ${total}...`;
+      }
+      const { data: album } = await sb.from('gallery_albums').select('cover_url').eq('id', albumId).maybeSingle();
+      if (album && !album.cover_url) {
+        const { data: first } = await sb.from('gallery_photos').select('image_url').eq('album_id', albumId).order('display_order', { ascending: true }).limit(1).maybeSingle();
+        if (first) await sb.from('gallery_albums').update({ cover_url: first.image_url }).eq('id', albumId);
+      }
+      logAction('gallery', 'Uploaded photos', `${done} to album ${albumId}`);
+      status.textContent = failed ? `Done. ${done} uploaded, ${failed} failed.` : `Done. ${done} uploaded.`;
+      setTimeout(() => { status.style.display = 'none'; status.textContent = ''; }, 3000);
+      loadAlbums();
+    }
+
+    async function deletePhoto(photoId) {
+      if (!confirm('Delete this photo?')) return;
+      const { data: photo } = await sb.from('gallery_photos').select('image_url').eq('id', photoId).maybeSingle();
+      const { error } = await sb.from('gallery_photos').delete().eq('id', photoId);
+      if (error) { showMsg('Delete failed: ' + error.message, 'error'); return; }
+      if (photo && photo.image_url) await removeFromGalleryBucket([photo.image_url]);
+      showMsg('Photo deleted.', 'success');
+      loadAlbums();
+    }
+
+    async function setAsCover(albumId, imageUrl) {
+      const { error } = await sb.from('gallery_albums').update({ cover_url: imageUrl }).eq('id', albumId);
+      if (error) { showMsg('Update failed: ' + error.message, 'error'); return; }
+      showMsg('Cover updated.', 'success');
+      loadAlbums();
+    }
+
+    async function loadAlbums() {
+      const list = document.getElementById('albumsList');
+      const filter = document.getElementById('albumFilter').value;
+      let q = sb.from('gallery_albums').select('*').order('event_date', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false });
+      if (filter === '__global__') q = q.is('chapter_id', null);
+      else if (filter && filter !== 'all') q = q.eq('chapter_id', filter);
+
+      const { data: albums, error } = await q;
+      if (error) { list.innerHTML = '<p class="loading-text">Could not load albums: ' + escNoticeHtml(error.message) + '</p>'; return; }
+      if (!albums || !albums.length) { list.innerHTML = '<p class="loading-text">No albums found.</p>'; return; }
+
+      const chapterById = {};
+      (chapters || []).forEach(c => { chapterById[c.id] = c.name; });
+
+      // Bulk fetch photos
+      const ids = albums.map(a => a.id);
+      const { data: photos } = await sb.from('gallery_photos').select('*').in('album_id', ids).order('display_order', { ascending: true });
+      const photosByAlbum = {};
+      (photos || []).forEach(p => { (photosByAlbum[p.album_id] = photosByAlbum[p.album_id] || []).push(p); });
+
+      list.innerHTML = albums.map(a => {
+        const ps = photosByAlbum[a.id] || [];
+        const dateStr = a.event_date ? new Date(a.event_date).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date';
+        const scopeLabel = a.chapter_id ? (chapterById[a.chapter_id] || 'Chapter') : 'Global';
+        const cover = a.cover_url
+          ? `<img src="${escNoticeHtml(a.cover_url)}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;flex-shrink:0;">`
+          : `<div style="width:80px;height:80px;background:linear-gradient(135deg,#1B2A4A,#6B213F);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#C49A3C;font-family:'Playfair Display',serif;font-weight:600;font-size:12px;">GSMP</div>`;
+
+        const photoTiles = ps.map(p => `
+          <div style="position:relative;width:90px;height:90px;border-radius:4px;overflow:hidden;background:#161b22;">
+            <img src="${escNoticeHtml(p.image_url)}" style="width:100%;height:100%;object-fit:cover;">
+            <div style="position:absolute;top:2px;right:2px;display:flex;gap:2px;">
+              <button class="btn-sm" style="padding:2px 6px;font-size:10px;background:rgba(255,255,255,0.95);color:#1B2A4A;" title="Set as cover" onclick="setAsCover('${a.id}','${p.image_url.replace(/'/g,"\\'")}')">★</button>
+              <button class="btn-sm btn-danger" style="padding:2px 6px;font-size:10px;" title="Delete" onclick="deletePhoto('${p.id}')">×</button>
+            </div>
+          </div>
+        `).join('');
+
+        return `
+          <div class="chapter-card">
+            <div class="chapter-card-header">
+              <div style="display:flex;gap:14px;align-items:flex-start;flex:1;min-width:0;">
+                ${cover}
+                <div style="flex:1;min-width:0;">
+                  <h4>${escNoticeHtml(a.title)}</h4>
+                  <div class="chapter-meta">${escNoticeHtml(scopeLabel)} · ${dateStr} · ${ps.length} photo${ps.length === 1 ? '' : 's'}</div>
+                  ${a.description ? `<div style="font-size:13px;color:#c9d1d9;margin-top:6px;">${escNoticeHtml(a.description)}</div>` : ''}
+                </div>
+              </div>
+              <div class="admin-actions">
+                <button class="btn-sm btn-edit" onclick="startEditAlbum('${a.id}')">Edit</button>
+                <button class="btn-sm btn-danger" onclick="deleteAlbum('${a.id}')">Delete</button>
+              </div>
+            </div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid #30363d;">
+              <label style="font-size:13px;font-weight:600;color:#c9d1d9;display:block;margin-bottom:6px;">Add photos</label>
+              <input type="file" accept="image/*" multiple onchange="uploadPhotosToAlbum('${a.id}', this.files); this.value='';" style="font-size:13px;color:#c9d1d9;">
+              <div id="upload-status-${a.id}" style="display:none;margin-top:6px;font-size:12px;color:#8b949e;"></div>
+              ${ps.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">${photoTiles}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) { window.location.href = '../login'; return; }
@@ -1907,8 +2195,10 @@
 
       await loadChapters();
       populateNoticeChapterSelects();
+      populateAlbumChapterSelects();
       loadNotices();
       loadEvents();
+      loadAlbums();
       loadMembers();
       loadArticles();
       loadShopItems();
