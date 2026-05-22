@@ -1193,7 +1193,7 @@
 
             <div style="margin-top:14px;padding-top:14px;border-top:1px solid #f3f4f6;">
               <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Add photos</label>
-              <input type="file" accept="image/*" multiple id="photo-input-${a.id}" onchange="uploadPhotosToAlbum('${a.id}', this.files); this.value='';" style="font-size:13px;">
+              <input type="file" accept="image/*" multiple id="photo-input-${a.id}" onchange="uploadPhotosToAlbum('${a.id}', Array.from(this.files)); this.value='';" style="font-size:13px;">
               <div id="upload-status-${a.id}" style="display:none;margin-top:6px;font-size:12px;color:#6b7280;"></div>
               ${ps.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">${photoTiles}</div>` : ''}
             </div>
