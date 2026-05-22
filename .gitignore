@@ -8,3 +8,4 @@ cleanup-and-push.sh
 .DS_Store
 wipe-history.sh
 deploy-gallery.sh
+deploy-gallery.sh
