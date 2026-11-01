@@ -524,7 +524,7 @@
         const imgThumb = ev.image_url ? `<img src="${ev.image_url}" style="width:32px;height:32px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">` : '<span style="color:#9ca3af;">—</span>';
         return `
           <tr>
-            <td><strong>${ev.title}</strong></td>
+            <td><strong>${escHtml(ev.title)}</strong></td>
             <td>${ev.event_type || '—'}</td>
             <td>${d}</td>
             <td>${ev.location || '—'}</td>

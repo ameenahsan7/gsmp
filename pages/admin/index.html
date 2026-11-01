@@ -461,35 +461,32 @@
 
     <!-- LOGS TAB -->
     <div class="tab-content" id="tab-logs">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <select id="logFilter" style="background:var(--surface-2);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:4px 8px;font-size:12px;font-family:'Courier New',monospace;">
-            <option value="all">All Actions</option>
-            <option value="member">Members</option>
-            <option value="event">Events</option>
-            <option value="article">Articles</option>
-            <option value="chapter">Chapters</option>
-            <option value="shop">Shop</option>
-            <option value="auth">Auth</option>
-          </select>
-          <span id="logCount" style="font-size:11px;color:var(--faint);font-family:'Courier New',monospace;">0 entries</span>
+      <div class="adm-card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px;">
+          <div class="row">
+            <select id="logFilter" onchange="loadLogs()">
+              <option value="all">All categories</option>
+              <option value="member">Members</option>
+              <option value="chapter">Chapters</option>
+              <option value="event">Events</option>
+              <option value="article">Articles</option>
+              <option value="shop">Shop</option>
+              <option value="code">Codes</option>
+              <option value="auth">Logins</option>
+            </select>
+            <input id="logSearch" placeholder="Search action, details, person" oninput="renderLogs()" style="min-width:240px;">
+            <label class="muted row" style="gap:6px;"><input type="checkbox" id="logHideAuth" checked onchange="renderLogs()"> Hide logins</label>
+          </div>
+          <div class="row"><span id="logCount" class="muted">0 entries</span><button onclick="loadLogs()">↻ Refresh</button></div>
         </div>
-        <button class="btn-sm" onclick="loadLogs()" style="background:transparent;color:var(--accent);border-color:var(--line);font-size:11px;font-family:'Courier New',monospace;">&#x21bb; Refresh</button>
+        <div class="table-wrap" style="max-height:640px;overflow-y:auto;">
+          <table class="log-table">
+            <thead><tr><th style="width:150px;">When</th><th style="width:110px;">Category</th><th>Action</th><th style="width:170px;">By</th></tr></thead>
+            <tbody id="logTerminal"><tr><td colspan="4" class="loading-text">Loading logs…</td></tr></tbody>
+          </table>
+        </div>
       </div>
-      <div id="logTerminal" style="
-        background: #010409;
-        border: 1px solid var(--line-soft);
-        border-radius: 6px;
-        padding: 16px;
-        font-family: 'Courier New', 'Fira Code', monospace;
-        font-size: 12px;
-        line-height: 1.7;
-        max-height: 600px;
-        overflow-y: auto;
-        color: var(--text);
-      ">
-        <span style="color:var(--faint);">Loading logs...</span>
-      </div>
+    </div>
     </div>
   </div>
   </main>
@@ -554,40 +551,37 @@
       } catch (e) { console.warn('Log write failed:', e); }
     }
 
+    let logRows = [];
     async function loadLogs() {
       const filter = document.getElementById('logFilter').value;
-      let query = sb.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(200);
+      let query = sb.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(500);
       if (filter !== 'all') query = query.eq('category', filter);
       const { data, error } = await query;
-      const terminal = document.getElementById('logTerminal');
-      const countEl = document.getElementById('logCount');
-      if (error) { terminal.innerHTML = '<span style="color:var(--danger);">ERROR: ' + error.message + '</span>'; return; }
-      if (!data || !data.length) {
-        terminal.innerHTML = '<span style="color:var(--faint);">No logs found.</span>';
-        countEl.textContent = '0 entries';
-        return;
-      }
-      countEl.textContent = data.length + ' entries';
-      const COLORS = { member: 'var(--accent)', event: '#d2a8ff', article: '#79c0ff', chapter: 'var(--warn)', shop: 'var(--ok)', auth: '#be185d', code: 'var(--warn)' };
-      terminal.innerHTML = data.map(log => {
-        const ts = new Date(log.created_at);
-        const time = ts.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
-        const catColor = COLORS[log.category] || 'var(--muted)';
-        const user = (log.user_email || 'system').split('@')[0];
-        return `<div style="border-bottom:1px solid var(--surface);padding:3px 0;">` +
-          `<span style="color:var(--faint);">${time}</span> ` +
-          `<span style="color:${catColor};font-weight:bold;">[${log.category.toUpperCase()}]</span> ` +
-          `<span style="color:var(--text);">${log.action}</span>` +
-          (log.details ? ` <span style="color:#6e7681;">— ${log.details}</span>` : '') +
-          ` <span style="color:var(--line);">by</span> <span style="color:var(--warn);">${user}</span>` +
-          `</div>`;
-      }).join('');
-      // auto-scroll to top
-      terminal.scrollTop = 0;
+      if (error) { document.getElementById('logTerminal').innerHTML = `<tr><td colspan="4" style="color:var(--danger)">${gsmpEsc(error.message)}</td></tr>`; return; }
+      logRows = data || [];
+      // when the user explicitly picks "Logins", don't hide them
+      if (filter === 'auth') document.getElementById('logHideAuth').checked = false;
+      renderLogs();
+    }
+    function renderLogs() {
+      const q = document.getElementById('logSearch').value.trim().toLowerCase();
+      const hideAuth = document.getElementById('logHideAuth').checked;
+      const rows = logRows.filter(l => !(hideAuth && l.category === 'auth') &&
+        (!q || [l.action, l.details, l.user_email].some(v => (v || '').toLowerCase().includes(q))));
+      document.getElementById('logCount').textContent = rows.length + ' of ' + logRows.length + ' entries';
+      const CAT = { member: 'accent', chapter: 'warn', event: 'ok', article: 'accent', shop: 'ok', code: 'warn', auth: 'muted' };
+      document.getElementById('logTerminal').innerHTML = rows.length ? rows.map(l => {
+        const ts = new Date(l.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
+        const c = CAT[l.category] || 'muted';
+        return `<tr>
+          <td class="muted" style="white-space:nowrap;">${ts}</td>
+          <td><span class="pill" style="color:var(--${c});">${gsmpEsc(l.category === 'auth' ? 'login' : l.category)}</span></td>
+          <td><b style="font-weight:600;">${gsmpEsc(l.action)}</b>${l.details ? `<div class="muted">${gsmpEsc(l.details)}</div>` : ''}</td>
+          <td class="muted">${gsmpEsc(l.user_email || 'system')}</td></tr>`;
+      }).join('') : '<tr><td colspan="4" class="muted">No matching entries.</td></tr>';
     }
 
     // Filter change triggers reload
-    document.getElementById('logFilter')?.addEventListener('change', loadLogs);
 
     // ========== CHAPTERS (with inline codes) ==========
     async function loadChapters() {
@@ -626,7 +620,7 @@
           <div class="chapter-card">
             <div class="chapter-card-header">
               <div>
-                <h4>${ch.name}</h4>
+                <h4>${gsmpEsc(ch.name)}</h4>
                 <div class="chapter-meta">${ch.city || ''}${ch.city && ch.country ? ', ' : ''}${ch.country || ''} · ${ch.status || 'active'}</div>
                 ${ch.description ? '<div class="chapter-meta" style="margin-top:4px;">' + ch.description + '</div>' : ''}
                 ${ch.created_by ? '<div class="chapter-meta" style="margin-top:4px;font-size:11px;opacity:0.7;">Created by: ' + ch.created_by + '</div>' : ''}
@@ -849,13 +843,13 @@
         const imgThumb = ev.image_url ? `<img src="${ev.image_url}" style="width:32px;height:32px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">` : '<span style="color:var(--faint);">—</span>';
         return `
           <tr>
-            <td><strong>${ev.title}</strong></td>
+            <td><strong>${gsmpEsc(ev.title)}</strong></td>
             <td>${ev.event_type || '—'}</td>
             <td>${d}</td>
             <td>${ev.location || '—'}</td>
             <td>${imgThumb}</td>
             <td style="text-align:center;" title="${names}"><strong style="color:${count > 0 ? '#059669' : '#9ca3af'}">${count}</strong></td>
-            <td style="font-size:12px;color:#6b7680;">${creator}</td>
+            <td style="font-size:12px;color:var(--muted);">${creator}</td>
             <td><input type="checkbox" ${portalChecked} onchange="togglePortal('${ev.id}', this.checked)" title="Show in member portal"></td>
             <td class="admin-actions">
               <button class="btn-sm btn-csv" onclick="exportEventReport('${ev.id}','${ev.title.replace(/'/g,"\\'")}')" title="Download attendee report">&#x2B73;</button>
@@ -967,7 +961,7 @@
           <td>
             <select class="member-chapter-select" onchange="assignChapter('${m.id}', this.value)">
               <option value="">— None —</option>
-              ${chapters.map(ch => `<option value="${ch.id}" ${ch.id === selectedChapter ? 'selected' : ''}>${ch.name}</option>`).join('')}
+              ${chapters.map(ch => `<option value="${ch.id}" ${ch.id === selectedChapter ? 'selected' : ''}>${gsmpEsc(ch.name)}</option>`).join('')}
             </select>
           </td>
           <td>
@@ -1131,7 +1125,7 @@
             ${imgPreview}
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
-                <strong style="font-size:13px;color:var(--text);">${a.title}</strong>
+                <strong style="font-size:13px;color:var(--text);">${gsmpEsc(a.title)}</strong>
                 ${statusBadge}
                 <span style="font-size:10px;color:var(--muted);background:var(--line-soft);padding:2px 8px;border-radius:10px;">${catLabel}</span>
               </div>
@@ -1319,7 +1313,7 @@
           return `
             <tr>
               <td style="color:var(--faint);">${i + 1}</td>
-              <td><strong>${item.title}</strong>${item.excerpt ? '<br><span style="font-size:11px;color:var(--muted);">' + item.excerpt.substring(0, 60) + '...</span>' : ''}</td>
+              <td><strong>${gsmpEsc(item.title)}</strong>${item.excerpt ? '<br><span style="font-size:11px;color:var(--muted);">' + gsmpEsc(item.excerpt.substring(0, 60)) + '...</span>' : ''}</td>
               <td>${item.category}</td>
               <td>${item.tag || '—'}</td>
               <td>${hasContent}</td>
@@ -1402,7 +1396,7 @@
         return `
           <tr>
             <td style="color:var(--faint);">${i + 1}</td>
-            <td><strong>${item.name}</strong>${item.description ? '<br><span style="font-size:11px;color:var(--muted);">' + item.description.substring(0, 60) + (item.description.length > 60 ? '...' : '') + '</span>' : ''}</td>
+            <td><strong>${gsmpEsc(item.name)}</strong>${item.description ? '<br><span style="font-size:11px;color:var(--muted);">' + gsmpEsc(item.description.substring(0, 60)) + (item.description.length > 60 ? '...' : '') + '</span>' : ''}</td>
             <td>${item.category || '—'}</td>
             <td>${item.price || '—'}</td>
             <td>${imgCell}</td>
@@ -1623,7 +1617,7 @@
         tbody.innerHTML = items.map((item, i) => `
           <tr>
             <td style="color:var(--faint);">${i + 1}</td>
-            <td><strong>${item.name}</strong>${item.description ? '<br><span style="font-size:11px;color:var(--muted);">' + item.description.substring(0, 50) + '</span>' : ''}</td>
+            <td><strong>${gsmpEsc(item.name)}</strong>${item.description ? '<br><span style="font-size:11px;color:var(--muted);">' + gsmpEsc(item.description.substring(0, 50)) + '</span>' : ''}</td>
             <td>${item.category}</td>
             <td>${item.price || '—'}</td>
             <td style="color:${item.active ? 'var(--ok)' : 'var(--danger)'}">${item.active ? 'Yes' : 'No'}</td>
@@ -1752,7 +1746,7 @@
         const expiryStr = n.expires_at ? new Date(n.expires_at).toLocaleString('en', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
         const scopeLabel = n.chapter_id ? (chapterById[n.chapter_id] || 'Chapter') : 'Network';
         return `
-          <div class="chapter-card" style="${n.is_pinned ? 'background:#1d2330;' : ''}">
+          <div class="chapter-card" style="${n.is_pinned ? 'background:var(--warn-soft);border-color:#fde68a;' : ''}">
             <div class="chapter-card-header">
               <div>
                 <h4>${escNoticeHtml(n.title)}</h4>
