@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Accounting — GSMP Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0d1117; --panel: #161b22; --line: #30363d; --text: #c9d1d9; --muted: #8b949e; --green: #3fb950; --blue: #58a6ff; --amber: #d29922; --red: #f85149; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; font-size: 14px; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 60px; }
+    a { color: var(--blue); }
+    h1 { font-size: 22px; margin: 6px 0 16px; color: #fff; }
+    h2 { font-size: 14px; color: #fff; margin: 0 0 12px; text-transform: uppercase; letter-spacing: .06em; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+    .kpi .v { font-size: 24px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+    .kpi .l { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .kpi .s { font-size: 12px; margin-top: 6px; }
+    .two { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+    @media (max-width: 800px) { .two { grid-template-columns: 1fr; } }
+    .bars { display: flex; align-items: flex-end; gap: 6px; height: 160px; padding-top: 10px; }
+    .bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+    .bar i { display: block; width: 100%; background: var(--green); border-radius: 3px 3px 0 0; min-height: 2px; }
+    .bar span { font-size: 10px; color: var(--muted); margin-top: 4px; }
+    .bar b { font-size: 10px; color: var(--text); margin-bottom: 2px; font-weight: 500; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border-bottom: 1px solid var(--line); padding: 6px 8px; white-space: nowrap; }
+    td { border-bottom: 1px solid #21262d; padding: 7px 8px; vertical-align: top; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tr.void td { color: var(--muted); text-decoration: line-through; }
+    tr.void td.keep { text-decoration: none; }
+    .muted { color: var(--muted); font-size: 12px; }
+    button, select, input { background: #21262d; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font: inherit; cursor: pointer; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .msg { padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; display: none; }
+    .msg.ok { display: block; background: #0f2d1a; color: var(--green); } .msg.err { display: block; background: #3d0b0b; color: #ffa198; }
+    .scroll { overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="row" style="justify-content:space-between;"><a href="../admin">&larr; Back to Admin</a><a href="../admin-applications">Applications &amp; payments →</a></div>
+    <h1>Accounting</h1>
+    <div id="msg" class="msg"></div>
+    <div id="gate" class="panel">Checking access…</div>
+    <div id="app" style="display:none;">
+      <div class="kpis" id="kpis"></div>
+      <div class="two">
+        <div class="panel"><h2>Revenue — last 12 months</h2><div class="bars" id="bars"></div></div>
+        <div class="panel"><h2>By chapter — this year</h2><div id="byChapter"></div></div>
+      </div>
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;margin-bottom:10px;">
+          <h2 style="margin:0;">Payments ledger</h2>
+          <div class="row">
+            <input id="q" placeholder="Search name, email, reference" oninput="renderLedger()" style="min-width:220px;">
+            <select id="yr" onchange="renderLedger()"></select>
+            <label class="muted"><input type="checkbox" id="showVoid" onchange="renderLedger()"> show voided</label>
+            <button onclick="exportCsv()">Export CSV</button>
+          </div>
+        </div>
+        <div class="scroll"><table>
+          <thead><tr><th>Paid on</th><th>Member</th><th>Chapter</th><th class="num">Amount</th><th>Method</th><th>Reference</th><th>Covers until</th><th>Recorded by</th><th></th></tr></thead>
+          <tbody id="ledger"></tbody>
+          <tfoot><tr><td colspan="3" class="muted">Total (shown, excl. voided)</td><td class="num" id="ledgerTotal"></td><td colspan="5"></td></tr></tfoot>
+        </table></div>
+      </div>
+      <div class="panel" id="noRecordPanel" style="display:none;">
+        <h2>Active members with no payment on record</h2>
+        <p class="muted">Usually members active before the ledger existed. Record their actual payment in Applications &amp; payments (Active tab) so the books are complete.</p>
+        <div id="noRecord"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    const e = gsmpEsc, $ = id => document.getElementById(id);
+    const FEE = 100;
+    let payments = [], members = [], chapters = {};
+    const money = (n, c = 'USD') => (c === 'USD' ? '$' : c + ' ') + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    const fmt = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    const iso = d => d.toISOString().slice(0, 10);
+    function flash(t, ok) { const m = $('msg'); m.textContent = t; m.className = 'msg ' + (ok ? 'ok' : 'err'); }
+
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { location.href = '../login'; return; }
+      if (!(await checkIsSaasAdmin())) { $('gate').textContent = 'Admins only.'; return; }
+      $('gate').style.display = 'none'; $('app').style.display = '';
+      load();
+    })();
+
+    async function load() {
+      const [p, m, c] = await Promise.all([
+        sb.from('membership_payments').select('*').order('paid_at', { ascending: false }).order('created_at', { ascending: false }),
+        sb.from('members').select('id, first_name, last_name, email, chapter_id, membership_status, paid_until'),
+        sb.from('chapters').select('id, name')]);
+      if (p.error) return flash(p.error.message, false);
+      payments = p.data; members = (m.data || []).map(x => ({ ...x, st: gsmpMemberState(x) }));
+      (c.data || []).forEach(x => chapters[x.id] = x.name);
+      const years = [...new Set(payments.map(x => x.paid_at.slice(0, 4)))].sort().reverse();
+      const thisYear = String(new Date().getFullYear());
+      if (!years.includes(thisYear)) years.unshift(thisYear);
+      $('yr').innerHTML = '<option value="all">All years</option>' + years.map(y => `<option ${y === thisYear ? 'selected' : ''}>${y}</option>`).join('');
+      renderKpis(); renderBars(); renderByChapter(); renderLedger(); renderNoRecord();
+    }
+
+    const valid = () => payments.filter(x => !x.voided);
+    const sum = list => {  // { USD: n, ... }
+      const t = {}; list.forEach(x => t[x.currency] = (t[x.currency] || 0) + Number(x.amount)); return t;
+    };
+    const showSum = t => Object.keys(t).length ? Object.entries(t).map(([c, n]) => money(n, c)).join(' + ') : money(0);
+
+    function renderKpis() {
+      const now = new Date(), ym = iso(now).slice(0, 7), y = ym.slice(0, 4);
+      const in30 = iso(new Date(Date.now() + 30 * 86400000)), today = iso(now);
+      const count = s => members.filter(m => m.st === s).length;
+      const renewSoon = members.filter(m => m.st === 'active' && m.paid_until && m.paid_until <= in30 && m.paid_until >= today).length;
+      const k = [
+        ['Revenue this month', showSum(sum(valid().filter(x => x.paid_at.startsWith(ym)))), ''],
+        ['Revenue ' + y, showSum(sum(valid().filter(x => x.paid_at.startsWith(y)))), `${valid().filter(x => x.paid_at.startsWith(y)).length} payments`],
+        ['All-time revenue', showSum(sum(valid())), ''],
+        ['Paid members', count('active'), `<span style="color:var(--green)">active &amp; current</span>`],
+        ['Awaiting payment', count('approved'), `<span style="color:var(--amber)">≈ ${money(count('approved') * FEE)} expected</span>`],
+        ['Renewals next 30 days', renewSoon, `<span style="color:var(--amber)">≈ ${money(renewSoon * FEE)}</span>`],
+        ['In grace (overdue)', count('grace'), `<span style="color:var(--amber)">≈ ${money(count('grace') * FEE)} at risk</span>`],
+        ['Lapsed', count('lapsed'), `<span style="color:var(--red)">portfolios paused</span>`],
+      ];
+      $('kpis').innerHTML = k.map(([l, v, s]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div>${s ? `<div class="s">${s}</div>` : ''}</div>`).join('');
+    }
+
+    function renderBars() {
+      const months = [];
+      for (let i = 11; i >= 0; i--) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); months.push(iso(d).slice(0, 7)); }
+      const usd = months.map(m => valid().filter(x => x.currency === 'USD' && x.paid_at.startsWith(m)).reduce((a, x) => a + Number(x.amount), 0));
+      const max = Math.max(...usd, 1);
+      $('bars').innerHTML = months.map((m, i) => `<div class="bar" title="${m}: ${money(usd[i])}">
+        ${usd[i] ? `<b>${money(usd[i])}</b>` : ''}<i style="height:${(usd[i] / max) * 120}px"></i>
+        <span>${new Date(m + '-01T00:00:00').toLocaleDateString('en-GB', { month: 'short' })}</span></div>`).join('');
+    }
+
+    function renderByChapter() {
+      const y = String(new Date().getFullYear()), t = {};
+      valid().filter(x => x.paid_at.startsWith(y) && x.currency === 'USD').forEach(x => {
+        const k = chapters[x.chapter_id] || 'No chapter'; t[k] = (t[k] || 0) + Number(x.amount); });
+      const rows = Object.entries(t).sort((a, b) => b[1] - a[1]);
+      $('byChapter').innerHTML = rows.length ? `<table>${rows.map(([k, v]) => `<tr><td>${e(k)}</td><td class="num">${money(v)}</td></tr>`).join('')}</table>`
+        : '<p class="muted">No payments this year yet.</p>';
+    }
+
+    function filtered() {
+      const q = $('q').value.trim().toLowerCase(), y = $('yr').value, sv = $('showVoid').checked;
+      return payments.filter(x => (sv || !x.voided) && (y === 'all' || x.paid_at.startsWith(y)) &&
+        (!q || [x.member_name, x.member_email, x.reference].some(v => (v || '').toLowerCase().includes(q))));
+    }
+
+    function renderLedger() {
+      const list = filtered();
+      $('ledger').innerHTML = list.map(x => `<tr class="${x.voided ? 'void' : ''}">
+        <td>${fmt(x.paid_at)}</td>
+        <td>${e(x.member_name)}<br><span class="muted">${e(x.member_email)}</span></td>
+        <td>${e(chapters[x.chapter_id] || '—')}</td>
+        <td class="num">${money(x.amount, x.currency)}</td>
+        <td>${e(x.method.replace('_', ' '))}</td>
+        <td>${e(x.reference || '—')}</td>
+        <td>${fmt(x.covers_until)}</td>
+        <td class="muted">${e(x.recorded_by)}</td>
+        <td class="keep">${x.voided ? `<span class="muted">voided by ${e(x.voided_by)}: ${e(x.void_reason)}</span>` : `<button onclick="voidPayment('${x.id}')">Void</button>`}</td></tr>`).join('')
+        || '<tr><td colspan="9" class="muted">No payments.</td></tr>';
+      $('ledgerTotal').textContent = showSum(sum(list.filter(x => !x.voided)));
+    }
+
+    function renderNoRecord() {
+      const paidIds = new Set(valid().map(x => x.member_id));
+      const list = members.filter(m => ['active', 'grace'].includes(m.st) && !paidIds.has(m.id));
+      $('noRecordPanel').style.display = list.length ? '' : 'none';
+      $('noRecord').innerHTML = list.map(m => `<div>${e(m.first_name + ' ' + m.last_name)} <span class="muted">${e(m.email)} · paid until ${fmt(m.paid_until)}</span></div>`).join('');
+    }
+
+    async function voidPayment(id) {
+      const reason = prompt('Reason for voiding this payment (e.g. entered twice, refunded):');
+      if (!reason) return;
+      const { error } = await sb.rpc('void_membership_payment', { p_payment: id, p_reason: reason });
+      if (error) return flash(error.message, false);
+      flash('Payment voided. If needed, adjust the member\'s paid-until date in Applications & payments.', true); load();
+    }
+
+    function exportCsv() {
+      const cols = ['paid_at', 'member_name', 'member_email', 'chapter', 'amount', 'currency', 'method', 'reference', 'covers_until', 'recorded_by', 'voided', 'void_reason'];
+      const cell = v => { const s = String(v ?? ''); return /^[=+\-@]/.test(s) ? `"'${s.replace(/"/g, '""')}"` : `"${s.replace(/"/g, '""')}"`; };
+      const rows = filtered().map(x => cols.map(c => cell(c === 'chapter' ? chapters[x.chapter_id] || '' : x[c])).join(','));
+      const blob = new Blob([[cols.join(','), ...rows].join('\n')], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `gsmp-payments-${$('yr').value}.csv`; a.click();
+    }
+  </script>
+</body>
+</html>

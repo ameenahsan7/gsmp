@@ -24,6 +24,10 @@ so they are not re-litigated. Update the Decision log whenever a decision change
   Chapter is granted and the code's use consumed only on **approval** (`gsmp_member_review` trigger).
   Applicants: no chapter, inactive personal code, no public card. Portfolio requires active member;
   lapsed → public portfolio shows "paused" (data kept).
+- **Money = `membership_payments` ledger** (append-only; no edit/delete; mistakes are VOIDED with reason).
+  Record via RPC `record_membership_payment()` only — it writes the ledger row AND activates/extends the member
+  atomically (never shortens paid_until). Accounting dashboard: `pages/admin-accounting`.
+- **Never commit member names/emails in migrations** (repo is public) — one-off data fixes are run by hand.
 - Members table is private: self, admins, and Chapter Leads (own chapter only). Public card goes through
   `get_member_card(code)` RPC.
 - Privilege fields on `members` (`member_title`, `chapter_id`) are guarded by trigger
@@ -48,6 +52,8 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 | 2026-11-06 | Fee **100 USD/year**; payment v1 manual (admin "Mark paid until"); Stripe later | Validate willingness to pay before integrating |
 | 2026-11-06 | Existing members grandfathered active, paid_until = +1 year at migration | No lockout on launch; admins correct individual dates (only 2 of 4 had actually paid) |
 | 2026-11-06 | Verified Portfolio pauses (not deleted) 30 days after membership lapses | Retention lever without holding data hostage |
+| 2026-11-07 | Only paid members are active; unpaid grandfathered members moved to "approved/awaiting payment" (manual data fix, 2 people) | Access must match money |
+| 2026-11-07 | Payments ledger + accounting dashboard; voided rows kept | Audit trail for a membership org handling fees |
 | 2026-11-01 | Personal project uses personal accounts only (GitHub `ameenahsan7`, personal laptop) | Keep GSMP out of employer org/logs |
 
 ## Roadmap (in order)
@@ -73,7 +79,7 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 ## Testing
 - DB changes are tested on a local Postgres 16 with Supabase stubs (auth.uid/role/jwt, anon/authenticated roles):
   load `schema/live-schema.sql`, then migrations in order, then scenario tests (role switch via
-  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03; 22 for issuer confirmation on 2026-11-05; 25 for membership applications on 2026-11-06.
+  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03; 22 for issuer confirmation on 2026-11-05; 25 for membership applications on 2026-11-06; 16 for the payments ledger on 2026-11-07.
 
 ## Known gaps
 1. `validate_and_use_referral_code` (now check-only) still answers valid/invalid to anyone → codes can be

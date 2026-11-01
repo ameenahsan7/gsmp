@@ -15,7 +15,7 @@
     a { color: var(--blue); }
     h1 { font-size: 22px; margin: 6px 0 16px; color: #fff; }
     .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-    input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font: inherit; }
+    select, input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font: inherit; }
     textarea { width: 100%; min-height: 50px; }
     button { background: #21262d; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; font-weight: 600; cursor: pointer; font: inherit; }
     button.ok { background: #238636; border-color: #2ea043; color: #fff; }
@@ -38,7 +38,7 @@
 </head>
 <body>
   <div class="wrap">
-    <a href="../admin">&larr; Back to Admin</a>
+    <div class="row" style="justify-content:space-between;"><a href="../admin">&larr; Back to Admin</a><a href="../admin-accounting">Accounting →</a></div>
     <h1>Applications &amp; Membership</h1>
     <div id="msg" class="msg"></div>
     <div id="gate" class="panel">Checking access…</div>
@@ -57,7 +57,9 @@
                   ['active', 'Active'], ['rejected', 'Rejected']];
     let tab = 'applicant', members = [], chapters = {};
     const fmt = d => d ? new Date(d.length === 10 ? d + 'T00:00:00' : d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
-    const plusYear = () => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); return d.toISOString().slice(0, 10); };
+    const today = () => new Date().toISOString().slice(0, 10);
+    const addYear = iso => { const d = new Date(iso + 'T00:00:00'); d.setFullYear(d.getFullYear() + 1); return d.toISOString().slice(0, 10); };
+    const FEE = 100;
     function flash(t, ok) { const m = $('msg'); m.textContent = t; m.className = 'msg ' + (ok ? 'ok' : 'err'); window.scrollTo({ top: 0 }); }
 
     (async () => {
@@ -99,8 +101,19 @@
       if (m.st === 'applicant' || m.st === 'rejected') actions = `
         <button class="ok" onclick="setStatus('${m.id}','approved')">Approve</button>
         ${m.st === 'applicant' ? `<button class="bad" onclick="setStatus('${m.id}','rejected')">Reject</button>` : ''}`;
-      const payRow = `<input type="date" id="pu-${m.id}" value="${m.paid_until && m.paid_until > new Date().toISOString().slice(0, 10) ? m.paid_until : plusYear()}">
-        <button class="ok" onclick="markPaid('${m.id}')">Mark paid until</button>`;
+      const base = m.paid_until && m.paid_until > today() ? m.paid_until : today();
+      const payRow = `<div style="width:100%;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;">
+        <div class="muted" style="margin-bottom:6px;">Record payment</div>
+        <div class="row">
+          <input id="amt-${m.id}" type="number" min="1" step="0.01" value="${FEE}" style="width:90px;">
+          <input id="cur-${m.id}" value="USD" maxlength="3" style="width:60px;text-transform:uppercase;">
+          <select id="mth-${m.id}"><option value="bank_transfer">Bank transfer</option><option value="cash">Cash</option>
+            <option value="card">Card</option><option value="payment_link">Payment link</option><option value="other">Other</option></select>
+          <input id="ref-${m.id}" placeholder="Reference / receipt no." style="min-width:160px;">
+          <label class="muted">Paid on <input id="pd-${m.id}" type="date" value="${today()}"></label>
+          <label class="muted">Covers until <input id="pu-${m.id}" type="date" value="${addYear(base)}"></label>
+          <button class="ok" onclick="recordPayment('${m.id}')">Record payment</button>
+        </div></div>`;
       if (m.st === 'approved' || m.st === 'grace' || m.st === 'lapsed' || m.st === 'active') actions += payRow;
       return `<div class="card">
         <div class="row" style="justify-content:space-between;">
@@ -132,13 +145,15 @@
       load();
     }
 
-    async function markPaid(id) {
-      const until = $('pu-' + id).value;
-      if (!until) return flash('Pick a date.', false);
-      if (!confirm(`Mark as paid until ${fmt(until)}? This activates the membership.`)) return;
-      const { error } = await sb.from('members').update({ membership_status: 'active', paid_until: until }).eq('id', id);
+    async function recordPayment(id) {
+      const amount = parseFloat($('amt-' + id).value), until = $('pu-' + id).value, paidOn = $('pd-' + id).value;
+      const currency = $('cur-' + id).value.trim().toUpperCase(), method = $('mth-' + id).value, ref = $('ref-' + id).value.trim();
+      if (!(amount > 0) || !until || !paidOn) return flash('Amount, payment date and "covers until" are required.', false);
+      if (!confirm(`Record ${amount} ${currency} (${method.replace('_', ' ')}) and activate membership until ${fmt(until)}?`)) return;
+      const { error } = await sb.rpc('record_membership_payment', { p_member: id, p_amount: amount, p_currency: currency,
+        p_method: method, p_reference: ref, p_paid_at: paidOn, p_covers_until: until });
       if (error) return flash(error.message, false);
-      flash('Membership active until ' + fmt(until), true); load();
+      flash(`Payment recorded — active until ${fmt(until)}.`, true); load();
     }
   </script>
 </body>
