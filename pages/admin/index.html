@@ -4,149 +4,26 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="../../images/favicon-white.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SaaS Admin — GSMP</title>
+  <title>Admin — GSMP</title>
   <link rel="stylesheet" href="../../css/style.css?v=12">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <style>
-    body { background: #0d1117; color: #c9d1d9; }
-    .admin-page { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
-    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .admin-header h1 { font-family: 'Playfair Display', serif; color: #58a6ff; font-size: 22px; }
-    .admin-tabs { display: flex; gap: 0; border-bottom: 1px solid #30363d; margin-bottom: 16px; }
-    .admin-tab { padding: 8px 18px; background: none; border: none; font-size: 13px; font-weight: 600; color: #8b949e; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
-    .admin-tab.active { color: #3fb950; border-bottom-color: #3fb950; }
-    .admin-tab:hover { color: #c9d1d9; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .admin-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    .admin-table th { text-align: left; padding: 6px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #8b949e; border-bottom: 1px solid #30363d; }
-    .admin-table td { padding: 6px 10px; border-bottom: 1px solid #21262d; font-size: 13px; color: #c9d1d9; }
-    .admin-table tr:hover { background: #161b22; }
-    .admin-form { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 14px 16px; margin-bottom: 16px; }
-    .admin-form h3 { margin-bottom: 10px; font-size: 14px; color: #3fb950; }
-    .admin-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .admin-form .form-group { margin-bottom: 8px; }
-    .admin-form label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 2px; color: #8b949e; }
-    .admin-form input, .admin-form select, .admin-form textarea { width: 100%; padding: 5px 10px; border: 1px solid #30363d; border-radius: 5px; font-size: 13px; font-family: 'Inter', sans-serif; background: #0d1117; color: #c9d1d9; }
-    .admin-form textarea { resize: vertical; min-height: 48px; }
-    .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 5px; border: 1px solid #30363d; cursor: pointer; font-weight: 600; background: #21262d; color: #c9d1d9; transition: all 0.15s; }
-    .btn-sm:hover { background: #30363d; }
-    .btn-add { background: #238636; color: #fff; border-color: #238636; }
-    .btn-add:hover { opacity: 0.9; background: #2ea043; }
-    .btn-danger { background: #21262d; color: #f85149; border-color: #f85149; }
-    .btn-danger:hover { background: #2d1215; }
-    .admin-actions { display: flex; gap: 6px; }
-    .admin-msg { padding: 6px 12px; border-radius: 5px; font-size: 12px; margin-bottom: 10px; display: none; }
-    .admin-back { text-decoration: none; color: #58a6ff; font-size: 13px; font-weight: 500; }
-    .admin-back:hover { text-decoration: underline; }
-    .member-chapter-select { padding: 4px 8px; font-size: 12px; border: 1px solid #30363d; border-radius: 4px; background: #0d1117; color: #c9d1d9; }
-    .loading-text { color: #484f58; font-style: italic; padding: 10px 0; font-size: 12px; }
-    .btn-csv { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
-    .btn-csv:hover { background: #30363d; }
-    .admin-msg.success { display: block; background: #0d2818; color: #3fb950; border: 1px solid #238636; }
-    .admin-msg.error { display: block; background: #2d1215; color: #f85149; border: 1px solid #f85149; }
-    .chapter-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-    .chapter-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .chapter-card-header h4 { font-size: 14px; color: #58a6ff; margin: 0; }
-    .chapter-meta { font-size: 12px; color: #8b949e; }
-    .chapter-codes { margin-top: 8px; padding-top: 8px; border-top: 1px solid #21262d; }
-    .chapter-codes h5 { font-size: 12px; font-weight: 600; color: #8b949e; margin-bottom: 5px; }
-    .code-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 12px; }
-    .code-badge { font-family: monospace; font-weight: 700; letter-spacing: 1px; background: #0d1117; padding: 2px 8px; border-radius: 4px; color: #3fb950; font-size: 12px; }
-    .code-meta { color: #8b949e; }
-    .add-code-inline { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
-    .add-code-inline input { padding: 4px 8px; border: 1px solid #30363d; border-radius: 5px; font-size: 12px; font-family: 'Inter', sans-serif; text-transform: uppercase; width: 130px; background: #0d1117; color: #c9d1d9; }
-    .add-code-inline input[type="number"] { width: 60px; }
-    .btn-edit { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
-    .btn-edit:hover { background: #30363d; }
-    .edit-inline { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 10px 12px; margin-top: 8px; }
-    .edit-inline .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .edit-inline .form-group { margin-bottom: 6px; }
-    .edit-inline label { display: block; font-size: 11px; font-weight: 600; color: #8b949e; margin-bottom: 2px; }
-    .edit-inline input, .edit-inline select, .edit-inline textarea { width: 100%; padding: 5px 8px; border: 1px solid #30363d; border-radius: 5px; font-size: 12px; font-family: 'Inter', sans-serif; background: #161b22; color: #c9d1d9; }
-    .edit-inline textarea { resize: vertical; min-height: 40px; }
-    .edit-actions { display: flex; gap: 6px; margin-top: 8px; }
-
-    @media (max-width: 768px) {
-      .admin-page { padding: 16px 10px; }
-      .admin-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .admin-header h1 { font-size: 22px; }
-      .admin-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-      .admin-tabs::-webkit-scrollbar { display: none; }
-      .admin-tab { padding: 12px 16px; font-size: 13px; white-space: nowrap; min-height: 44px; }
-      .admin-stats-grid {
-        grid-template-columns: 1fr 1fr 1fr !important;
-        gap: 8px !important;
-      }
-      .admin-form { padding: 16px; }
-      .admin-form .form-row { grid-template-columns: 1fr; }
-      .admin-form input, .admin-form select, .admin-form textarea { padding: 10px 12px; font-size: 16px; }
-      .admin-table { font-size: 12px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .admin-table th, .admin-table td { padding: 8px 8px; white-space: nowrap; }
-      .member-chapter-select { font-size: 14px; padding: 6px 8px; min-height: 36px; }
-      .btn-sm { min-height: 40px; min-width: 40px; padding: 8px 14px; font-size: 13px; }
-      .btn-csv { min-height: 40px; padding: 8px 12px; font-size: 12px; }
-      .admin-actions { gap: 8px; flex-wrap: wrap; }
-      .chapter-card { padding: 14px; }
-      .chapter-card-header { flex-direction: column; gap: 8px; }
-      .add-code-inline { flex-wrap: wrap; }
-      .add-code-inline input { width: 100% !important; font-size: 16px; padding: 10px; }
-      .code-row { flex-wrap: wrap; gap: 6px; }
-      .edit-inline { padding: 12px; }
-      .edit-inline .form-row { grid-template-columns: 1fr; }
-      .edit-inline input, .edit-inline select, .edit-inline textarea { padding: 10px; font-size: 16px; }
-      .edit-actions { flex-wrap: wrap; }
-      .admin-back { font-size: 13px; min-height: 44px; display: inline-flex; align-items: center; }
-      /* Articles list cards on mobile */
-      #articlesListContainer > div { flex-direction: column !important; }
-      #articlesListContainer > div img { width: 100% !important; height: 160px !important; border-radius: 8px !important; }
-      #articlesListContainer .admin-actions { flex-direction: row !important; width: 100% !important; justify-content: flex-start; }
-    }
-    @media (max-width: 380px) {
-      .admin-page { padding: 12px 8px; }
-      .admin-header h1 { font-size: 20px; }
-      .admin-tab { padding: 10px 12px; font-size: 12px; }
-      .admin-stats-grid { grid-template-columns: 1fr !important; }
-      .admin-form { padding: 12px; }
-      .chapter-card { padding: 12px; }
-    }
-  </style>
+  <link rel="stylesheet" href="../../css/admin.css?v=1">
 </head>
-<body>
+<body class="adm">
+ <div class="adm-shell">
+  <aside class="adm-side" id="admSide"></aside>
+  <main class="adm-main">
   <div class="admin-page">
-    <div class="admin-header">
-      <div>
-        <a href="../dashboard" class="admin-back">&larr; Back to Dashboard</a>
-        <h1>SaaS Admin</h1>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <a href="../admin-applications" class="btn btn-ghost" style="font-size:14px;">Applications</a>
-        <a href="../admin-accounting" class="btn btn-ghost" style="font-size:14px;">Accounting</a>
-        <a href="../admin-portfolios" class="btn btn-ghost" style="font-size:14px;">Portfolio review</a>
-        <a href="#" id="logoutBtn" class="btn btn-ghost" style="font-size:14px;">Log Out</a>
-      </div>
-    </div>
+    <header class="adm-top">
+      <div><h1 id="admTitle">Overview</h1><p class="adm-sub" id="admSub">What needs your attention today.</p></div>
+      <div class="row" id="admTopActions"></div>
+    </header>
 
     <div id="adminMsg" class="admin-msg"></div>
 
-    <!-- ANALYTICS -->
-    <div class="admin-stats-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
-      <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;text-align:center;">
-        <div style="font-size:24px;font-weight:700;color:#3fb950;" id="statMembers">-</div>
-        <div style="font-size:11px;color:#8b949e;margin-top:2px;">Members</div>
-      </div>
-      <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;text-align:center;">
-        <div style="font-size:24px;font-weight:700;color:#3fb950;" id="statChapters">-</div>
-        <div style="font-size:11px;color:#8b949e;margin-top:2px;">Chapters</div>
-      </div>
-      <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;text-align:center;">
-        <div style="font-size:24px;font-weight:700;color:#3fb950;" id="statEvents">-</div>
-        <div style="font-size:11px;color:#8b949e;margin-top:2px;">Events</div>
-      </div>
-    </div>
-
     <div class="admin-tabs">
-      <button class="admin-tab active" data-tab="chapters">Chapters</button>
+      <button class="admin-tab active" data-tab="overview">Overview</button>
+      <button class="admin-tab" data-tab="chapters">Chapters</button>
       <button class="admin-tab" data-tab="notices">Notices</button>
       <button class="admin-tab" data-tab="events">Events</button>
       <button class="admin-tab" data-tab="gallery">Gallery</button>
@@ -156,8 +33,29 @@
       <button class="admin-tab" data-tab="logs">Logs</button>
     </div>
 
+    <!-- OVERVIEW TAB -->
+    <div class="tab-content active" id="tab-overview">
+      <div class="kpis" id="ovKpis">
+        <a class="kpi" href="#members"><span class="v" id="statMembers">–</span><span class="l">Members</span><div class="s" id="ovMembersSub"></div></a>
+        <a class="kpi" href="../admin-accounting"><span class="v" id="ovRevenue">–</span><span class="l">Revenue this month</span><div class="s" id="ovRevenueSub"></div></a>
+        <a class="kpi" href="#chapters"><span class="v" id="statChapters">–</span><span class="l">Chapters</span></a>
+        <a class="kpi" href="#events"><span class="v" id="statEvents">–</span><span class="l">Events</span><div class="s" id="ovEventsSub"></div></a>
+      </div>
+      <div class="two">
+        <div class="adm-card"><h2>Needs attention</h2><div id="ovTodo"><p class="loading-text">Loading…</p></div></div>
+        <div class="adm-card"><h2>Quick actions</h2>
+          <div style="display:grid;gap:8px;">
+            <a class="todo" href="../admin-applications"><span class="dot b">＋</span><div><b>Review applications</b><small>Approve, reject, record payments</small></div><span class="go">→</span></a>
+            <a class="todo" href="#notices"><span class="dot g">✎</span><div><b>Post a notice</b><small>Network-wide or one chapter</small></div><span class="go">→</span></a>
+            <a class="todo" href="#events"><span class="dot g">◷</span><div><b>Create an event</b><small>Shows in the member portal</small></div><span class="go">→</span></a>
+            <a class="todo" href="../admin-portfolios"><span class="dot b">✓</span><div><b>Portfolio review</b><small>Verify credentials, email issuers</small></div><span class="go">→</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- CHAPTERS TAB -->
-    <div class="tab-content active" id="tab-chapters">
+    <div class="tab-content" id="tab-chapters">
       <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
         <button class="btn-sm btn-csv" onclick="exportChaptersCSV()">&#x2B73; Export CSV</button>
       </div>
@@ -238,7 +136,7 @@
       </div>
 
       <div style="display:flex;align-items:center;gap:10px;margin:14px 0 8px 0;">
-        <label style="font-size:12px;color:#8b949e;">Filter:</label>
+        <label style="font-size:12px;color:var(--muted);">Filter:</label>
         <select id="noticeFilter" class="member-chapter-select" onchange="loadNotices()">
           <option value="all">All scopes</option>
           <option value="__global__">Global only</option>
@@ -350,7 +248,7 @@
       </div>
 
       <div style="display:flex;align-items:center;gap:10px;margin:14px 0 8px 0;">
-        <label style="font-size:12px;color:#8b949e;">Filter:</label>
+        <label style="font-size:12px;color:var(--muted);">Filter:</label>
         <select id="albumFilter" class="member-chapter-select" onchange="loadAlbums()">
           <option value="all">All scopes</option>
           <option value="__global__">Global only</option>
@@ -386,9 +284,9 @@
         </label>
         <button class="btn-sm btn-csv" onclick="exportArticlesCSV()">&#x2B73; Export CSV</button>
       </div>
-      <div id="articleImportPreview" style="display:none;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:12px;margin-bottom:10px;">
+      <div id="articleImportPreview" style="display:none;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:12px;margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:13px;font-weight:600;color:#58a6ff;" id="articleImportInfo">Preview</span>
+          <span style="font-size:13px;font-weight:600;color:var(--accent);" id="articleImportInfo">Preview</span>
           <div style="display:flex;gap:6px;">
             <button class="btn-sm btn-add" onclick="confirmArticleImport()">Confirm Import</button>
             <button class="btn-sm btn-edit" onclick="cancelArticleImport()">Cancel</button>
@@ -404,7 +302,7 @@
           <div class="form-group">
             <label>Title *</label>
             <input type="text" id="articleTitle" placeholder="Article title" maxlength="80">
-            <span style="font-size:11px;color:#484f58;">Max 80 characters</span>
+            <span style="font-size:11px;color:var(--faint);">Max 80 characters</span>
           </div>
           <div class="form-group">
             <label>Category *</label>
@@ -418,7 +316,7 @@
           <div class="form-group">
             <label>Tag Label</label>
             <input type="text" id="articleTag" placeholder="e.g. Research, Opinion, Event Recap" maxlength="20">
-            <span style="font-size:11px;color:#484f58;">1–2 words (e.g. Research, Opinion)</span>
+            <span style="font-size:11px;color:var(--faint);">1–2 words (e.g. Research, Opinion)</span>
           </div>
           <div class="form-group">
             <label>Author</label>
@@ -428,25 +326,25 @@
         <div class="form-group">
           <label>Excerpt / Summary *</label>
           <textarea id="articleExcerpt" placeholder="Short summary shown on cards (2-3 sentences)" rows="3" maxlength="600"></textarea>
-          <span style="font-size:11px;color:#484f58;">Featured news cards show up to ~500 chars. Community cards show ~300 chars. Write 3-5 sentences for best results.</span>
+          <span style="font-size:11px;color:var(--faint);">Featured news cards show up to ~500 chars. Community cards show ~300 chars. Write 3-5 sentences for best results.</span>
         </div>
         <div class="form-group">
           <label>Full Article Content</label>
           <textarea id="articleContent" rows="8" placeholder="Full article body. Use double line breaks for paragraphs. Start a line with ## for headings or > for quotes."></textarea>
-          <span style="font-size:11px;color:#484f58;">This is shown on the dedicated article page. Excerpt is used for homepage cards.</span>
+          <span style="font-size:11px;color:var(--faint);">This is shown on the dedicated article page. Excerpt is used for homepage cards.</span>
         </div>
         <div class="form-group">
           <label>Image URL</label>
           <input type="text" id="articleImage" placeholder="https://images.unsplash.com/... or any image URL">
-          <span style="font-size:11px;color:#484f58;">Image auto-fits any size. Best results with 600px+ wide images. Use Unsplash, Pexels or any direct image link.</span>
+          <span style="font-size:11px;color:var(--faint);">Image auto-fits any size. Best results with 600px+ wide images. Use Unsplash, Pexels or any direct image link.</span>
         </div>
         <div class="form-group">
           <label>Publish Date</label>
           <input type="date" id="articleDate" style="max-width:220px;">
-          <span style="font-size:11px;color:#484f58;">Override the publish date. Defaults to today if left empty.</span>
+          <span style="font-size:11px;color:var(--faint);">Override the publish date. Defaults to today if left empty.</span>
         </div>
         <div style="display:flex;align-items:center;gap:16px;">
-          <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#8b949e;cursor:pointer;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;">
             <input type="checkbox" id="articlePublished" checked> Published (visible on homepage)
           </label>
         </div>
@@ -461,10 +359,10 @@
 
     <!-- SHOP TAB -->
     <div class="tab-content" id="tab-shop">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 14px;background:#161b22;border:1px solid #30363d;border-radius:6px;">
-        <span style="font-size:13px;color:#8b949e;">Shop Page:</span>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:6px;">
+        <span style="font-size:13px;color:var(--muted);">Shop Page:</span>
         <button id="shopToggleBtn" class="btn-sm" onclick="toggleShopVisibility()" style="min-width:80px;">...</button>
-        <span id="shopToggleStatus" style="font-size:12px;color:#484f58;"></span>
+        <span id="shopToggleStatus" style="font-size:12px;color:var(--faint);"></span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <button class="btn-sm btn-add" onclick="toggleShopForm()">+ Add Item</button>
@@ -476,9 +374,9 @@
           <button class="btn-sm btn-csv" onclick="exportShopCSV()">&#x2B73; Export CSV</button>
         </div>
       </div>
-      <div id="shopImportPreview" style="display:none;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:12px;margin-bottom:10px;">
+      <div id="shopImportPreview" style="display:none;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:12px;margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:13px;font-weight:600;color:#58a6ff;" id="importInfo">Preview</span>
+          <span style="font-size:13px;font-weight:600;color:var(--accent);" id="importInfo">Preview</span>
           <div style="display:flex;gap:6px;">
             <button class="btn-sm btn-add" onclick="confirmShopImport()">Confirm Import</button>
             <button class="btn-sm btn-edit" onclick="cancelShopImport()">Cancel</button>
@@ -565,7 +463,7 @@
     <div class="tab-content" id="tab-logs">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <select id="logFilter" style="background:#0d1117;color:#8b949e;border:1px solid #30363d;border-radius:4px;padding:4px 8px;font-size:12px;font-family:'Courier New',monospace;">
+          <select id="logFilter" style="background:var(--surface-2);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:4px 8px;font-size:12px;font-family:'Courier New',monospace;">
             <option value="all">All Actions</option>
             <option value="member">Members</option>
             <option value="event">Events</option>
@@ -574,13 +472,13 @@
             <option value="shop">Shop</option>
             <option value="auth">Auth</option>
           </select>
-          <span id="logCount" style="font-size:11px;color:#484f58;font-family:'Courier New',monospace;">0 entries</span>
+          <span id="logCount" style="font-size:11px;color:var(--faint);font-family:'Courier New',monospace;">0 entries</span>
         </div>
-        <button class="btn-sm" onclick="loadLogs()" style="background:transparent;color:#58a6ff;border-color:#30363d;font-size:11px;font-family:'Courier New',monospace;">&#x21bb; Refresh</button>
+        <button class="btn-sm" onclick="loadLogs()" style="background:transparent;color:var(--accent);border-color:var(--line);font-size:11px;font-family:'Courier New',monospace;">&#x21bb; Refresh</button>
       </div>
       <div id="logTerminal" style="
         background: #010409;
-        border: 1px solid #21262d;
+        border: 1px solid var(--line-soft);
         border-radius: 6px;
         padding: 16px;
         font-family: 'Courier New', 'Fira Code', monospace;
@@ -588,30 +486,21 @@
         line-height: 1.7;
         max-height: 600px;
         overflow-y: auto;
-        color: #7ee787;
+        color: var(--text);
       ">
-        <span style="color:#484f58;">Loading logs...</span>
+        <span style="color:var(--faint);">Loading logs...</span>
       </div>
     </div>
   </div>
+  </main>
+ </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="../../js/supabase-config.js"></script>
+  <script src="../../js/admin-shell.js?v=1"></script>
   <script>
     // Admin check is sourced from public.app_admins via the is_saas_admin() RPC.
     // See window.checkIsSaasAdmin() in js/supabase-config.js.
-
-    // Breakglass: ?bg=YOUR_PASSPHRASE bypasses email check
-    // Hash of the passphrase stored here so it's not plaintext in source
-    const BG_HASH = '09593112ce6122a0c7ebc7de7b87f1ad0f63b7b826c85b3ea7ad4b304a541f66';
-    async function checkBreakglass() {
-      const bg = new URLSearchParams(window.location.search).get('bg');
-      if (!bg) return false;
-      const encoded = new TextEncoder().encode(bg);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
-      const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-      return hashHex === BG_HASH;
-    }
 
     let chapters = [];
     let allCodes = [];
@@ -619,14 +508,32 @@
     let currentUserEmail = '';
 
     // Tab switching
+    const TAB_META = {
+      overview: ['Overview', 'What needs your attention today.'],
+      chapters: ['Chapters', 'Chapters, their leads and referral codes.'],
+      notices: ['Notices', 'Announcements shown on member dashboards.'],
+      events: ['Events', 'Events and RSVPs.'],
+      gallery: ['Gallery', 'Albums and photos on the public gallery.'],
+      members: ['Members', 'Every account, its membership status, chapter and title.'],
+      articles: ['Articles', 'News and articles on the public site.'],
+      shop: ['Shop', 'Items listed in the GSMP shop.'],
+      logs: ['Activity log', 'Admin and member actions, newest first.'],
+    };
+    function showTab(name) {
+      if (!document.getElementById('tab-' + name)) name = 'overview';
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + name));
+      const [t, sub] = TAB_META[name] || [name, ''];
+      document.getElementById('admTitle').textContent = t;
+      document.getElementById('admSub').textContent = sub;
+      document.title = t + ' — GSMP Admin';
+      if (window.gsmpAdminSetActive) gsmpAdminSetActive(name);
+      window.scrollTo({ top: 0 });
+    }
     document.querySelectorAll('.admin-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-      });
+      tab.addEventListener('click', () => { history.replaceState(null, '', '#' + tab.dataset.tab); showTab(tab.dataset.tab); });
     });
+    window.addEventListener('hashchange', () => showTab(location.hash.slice(1)));
 
     function showMsg(text, type) {
       const msg = document.getElementById('adminMsg');
@@ -654,25 +561,25 @@
       const { data, error } = await query;
       const terminal = document.getElementById('logTerminal');
       const countEl = document.getElementById('logCount');
-      if (error) { terminal.innerHTML = '<span style="color:#f85149;">ERROR: ' + error.message + '</span>'; return; }
+      if (error) { terminal.innerHTML = '<span style="color:var(--danger);">ERROR: ' + error.message + '</span>'; return; }
       if (!data || !data.length) {
-        terminal.innerHTML = '<span style="color:#484f58;">No logs found.</span>';
+        terminal.innerHTML = '<span style="color:var(--faint);">No logs found.</span>';
         countEl.textContent = '0 entries';
         return;
       }
       countEl.textContent = data.length + ' entries';
-      const COLORS = { member: '#58a6ff', event: '#d2a8ff', article: '#79c0ff', chapter: '#f0883e', shop: '#3fb950', auth: '#f778ba', code: '#ffa657' };
+      const COLORS = { member: 'var(--accent)', event: '#d2a8ff', article: '#79c0ff', chapter: 'var(--warn)', shop: 'var(--ok)', auth: '#be185d', code: 'var(--warn)' };
       terminal.innerHTML = data.map(log => {
         const ts = new Date(log.created_at);
         const time = ts.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
-        const catColor = COLORS[log.category] || '#8b949e';
+        const catColor = COLORS[log.category] || 'var(--muted)';
         const user = (log.user_email || 'system').split('@')[0];
-        return `<div style="border-bottom:1px solid #161b22;padding:3px 0;">` +
-          `<span style="color:#484f58;">${time}</span> ` +
+        return `<div style="border-bottom:1px solid var(--surface);padding:3px 0;">` +
+          `<span style="color:var(--faint);">${time}</span> ` +
           `<span style="color:${catColor};font-weight:bold;">[${log.category.toUpperCase()}]</span> ` +
-          `<span style="color:#c9d1d9;">${log.action}</span>` +
+          `<span style="color:var(--text);">${log.action}</span>` +
           (log.details ? ` <span style="color:#6e7681;">— ${log.details}</span>` : '') +
-          ` <span style="color:#30363d;">by</span> <span style="color:#ffa657;">${user}</span>` +
+          ` <span style="color:var(--line);">by</span> <span style="color:var(--warn);">${user}</span>` +
           `</div>`;
       }).join('');
       // auto-scroll to top
@@ -876,7 +783,7 @@
       const prev = document.getElementById('eventImagePreview');
       if (img) {
         prev.style.display = 'block';
-        prev.innerHTML = `<img src="${img}" alt="" style="max-width:200px;max-height:120px;border-radius:6px;border:1px solid #30363d;"><div style="font-size:12px;color:#8b949e;margin-top:4px;">Current image. Choose a new file to replace, or paste a different URL.</div>`;
+        prev.innerHTML = `<img src="${img}" alt="" style="max-width:200px;max-height:120px;border-radius:6px;border:1px solid var(--line);"><div style="font-size:12px;color:var(--muted);margin-top:4px;">Current image. Choose a new file to replace, or paste a different URL.</div>`;
       } else {
         prev.style.display = 'none';
         prev.innerHTML = '';
@@ -939,7 +846,7 @@
         const creator = ev.created_by ? ev.created_by.split('@')[0] : '—';
         const count = rsvpCounts[ev.id] || 0;
         const names = (rsvpMemberIds[ev.id] || []).map(id => memberNames[id] || 'Unknown').join(', ');
-        const imgThumb = ev.image_url ? `<img src="${ev.image_url}" style="width:32px;height:32px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">` : '<span style="color:#484f58;">—</span>';
+        const imgThumb = ev.image_url ? `<img src="${ev.image_url}" style="width:32px;height:32px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">` : '<span style="color:var(--faint);">—</span>';
         return `
           <tr>
             <td><strong>${ev.title}</strong></td>
@@ -1033,10 +940,10 @@
     function membershipPill(m) {
       const st = gsmpMemberState(m);
       const d = m.paid_until ? new Date(m.paid_until + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' }) : '';
-      const P = { active: ['#3fb950', 'Paid' + (d ? ' · ' + d : '')], grace: ['#d29922', 'Renewal due · ' + d],
-                  lapsed: ['#f85149', 'Lapsed · ' + d], approved: ['#d29922', 'Unpaid · awaiting'],
-                  applicant: ['#58a6ff', 'Applicant'], rejected: ['#f85149', 'Rejected'] }[st] || ['#8b949e', st];
-      return `<a href="../admin-applications" style="text-decoration:none;"><span style="display:inline-block;white-space:nowrap;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:#21262d;color:${P[0]};">${gsmpEsc(P[1])}</span></a>`;
+      const P = { active: ['var(--ok)', 'Paid' + (d ? ' · ' + d : '')], grace: ['var(--warn)', 'Renewal due · ' + d],
+                  lapsed: ['var(--danger)', 'Lapsed · ' + d], approved: ['var(--warn)', 'Unpaid · awaiting'],
+                  applicant: ['var(--accent)', 'Applicant'], rejected: ['var(--danger)', 'Rejected'] }[st] || ['var(--muted)', st];
+      return `<a href="../admin-applications" style="text-decoration:none;"><span style="display:inline-block;white-space:nowrap;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--line-soft);color:${P[0]};">${gsmpEsc(P[1])}</span></a>`;
     }
 
     async function loadMembers() {
@@ -1207,29 +1114,29 @@
       const container = document.getElementById('articlesListContainer');
       if (error) { showMsg('Error loading articles: ' + error.message, 'error'); return; }
       if (!data || !data.length) {
-        container.innerHTML = '<p style="color:#484f58;">No articles yet. Add one above.</p>';
+        container.innerHTML = '<p style="color:var(--faint);">No articles yet. Add one above.</p>';
         return;
       }
       container.innerHTML = data.map(a => {
         const date = new Date(a.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
         const statusBadge = a.published
-          ? '<span style="background:#0d2818;color:#3fb950;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid #238636;">Published</span>'
-          : '<span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid #30363d;">Draft</span>';
+          ? '<span style="background:var(--ok-soft);color:var(--ok);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid var(--brand);">Published</span>'
+          : '<span style="background:var(--line-soft);color:var(--muted);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid var(--line);">Draft</span>';
         const catLabel = a.category === 'community' ? 'Community' : 'News';
         const imgPreview = a.image_url
           ? `<img src="${a.image_url}" style="width:50px;height:50px;object-fit:cover;border-radius:5px;flex-shrink:0;" onerror="this.style.display='none'">`
-          : '<div style="width:50px;height:50px;background:#21262d;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#484f58;font-size:10px;">No img</div>';
+          : '<div style="width:50px;height:50px;background:var(--line-soft);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:10px;">No img</div>';
         return `
-          <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 14px;background:#161b22;border:1px solid #30363d;border-radius:8px;margin-bottom:8px;">
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:8px;">
             ${imgPreview}
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
-                <strong style="font-size:13px;color:#c9d1d9;">${a.title}</strong>
+                <strong style="font-size:13px;color:var(--text);">${a.title}</strong>
                 ${statusBadge}
-                <span style="font-size:10px;color:#8b949e;background:#21262d;padding:2px 8px;border-radius:10px;">${catLabel}</span>
+                <span style="font-size:10px;color:var(--muted);background:var(--line-soft);padding:2px 8px;border-radius:10px;">${catLabel}</span>
               </div>
-              <p style="font-size:12px;color:#8b949e;margin:0 0 4px;line-height:1.4;">${a.excerpt || (a.content ? a.content.substring(0, 100) + '...' : 'No content')}</p>
-              <div style="font-size:11px;color:#484f58;">By ${a.author || 'GSMP'} · ${date}${a.tag ? ' · ' + a.tag : ''}</div>
+              <p style="font-size:12px;color:var(--muted);margin:0 0 4px;line-height:1.4;">${a.excerpt || (a.content ? a.content.substring(0, 100) + '...' : 'No content')}</p>
+              <div style="font-size:11px;color:var(--faint);">By ${a.author || 'GSMP'} · ${date}${a.tag ? ' · ' + a.tag : ''}</div>
             </div>
             <div class="admin-actions" style="flex-shrink:0;">
               <button class="btn-sm btn-edit" onclick="editArticle('${a.id}')">Edit</button>
@@ -1408,15 +1315,15 @@
         const tbody = document.querySelector('#articleImportTable tbody');
         thead.innerHTML = '<tr><th>#</th><th>Title</th><th>Category</th><th>Tag</th><th>Content</th><th>Published</th></tr>';
         tbody.innerHTML = items.map((item, i) => {
-          const hasContent = item.content ? '<span style="color:#3fb950;">Yes (' + item.content.length + ' chars)</span>' : '<span style="color:#8b949e;">No</span>';
+          const hasContent = item.content ? '<span style="color:var(--ok);">Yes (' + item.content.length + ' chars)</span>' : '<span style="color:var(--muted);">No</span>';
           return `
             <tr>
-              <td style="color:#484f58;">${i + 1}</td>
-              <td><strong>${item.title}</strong>${item.excerpt ? '<br><span style="font-size:11px;color:#8b949e;">' + item.excerpt.substring(0, 60) + '...</span>' : ''}</td>
+              <td style="color:var(--faint);">${i + 1}</td>
+              <td><strong>${item.title}</strong>${item.excerpt ? '<br><span style="font-size:11px;color:var(--muted);">' + item.excerpt.substring(0, 60) + '...</span>' : ''}</td>
               <td>${item.category}</td>
               <td>${item.tag || '—'}</td>
               <td>${hasContent}</td>
-              <td style="color:${item.published ? '#3fb950' : '#f85149'}">${item.published ? 'Yes' : 'No'}</td>
+              <td style="color:${item.published ? 'var(--ok)' : 'var(--danger)'}">${item.published ? 'Yes' : 'No'}</td>
             </tr>`;
         }).join('');
         preview.style.display = 'block';
@@ -1479,23 +1386,23 @@
       const { data, error } = await sb.from('shop_items').select('*').order('sort_order').order('category').order('name');
       const tbody = document.getElementById('shopTableBody');
       if (error) {
-        tbody.innerHTML = '<tr><td colspan="8" style="color:#f85149;">Error: ' + error.message + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="color:var(--danger);">Error: ' + error.message + '</td></tr>';
         return;
       }
       if (!data || !data.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="color:#484f58;">No shop items yet. Click "+ Add Item" above.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="color:var(--faint);">No shop items yet. Click "+ Add Item" above.</td></tr>';
         return;
       }
       tbody.innerHTML = data.map((item, i) => {
         const imgCell = item.image_url
           ? `<img src="${item.image_url}" style="width:32px;height:32px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">`
-          : '<span style="color:#484f58;">—</span>';
-        const activeColor = item.active ? '#3fb950' : '#f85149';
+          : '<span style="color:var(--faint);">—</span>';
+        const activeColor = item.active ? 'var(--ok)' : 'var(--danger)';
         const activeLabel = item.active ? 'Yes' : 'No';
         return `
           <tr>
-            <td style="color:#484f58;">${i + 1}</td>
-            <td><strong>${item.name}</strong>${item.description ? '<br><span style="font-size:11px;color:#8b949e;">' + item.description.substring(0, 60) + (item.description.length > 60 ? '...' : '') + '</span>' : ''}</td>
+            <td style="color:var(--faint);">${i + 1}</td>
+            <td><strong>${item.name}</strong>${item.description ? '<br><span style="font-size:11px;color:var(--muted);">' + item.description.substring(0, 60) + (item.description.length > 60 ? '...' : '') + '</span>' : ''}</td>
             <td>${item.category || '—'}</td>
             <td>${item.price || '—'}</td>
             <td>${imgCell}</td>
@@ -1609,11 +1516,11 @@
       const status = document.getElementById('shopToggleStatus');
       if (shopVisible) {
         btn.textContent = 'Visible';
-        btn.style.background = '#238636'; btn.style.borderColor = '#238636'; btn.style.color = '#fff';
+        btn.style.background = 'var(--brand)'; btn.style.borderColor = 'var(--brand)'; btn.style.color = '#fff';
         status.textContent = 'Shop page is live on the website';
       } else {
         btn.textContent = 'Hidden';
-        btn.style.background = '#da3633'; btn.style.borderColor = '#da3633'; btn.style.color = '#fff';
+        btn.style.background = 'var(--danger)'; btn.style.borderColor = 'var(--danger)'; btn.style.color = '#fff';
         status.textContent = 'Shop page is hidden from the website';
       }
     }
@@ -1715,11 +1622,11 @@
         thead.innerHTML = '<tr><th>#</th><th>Name</th><th>Category</th><th>Price</th><th>Active</th><th>Sort</th></tr>';
         tbody.innerHTML = items.map((item, i) => `
           <tr>
-            <td style="color:#484f58;">${i + 1}</td>
-            <td><strong>${item.name}</strong>${item.description ? '<br><span style="font-size:11px;color:#8b949e;">' + item.description.substring(0, 50) + '</span>' : ''}</td>
+            <td style="color:var(--faint);">${i + 1}</td>
+            <td><strong>${item.name}</strong>${item.description ? '<br><span style="font-size:11px;color:var(--muted);">' + item.description.substring(0, 50) + '</span>' : ''}</td>
             <td>${item.category}</td>
             <td>${item.price || '—'}</td>
-            <td style="color:${item.active ? '#3fb950' : '#f85149'}">${item.active ? 'Yes' : 'No'}</td>
+            <td style="color:${item.active ? 'var(--ok)' : 'var(--danger)'}">${item.active ? 'Yes' : 'No'}</td>
             <td>${item.sort_order}</td>
           </tr>`).join('');
         preview.style.display = 'block';
@@ -1857,7 +1764,7 @@
               </div>
             </div>
             ${n.image_url ? `<img src="${escNoticeHtml(n.image_url)}" alt="" style="display:block;width:100%;max-height:240px;object-fit:cover;border-radius:6px;margin:8px 0;">` : ''}
-            ${n.body ? `<div style="font-size:13px;color:#c9d1d9;white-space:pre-wrap;">${escNoticeHtml(n.body)}</div>` : ''}
+            ${n.body ? `<div style="font-size:13px;color:var(--text);white-space:pre-wrap;">${escNoticeHtml(n.body)}</div>` : ''}
           </div>
         `;
       }).join('');
@@ -1876,7 +1783,7 @@
       const prev = document.getElementById('noticeImagePreview');
       if (n.image_url) {
         prev.style.display = 'block';
-        prev.innerHTML = `<img src="${escNoticeHtml(n.image_url)}" alt="" style="max-width:200px;max-height:120px;border-radius:6px;border:1px solid #30363d;"><div style="font-size:12px;color:#8b949e;margin-top:4px;">Current image. Choose a new file to replace.</div>`;
+        prev.innerHTML = `<img src="${escNoticeHtml(n.image_url)}" alt="" style="max-width:200px;max-height:120px;border-radius:6px;border:1px solid var(--line);"><div style="font-size:12px;color:var(--muted);margin-top:4px;">Current image. Choose a new file to replace.</div>`;
       } else {
         prev.style.display = 'none';
         prev.innerHTML = '';
@@ -2159,7 +2066,7 @@
           : `<div style="width:80px;height:80px;background:linear-gradient(135deg,#1B2A4A,#6B213F);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#C49A3C;font-family:'Playfair Display',serif;font-weight:600;font-size:12px;">GSMP</div>`;
 
         const photoTiles = ps.map(p => `
-          <div style="position:relative;width:90px;height:90px;border-radius:4px;overflow:hidden;background:#161b22;">
+          <div style="position:relative;width:90px;height:90px;border-radius:4px;overflow:hidden;background:var(--surface);">
             <img src="${escNoticeHtml(p.image_url)}" style="width:100%;height:100%;object-fit:cover;">
             <div style="position:absolute;top:2px;right:2px;display:flex;gap:2px;">
               <button class="btn-sm" style="padding:2px 6px;font-size:10px;background:rgba(255,255,255,0.95);color:#1B2A4A;" title="Set as cover" onclick="setAsCover('${a.id}','${p.image_url.replace(/'/g,"\\'")}')">★</button>
@@ -2176,7 +2083,7 @@
                 <div style="flex:1;min-width:0;">
                   <h4>${escNoticeHtml(a.title)}</h4>
                   <div class="chapter-meta">${escNoticeHtml(scopeLabel)} · ${dateStr} · ${ps.length} photo${ps.length === 1 ? '' : 's'}</div>
-                  ${a.description ? `<div style="font-size:13px;color:#c9d1d9;margin-top:6px;">${escNoticeHtml(a.description)}</div>` : ''}
+                  ${a.description ? `<div style="font-size:13px;color:var(--text);margin-top:6px;">${escNoticeHtml(a.description)}</div>` : ''}
                 </div>
               </div>
               <div class="admin-actions">
@@ -2184,10 +2091,10 @@
                 <button class="btn-sm btn-danger" onclick="deleteAlbum('${a.id}')">Delete</button>
               </div>
             </div>
-            <div style="margin-top:14px;padding-top:14px;border-top:1px solid #30363d;">
-              <label style="font-size:13px;font-weight:600;color:#c9d1d9;display:block;margin-bottom:6px;">Add photos</label>
-              <input type="file" accept="image/*" multiple onchange="uploadPhotosToAlbum('${a.id}', Array.from(this.files)); this.value='';" style="font-size:13px;color:#c9d1d9;">
-              <div id="upload-status-${a.id}" style="display:none;margin-top:6px;font-size:12px;color:#8b949e;"></div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);">
+              <label style="font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:6px;">Add photos</label>
+              <input type="file" accept="image/*" multiple onchange="uploadPhotosToAlbum('${a.id}', Array.from(this.files)); this.value='';" style="font-size:13px;color:var(--text);">
+              <div id="upload-status-${a.id}" style="display:none;margin-top:6px;font-size:12px;color:var(--muted);"></div>
               ${ps.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">${photoTiles}</div>` : ''}
             </div>
           </div>
@@ -2201,12 +2108,15 @@
 
       currentUserEmail = session.user.email;
       myAdminUserId = session.user.id;
-      const isBreakglass = await checkBreakglass();
       const isSaasAdmin = await checkIsSaasAdmin();
-      if (!isSaasAdmin && !isBreakglass) {
-        document.querySelector('.admin-page').innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2 style="color:#991B1B;">Access Denied</h2><p>You do not have admin privileges.</p><a href="../dashboard">Back to Dashboard</a></div>';
+      if (!isSaasAdmin) {
+        document.querySelector('.admin-page').innerHTML = '<div class="adm-card" style="text-align:center;padding:60px 20px;"><h2 style="color:var(--danger);">Access denied</h2><p>You do not have admin privileges.</p><a href="../dashboard">Back to Dashboard</a></div>';
         return;
       }
+
+      gsmpAdminShell('overview');
+      showTab(location.hash.slice(1) || 'overview');
+      loadOverview();
 
       await loadChapters();
       populateNoticeChapterSelects();
@@ -2222,12 +2132,40 @@
       loadLogs();
       logAction('auth', 'Admin portal opened', currentUserEmail);
 
-      document.getElementById('logoutBtn').addEventListener('click', async (e) => {
-        e.preventDefault();
-        await sb.auth.signOut();
-        window.location.href = '../login';
-      });
     })();
+
+    // ========== OVERVIEW ==========
+    async function loadOverview() {
+      const today = new Date().toISOString().slice(0, 10);
+      const in30 = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+      const month = today.slice(0, 7);
+      const [mem, claims, pays, evts] = await Promise.all([
+        sb.from('members').select('membership_status, paid_until, applied_at'),
+        sb.from('portfolio_claims').select('id', { count: 'exact', head: true }).eq('status', 'submitted'),
+        sb.from('membership_payments').select('amount, currency, paid_at, voided').gte('paid_at', month + '-01'),
+        sb.from('events').select('id', { count: 'exact', head: true }).gte('event_date', new Date().toISOString())]);
+      const ms = (mem.data || []).map(m => ({ ...m, st: gsmpMemberState(m) }));
+      const n = st => ms.filter(m => m.st === st).length;
+      const applicants = ms.filter(m => m.st === 'applicant');
+      const oldest = applicants.reduce((d, m) => Math.max(d, m.applied_at ? Math.floor((Date.now() - new Date(m.applied_at)) / 864e5) : 0), 0);
+      const renew = ms.filter(m => m.st === 'active' && m.paid_until && m.paid_until >= today && m.paid_until <= in30).length;
+      const rev = (pays.data || []).filter(p => !p.voided && p.currency === 'USD').reduce((a, p) => a + Number(p.amount), 0);
+      document.getElementById('ovMembersSub').innerHTML = `<span style="color:var(--ok)">${n('active') + n('grace')} paid</span> · ${applicants.length} applying`;
+      document.getElementById('ovRevenue').textContent = '$' + rev.toLocaleString('en-US');
+      document.getElementById('ovRevenueSub').textContent = (pays.data || []).filter(p => !p.voided).length + ' payments';
+      document.getElementById('ovEventsSub').textContent = (evts.count || 0) + ' upcoming';
+
+      const items = [];
+      if (applicants.length) items.push(['r', applicants.length, `Application${applicants.length > 1 ? 's' : ''} to review`, oldest ? `Oldest waiting ${oldest} day${oldest > 1 ? 's' : ''}${oldest > 2 ? ' — over the 48h target' : ''}` : 'New today', '../admin-applications']);
+      if (claims.count) items.push(['b', claims.count, `Credential${claims.count > 1 ? 's' : ''} to verify`, 'Submitted for portfolio review', '../admin-portfolios']);
+      if (n('approved')) items.push(['a', n('approved'), 'Approved, awaiting payment', '≈ $' + (n('approved') * 100) + ' expected — follow up', '../admin-applications']);
+      if (n('grace')) items.push(['a', n('grace'), 'Renewal overdue (grace period)', 'Portfolios pause after 30 days', '../admin-accounting']);
+      if (renew) items.push(['g', renew, 'Renewals due in 30 days', '≈ $' + (renew * 100), '../admin-accounting']);
+      if (n('lapsed')) items.push(['r', n('lapsed'), 'Lapsed memberships', 'Portfolios paused — win them back', '../admin-accounting']);
+      document.getElementById('ovTodo').innerHTML = items.length
+        ? items.map(([c, num, t, s, href]) => `<a class="todo" href="${href}"><span class="dot ${c}">${num}</span><div><b>${t}</b><small>${gsmpEsc(s)}</small></div><span class="go">→</span></a>`).join('')
+        : '<div class="todo"><span class="dot g">✓</span><div><b>All clear</b><small>No applications, reviews or overdue payments.</small></div></div>';
+    }
   </script>
 </body>
 </html>

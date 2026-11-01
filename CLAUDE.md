@@ -27,6 +27,9 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 - **Money = `membership_payments` ledger** (append-only; no edit/delete; mistakes are VOIDED with reason).
   Record via RPC `record_membership_payment()` only — it writes the ledger row AND activates/extends the member
   atomically (never shortens paid_until). Accounting dashboard: `pages/admin-accounting`.
+- **Admin UI = one light design system**: `css/admin.css` + shared sidebar `js/admin-shell.js`
+  (`gsmpAdminShell('<section>')`, live badges for applications / claims / unpaid). Main admin page sections
+  are hash-routed (`pages/admin/#members`). New admin pages: `<body class="adm">` + `.adm-shell` + `#admSide`.
 - **Never commit member names/emails in migrations** (repo is public) — one-off data fixes are run by hand.
 - Members table is private: self, admins, and Chapter Leads (own chapter only). Public card goes through
   `get_member_card(code)` RPC.
