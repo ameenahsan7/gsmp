@@ -88,6 +88,7 @@
 
       if (active) {
         html += '<div class="body">';
+        if (!(p.claims || []).length) html += '<div class="section"><p class="bio" style="color:#6b7280;">No credentials have been published on this portfolio yet.</p></div>';
         if (p.bio) html += `<div class="section"><h2>About <span style="color:#9ca3af;letter-spacing:0;text-transform:none;font-weight:500;">(self-declared)</span></h2><div class="bio">${e(p.bio).replace(/\n/g, '<br>')}</div>
           ${p.email || p.phone ? `<div class="contact">${p.email ? e(p.email) : ''}${p.email && p.phone ? ' · ' : ''}${p.phone ? e(p.phone) : ''}</div>` : ''}</div>`;
         for (const [k, label] of Object.entries(SECTIONS)) {

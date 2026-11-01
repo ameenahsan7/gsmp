@@ -35,6 +35,7 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 | 2026-11-01 | Security lockdown shipped (`migrations/2026-11-01_security_lockdown.sql`) | World-writable articles, self-promotion to Chapter Lead, stored XSS into admin, member PII readable by any user |
 | 2026-11-02 | Admin access only via `app_admins`; employer (propertyfinder.ae) email removed | Employer controls that mailbox → would control GSMP |
 | 2026-11-02 | Referral enforced in DB trigger; chapter derived from code; personal codes capped at **5** invites | Invite-only must hold server-side; scarcity supports paid tier |
+| 2026-11-04 | Portfolio can go **active** only with ≥1 verified credential (DB-enforced) | "Verified Portfolio" with 0 verified items dilutes the mark |
 | 2026-11-01 | Personal project uses personal accounts only (GitHub `ameenahsan7`, personal laptop) | Keep GSMP out of employer org/logs |
 
 ## Roadmap (in order)
