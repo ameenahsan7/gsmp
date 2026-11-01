@@ -309,7 +309,7 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="../../js/supabase-config.js"></script>
   <script>
     let _memberData = {};
@@ -442,7 +442,7 @@
       if (impersonating && member) {
         const banner = document.createElement('div');
         banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#f85149;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-weight:600;';
-        banner.innerHTML = `Viewing as <strong>${member.first_name} ${member.last_name || ''}</strong> (${member.email || ''}) &nbsp; <a href="../admin" style="color:#fff;text-decoration:underline;">← Back to Admin</a>`;
+        banner.innerHTML = `Viewing as <strong>${gsmpEsc(member.first_name)} ${gsmpEsc(member.last_name)}</strong> (${gsmpEsc(member.email)}) &nbsp; <a href="../admin" style="color:#fff;text-decoration:underline;">← Back to Admin</a>`;
         document.body.prepend(banner);
         document.body.style.paddingTop = '36px';
         // Persist view_as param on all nav links

@@ -305,7 +305,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="../../js/supabase-config.js"></script>
   <script>
     let myChapterId = null;
@@ -466,15 +466,15 @@
         const currentTitle = m.member_title || 'Member';
         return `
         <tr>
-          <td><strong>${m.first_name || ''} ${m.last_name || ''}</strong></td>
-          <td>${m.email || '—'}</td>
-          <td>${m.school || '—'}</td>
+          <td><strong>${gsmpEsc(m.first_name)} ${gsmpEsc(m.last_name)}</strong></td>
+          <td>${gsmpEsc(m.email) || '—'}</td>
+          <td>${gsmpEsc(m.school) || '—'}</td>
           <td>
             <select class="member-chapter-select" onchange="assignTitle('${m.id}', this.value)">
               ${TITLE_OPTIONS.map(t => `<option value="${t}" ${t === currentTitle ? 'selected' : ''}>${t}</option>`).join('')}
             </select>
           </td>
-          <td><span style="font-family:monospace;font-size:12px;">${m.referred_by || '—'}</span></td>
+          <td><span style="font-family:monospace;font-size:12px;">${gsmpEsc(m.referred_by) || '—'}</span></td>
         </tr>
       `}).join('');
 

@@ -19,3 +19,11 @@ async function checkIsSaasAdmin() {
   }
 }
 window.checkIsSaasAdmin = checkIsSaasAdmin;
+
+// Escape user-supplied text before inserting into innerHTML (prevents stored XSS).
+function gsmpEsc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+window.gsmpEsc = gsmpEsc;

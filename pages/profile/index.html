@@ -294,7 +294,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="../../js/supabase-config.js"></script>
   <script>
     // Smart casing: handles abbreviations like UAE, USA, UK, etc.
@@ -362,11 +362,9 @@
         return;
       }
 
-      const { data: member, error } = await sb
-        .from('members')
-        .select('first_name, last_name, school, year, country, city, email, phone, chapter_id, degree, field, specialty, member_title')
-        .eq('referral_code', code.toUpperCase())
-        .single();
+      const { data: rows, error } = await sb.rpc('get_member_card', { p_code: code });
+      const member = Array.isArray(rows) ? rows[0] : rows;
+      if (member) for (const k in member) if (typeof member[k] === 'string') member[k] = gsmpEsc(member[k]);
 
       if (error || !member) {
         card.innerHTML = '<div class="error-state"><h2>Profile Not Found</h2><p>This member profile could not be found.</p></div>';
