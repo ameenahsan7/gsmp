@@ -15,16 +15,16 @@
         <img src="../../images/logo.jpeg" alt="GSMP" class="logo-icon">
         <span class="logo-text">GSMP</span>
       </a>
-      <h1>Join GSMP</h1>
-      <p class="auth-sub">Membership is by referral only. Enter your code to get started.</p>
+      <h1>Apply to GSMP</h1>
+      <p class="auth-sub">Apply below. Every application is reviewed by the GSMP team; approved applicants activate their membership with the annual fee.</p>
 
       <div id="errorMsg" style="display:none; background:#FEE2E2; color:#991B1B; padding:12px 16px; border-radius:6px; font-size:14px; margin-bottom:16px;"></div>
       <div id="successMsg" style="display:none; background:#D1FAE5; color:#065F46; padding:12px 16px; border-radius:6px; font-size:14px; margin-bottom:16px;"></div>
 
       <form id="joinForm">
         <div class="form-group">
-          <label for="referralCode">Referral Code</label>
-          <input type="text" id="referralCode" placeholder="Enter your referral code" required style="text-transform:uppercase;">
+          <label for="referralCode">Referral Code (optional)</label>
+          <input type="text" id="referralCode" placeholder="Have a code from a member? Enter it here" style="text-transform:uppercase;">
         </div>
 
         <div class="form-row">
@@ -153,7 +153,12 @@
           <input type="text" id="interests" placeholder="e.g. Surgery, Research, Global Health">
         </div>
 
-        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Create My Account</button>
+        <div class="form-group">
+          <label for="appMessage">Why do you want to join GSMP?</label>
+          <textarea id="appMessage" maxlength="1000" rows="3" required placeholder="A few lines about you, your training and what you hope to get from GSMP." style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font:inherit;"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Submit Application</button>
       </form>
 
       <p class="auth-footer">
@@ -194,7 +199,7 @@
       e.preventDefault();
       errorMsg.style.display = 'none';
       successMsg.style.display = 'none';
-      submitBtn.textContent = 'Creating account...';
+      submitBtn.textContent = 'Submitting...';
       submitBtn.disabled = true;
 
       const referralCode = document.getElementById('referralCode').value.trim().toUpperCase();
@@ -206,7 +211,7 @@
       if (password !== confirmPassword) {
         errorMsg.textContent = 'Passwords do not match.';
         errorMsg.style.display = 'block';
-        submitBtn.textContent = 'Join GSMP';
+        submitBtn.textContent = 'Submit Application';
         submitBtn.disabled = false;
         return;
       }
@@ -220,15 +225,17 @@
       const specialty = document.getElementById('specialty').value.trim();
       const phone = document.getElementById('phone').value.trim();
       const interests = document.getElementById('interests').value.trim();
+      const appMessage = document.getElementById('appMessage').value.trim();
 
       try {
         // Pre-check only (no use consumed). The DB enforces + consumes at insert.
-        const { data: rpcResult, error: rpcError } = await sb.rpc('validate_and_use_referral_code', { p_code: referralCode });
-        if (rpcError) throw new Error('Could not validate referral code: ' + rpcError.message);
-
-        const validation = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult;
-        if (!validation || !validation.is_valid) {
-          throw new Error((validation && validation.error_message) || 'Invalid or expired referral code.');
+        if (referralCode) {
+          const { data: rpcResult, error: rpcError } = await sb.rpc('validate_and_use_referral_code', { p_code: referralCode });
+          if (rpcError) throw new Error('Could not validate referral code: ' + rpcError.message);
+          const validation = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult;
+          if (!validation || !validation.is_valid) {
+            throw new Error(((validation && validation.error_message) || 'Invalid or expired referral code.') + ' Leave it empty to apply without one.');
+          }
         }
 
         const { data: authData, error: authError } = await sb.auth.signUp({
@@ -260,29 +267,30 @@
             specialty: specialty || null,
             phone: phone,
             interests: interests,
-            referred_by: referralCode,
+            referred_by: referralCode || null,
+            application_message: appMessage,
             referral_code: personalCode,
           });
 
-          // The database validates the referral code, assigns the chapter and
-          // consumes one use (trigger gsmp_enforce_referral). Surface its errors.
+          // The DB validates any referral code and files this as an application
+          // (trigger gsmp_enforce_referral). Chapter + code use are granted on approval.
           if (profileError) throw new Error(profileError.message || 'Could not create your member profile.');
           // No client-side referral_codes insert here — handled by the
           // members_create_personal_code trigger (SECURITY DEFINER).
         }
 
         if (authData.session) {
-          window.location.href = '../welcome';
+          window.location.href = '../dashboard';
         } else {
-          successMsg.textContent = 'Account created! Check your email to confirm, then log in.';
+          successMsg.textContent = 'Application received! Confirm your email, then log in to follow your application. We aim to review within 48 hours.';
           successMsg.style.display = 'block';
-          submitBtn.textContent = 'Account Created';
+          submitBtn.textContent = 'Application Submitted';
         }
 
       } catch (err) {
         errorMsg.textContent = err.message || 'Something went wrong. Please try again.';
         errorMsg.style.display = 'block';
-        submitBtn.textContent = 'Create My Account';
+        submitBtn.textContent = 'Submit Application';
         submitBtn.disabled = false;
       }
     });

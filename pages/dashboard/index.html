@@ -100,7 +100,7 @@
         member = m;
         impersonating = true;
       } else {
-        const { data: m } = await sb.from('members').select('first_name, member_title, chapter_id').eq('id', session.user.id).single();
+        const { data: m } = await sb.from('members').select('first_name, member_title, chapter_id, membership_status, paid_until, review_note').eq('id', session.user.id).single();
         member = m;
       }
 
@@ -109,7 +109,7 @@
         // Show impersonation banner
         const banner = document.createElement('div');
         banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#f85149;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-weight:600;';
-        banner.innerHTML = `Viewing as <strong>${member.first_name} ${member.last_name || ''}</strong> (${member.email || ''}) &nbsp; <a href="../admin" style="color:#fff;text-decoration:underline;">← Back to Admin</a>`;
+        banner.innerHTML = `Viewing as <strong>${gsmpEsc(member.first_name)} ${gsmpEsc(member.last_name)}</strong> (${gsmpEsc(member.email)}) &nbsp; <a href="../admin" style="color:#fff;text-decoration:underline;">← Back to Admin</a>`;
         document.body.prepend(banner);
         document.body.style.paddingTop = '36px';
         // Persist view_as param on all nav links
@@ -121,6 +121,17 @@
         });
       } else if (member) {
         document.getElementById('dashGreeting').textContent = `Welcome, ${member.first_name}`;
+        // Membership gate: applicants / approved-unpaid / rejected see only their status
+        const notice = await gsmpMembershipNotice(member);
+        const st = gsmpMemberState(member);
+        if (notice) document.querySelector('.dash-header').insertAdjacentHTML('afterend', notice);
+        if (['applicant', 'approved', 'rejected'].includes(st)) {
+          document.querySelectorAll('.dash-main .dash-section:not(#membershipNotice)').forEach(el => { el.style.display = 'none'; });
+          const out = async e => { e.preventDefault(); await sb.auth.signOut(); window.location.href = '../login'; };
+          document.getElementById('logoutBtn').addEventListener('click', out);
+          const mo = document.getElementById('mobileLogoutBtn'); if (mo) mo.addEventListener('click', out);
+          return;
+        }
       } else {
         const meta = session.user.user_metadata;
         document.getElementById('dashGreeting').textContent = `Welcome, ${meta.first_name || 'Member'}`;

@@ -17,7 +17,13 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 - **Admins = `public.app_admins` table, checked via `public.is_saas_admin()`.** Never hard-code emails in policies.
 - **Escape all user-supplied text** inserted via `innerHTML` with `gsmpEsc()` (defined in `js/supabase-config.js`).
 - **No policy may be `USING (true)` / `WITH CHECK (true)` for writes.**
-- Signup: `gsmp_enforce_referral` trigger validates `referred_by`, sets `chapter_id`, consumes a use.
+- Membership lifecycle (`members.membership_status` + `paid_until`): **applicant → approved → active**, or rejected.
+  Effective state via `gsmp_member_state()` (SQL) / `gsmpMemberState()` (JS): active → **grace** (≤30 days past
+  paid_until) → **lapsed**. No cron. Only admins change status/payment (guard trigger). Admin page: `pages/admin-applications`.
+- Signup = application. Referral code OPTIONAL; if given must be valid; stored as `requested_chapter_id`.
+  Chapter is granted and the code's use consumed only on **approval** (`gsmp_member_review` trigger).
+  Applicants: no chapter, inactive personal code, no public card. Portfolio requires active member;
+  lapsed → public portfolio shows "paused" (data kept).
 - Members table is private: self, admins, and Chapter Leads (own chapter only). Public card goes through
   `get_member_card(code)` RPC.
 - Privilege fields on `members` (`member_title`, `chapter_id`) are guarded by trigger
@@ -38,6 +44,10 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 | 2026-11-04 | Portfolio can go **active** only with ≥1 verified credential (DB-enforced) | "Verified Portfolio" with 0 verified items dilutes the mark |
 | 2026-11-05 | Resend on root `gsmpglobal.org` (single team, Servlee domain removed); API key = sending-only, domain-scoped | Free plan = 1 domain; least privilege |
 | 2026-11-05 | Anees Mohamed (founder's brother, runs the service; Tashkent Chapter Lead) made a SaaS admin. Chapter Leads get NO portfolio-review rights | Operator needs network-wide access; keeping review out of chapter leads keeps "Verified" strict as chapters grow |
+| 2026-11-06 | Open applications → admin review → payment → active (Anees's model). Invite-only dropped; codes optional, track referrer, referred applicants reviewed first | Wider funnel + quality gate + revenue |
+| 2026-11-06 | Fee **100 USD/year**; payment v1 manual (admin "Mark paid until"); Stripe later | Validate willingness to pay before integrating |
+| 2026-11-06 | Existing members grandfathered active, paid_until = +1 year at migration | No lockout on launch; admins correct individual dates (only 2 of 4 had actually paid) |
+| 2026-11-06 | Verified Portfolio pauses (not deleted) 30 days after membership lapses | Retention lever without holding data hostage |
 | 2026-11-01 | Personal project uses personal accounts only (GitHub `ameenahsan7`, personal laptop) | Keep GSMP out of employer org/logs |
 
 ## Roadmap (in order)
@@ -56,12 +66,14 @@ so they are not re-litigated. Update the Decision log whenever a decision change
    issuer page `pages/confirm/?t=<64-hex>` → confirm auto-verifies ONLY if claim unchanged since email.
    Token: 256-bit, only sha256 stored, single use, 14-day expiry, 1 email/claim/24h.
    Reviewers = SaaS admins. "Verified" = issuer/official source confirmed, never competence.
-5. Paid Verified Portfolio tier → triggers Supabase Pro upgrade.
+5. ~~Membership applications + manual payment~~ (2026-11-06, `migrations/2026-11-06_membership_applications.sql`)
+6. Stripe payment link + webhook (Edge Function sets paid_until) → triggers Supabase Pro upgrade.
+7. Renewal reminder emails (Resend) at 30 / 7 / 0 days before paid_until.
 
 ## Testing
 - DB changes are tested on a local Postgres 16 with Supabase stubs (auth.uid/role/jwt, anon/authenticated roles):
   load `schema/live-schema.sql`, then migrations in order, then scenario tests (role switch via
-  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03; 22 for issuer confirmation on 2026-11-05.
+  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03; 22 for issuer confirmation on 2026-11-05; 25 for membership applications on 2026-11-06.
 
 ## Known gaps
 1. `validate_and_use_referral_code` (now check-only) still answers valid/invalid to anyone → codes can be

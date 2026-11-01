@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Applications & Membership — GSMP Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0d1117; --panel: #161b22; --line: #30363d; --text: #c9d1d9; --muted: #8b949e; --green: #3fb950; --blue: #58a6ff; --amber: #d29922; --red: #f85149; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; font-size: 14px; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+    a { color: var(--blue); }
+    h1 { font-size: 22px; margin: 6px 0 16px; color: #fff; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font: inherit; }
+    textarea { width: 100%; min-height: 50px; }
+    button { background: #21262d; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; font-weight: 600; cursor: pointer; font: inherit; }
+    button.ok { background: #238636; border-color: #2ea043; color: #fff; }
+    button.bad { background: #3d0b0b; border-color: var(--red); color: #ffa198; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+    .pill { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 8px; background: #21262d; }
+    .s-applicant { color: var(--blue); } .s-approved { color: var(--amber); } .s-active { color: var(--green); }
+    .s-grace { color: var(--amber); } .s-lapsed, .s-rejected { color: var(--red); }
+    .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+    .tabs button.on { border-color: var(--blue); color: #fff; }
+    .msg { padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; display: none; }
+    .msg.ok { display: block; background: #0f2d1a; color: var(--green); } .msg.err { display: block; background: #3d0b0b; color: #ffa198; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 4px 16px; margin-top: 6px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 16px; }
+    .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px; text-align: center; }
+    .stat b { display: block; font-size: 22px; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="../admin">&larr; Back to Admin</a>
+    <h1>Applications &amp; Membership</h1>
+    <div id="msg" class="msg"></div>
+    <div id="gate" class="panel">Checking access…</div>
+    <div id="app" style="display:none;">
+      <div class="stats" id="stats"></div>
+      <div class="tabs" id="tabs"></div>
+      <div id="list"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    const e = gsmpEsc, $ = id => document.getElementById(id);
+    const TABS = [['applicant', 'To review'], ['approved', 'Awaiting payment'], ['grace', 'Renewal due'], ['lapsed', 'Lapsed'],
+                  ['active', 'Active'], ['rejected', 'Rejected']];
+    let tab = 'applicant', members = [], chapters = {};
+    const fmt = d => d ? new Date(d.length === 10 ? d + 'T00:00:00' : d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    const plusYear = () => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); return d.toISOString().slice(0, 10); };
+    function flash(t, ok) { const m = $('msg'); m.textContent = t; m.className = 'msg ' + (ok ? 'ok' : 'err'); window.scrollTo({ top: 0 }); }
+
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { location.href = '../login'; return; }
+      if (!(await checkIsSaasAdmin())) { $('gate').textContent = 'Admins only.'; return; }
+      $('gate').style.display = 'none'; $('app').style.display = '';
+      const { data: ch } = await sb.from('chapters').select('id, name');
+      (ch || []).forEach(c => chapters[c.id] = c.name);
+      load();
+    })();
+
+    async function load() {
+      const { data, error } = await sb.from('members')
+        .select('id, first_name, last_name, email, phone, school, degree, year, field, specialty, country, city, referred_by, chapter_id, requested_chapter_id, membership_status, paid_until, application_message, review_note, reviewed_by, reviewed_at, applied_at, joined_at')
+        .order('applied_at', { ascending: true, nullsFirst: false });
+      if (error) return flash(error.message, false);
+      members = data.map(m => ({ ...m, st: gsmpMemberState(m) }));
+      const count = k => members.filter(m => m.st === k).length;
+      $('stats').innerHTML = TABS.map(([k, l]) => `<div class="stat"><b>${count(k)}</b><span class="muted">${l}</span></div>`).join('');
+      renderTabs(); render();
+    }
+    function renderTabs() { $('tabs').innerHTML = TABS.map(([k, l]) => `<button class="${k === tab ? 'on' : ''}" onclick="setTab('${k}')">${l}</button>`).join(''); }
+    function setTab(k) { tab = k; renderTabs(); render(); }
+
+    function render() {
+      let list = members.filter(m => m.st === tab);
+      if (tab === 'applicant') list.sort((a, b) => (b.referred_by ? 1 : 0) - (a.referred_by ? 1 : 0)); // referred first
+      if (['active', 'grace', 'lapsed'].includes(tab)) list.sort((a, b) => (a.paid_until || '9999').localeCompare(b.paid_until || '9999'));
+      if (!list.length) { $('list').innerHTML = '<div class="panel muted">Nothing here.</div>'; return; }
+      $('list').innerHTML = list.map(card).join('');
+    }
+
+    function card(m) {
+      const name = e(((m.first_name || '') + ' ' + (m.last_name || '')).trim());
+      const ch = chapters[m.chapter_id] || (m.requested_chapter_id ? chapters[m.requested_chapter_id] + ' (requested)' : '—');
+      const waitDays = m.applied_at ? Math.floor((Date.now() - new Date(m.applied_at)) / 86400000) : null;
+      let actions = '';
+      if (m.st === 'applicant' || m.st === 'rejected') actions = `
+        <button class="ok" onclick="setStatus('${m.id}','approved')">Approve</button>
+        ${m.st === 'applicant' ? `<button class="bad" onclick="setStatus('${m.id}','rejected')">Reject</button>` : ''}`;
+      const payRow = `<input type="date" id="pu-${m.id}" value="${m.paid_until && m.paid_until > new Date().toISOString().slice(0, 10) ? m.paid_until : plusYear()}">
+        <button class="ok" onclick="markPaid('${m.id}')">Mark paid until</button>`;
+      if (m.st === 'approved' || m.st === 'grace' || m.st === 'lapsed' || m.st === 'active') actions += payRow;
+      return `<div class="card">
+        <div class="row" style="justify-content:space-between;">
+          <div><strong>${name}</strong> <span class="muted">${e(m.email)}${m.phone ? ' · ' + e(m.phone) : ''}</span></div>
+          <span class="pill s-${m.st}">${m.st}</span></div>
+        <div class="grid muted">
+          <div>${e([m.degree, m.year].filter(Boolean).join(' · '))}</div>
+          <div>${e(m.school)}</div>
+          <div>${e([m.city, m.country].filter(Boolean).join(', '))}</div>
+          <div>Chapter: ${e(ch)}</div>
+          <div>Referral: ${m.referred_by ? e(m.referred_by) : 'none'}</div>
+          <div>${m.st === 'applicant' && waitDays !== null ? `Waiting ${waitDays} day${waitDays === 1 ? '' : 's'}` : 'Paid until: ' + fmt(m.paid_until)}</div>
+        </div>
+        ${m.application_message ? `<div style="margin-top:8px;">“${e(m.application_message)}”</div>` : ''}
+        ${m.reviewed_by ? `<div class="muted" style="margin-top:6px;">Last change by ${e(m.reviewed_by)} on ${fmt(m.reviewed_at)}${m.review_note ? ' — ' + e(m.review_note) : ''}</div>` : ''}
+        ${m.st === 'applicant' ? `<textarea id="note-${m.id}" placeholder="Note to applicant (required to reject; optional on approve)" style="margin-top:8px;"></textarea>` : ''}
+        <div class="row" style="margin-top:8px;">${actions}</div></div>`;
+    }
+
+    async function setStatus(id, status) {
+      const noteEl = $('note-' + id), note = noteEl ? noteEl.value.trim() : '';
+      if (status === 'rejected' && !note) return flash('Add a note explaining the decision.', false);
+      if (status === 'rejected' && !confirm('Reject this application?')) return;
+      const patch = { membership_status: status };
+      if (note) patch.review_note = note;
+      const { error } = await sb.from('members').update(patch).eq('id', id);
+      if (error) return flash(error.message, false);
+      flash(status === 'approved' ? 'Approved — they now see the payment instructions.' : 'Application rejected.', true);
+      load();
+    }
+
+    async function markPaid(id) {
+      const until = $('pu-' + id).value;
+      if (!until) return flash('Pick a date.', false);
+      if (!confirm(`Mark as paid until ${fmt(until)}? This activates the membership.`)) return;
+      const { error } = await sb.from('members').update({ membership_status: 'active', paid_until: until }).eq('id', id);
+      if (error) return flash(error.message, false);
+      flash('Membership active until ' + fmt(until), true); load();
+    }
+  </script>
+</body>
+</html>

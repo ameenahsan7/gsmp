@@ -100,12 +100,15 @@
     async function load() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) { location.href = '../login'; return; }
+      const { data: me } = await sb.from('members').select('membership_status, paid_until, review_note').eq('id', session.user.id).maybeSingle();
+      const notice = await gsmpMembershipNotice(me);
+      if (notice) document.querySelector('.dash-header').insertAdjacentHTML('afterend', notice);
       const { data: p } = await sb.from('portfolios').select('*').eq('member_id', session.user.id).maybeSingle();
       portfolio = p;
       if (!p) {
         $('root').innerHTML = `<div class="dash-section empty">
           <h2>Invite-only pilot</h2>
-          <p>The GSMP Verified Portfolio is in a closed pilot. Each credential is confirmed with its issuer,
+          <p>The GSMP Verified Portfolio is a benefit of active membership, currently in a closed pilot. Each credential is confirmed with its issuer,
           and you get a public page with a QR code anyone can check.</p>
           <p class="pf-hint">You'll see your portfolio here once GSMP invites you.</p></div>`;
         return;

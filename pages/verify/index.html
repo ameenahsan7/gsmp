@@ -84,7 +84,9 @@
 
       html += active
         ? `<div class="banner active">✓ Active · ${verifiedCount} verified credential${verifiedCount === 1 ? '' : 's'}${p.identity_verified ? ' · Identity verified' : ''} · Updated ${fmt(p.updated_at)}</div>`
-        : `<div class="banner bad">⚠ This portfolio is ${e(p.status).toUpperCase()}. Its credentials are no longer vouched for by GSMP. Do not rely on any printed copy.</div>`;
+        : p.status === 'paused'
+          ? `<div class="banner bad">⏸ Verification paused — this member's GSMP membership has lapsed. Credentials are not currently vouched for by GSMP. Do not rely on any printed copy.</div>`
+          : `<div class="banner bad">⚠ This portfolio is ${e(p.status).toUpperCase()}. Its credentials are no longer vouched for by GSMP. Do not rely on any printed copy.</div>`;
 
       if (active) {
         html += '<div class="body">';
