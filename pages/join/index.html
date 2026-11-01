@@ -16,7 +16,20 @@
         <span class="logo-text">GSMP</span>
       </a>
       <h1>Apply to GSMP</h1>
-      <p class="auth-sub">Apply below. Every application is reviewed by the GSMP team; approved applicants activate their membership with the annual fee.</p>
+      <p class="auth-sub">Every application is reviewed by the GSMP team, usually within 48 hours.</p>
+
+      <div id="feeBox" style="background:#F7F4EE;border:1px solid #e7dcc2;border-radius:10px;padding:14px 16px;margin:0 0 18px;font-size:14px;line-height:1.55;color:#1f2937;">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;">
+          <strong style="color:#1B2A4A;">Membership</strong>
+          <span><strong id="feeAmount" style="color:#1B2A4A;font-size:16px;">100 USD</strong> <span style="color:#6b7280;">/ year</span></span>
+        </div>
+        <div style="color:#6b7280;margin:2px 0 8px;">Applying is free. You pay only after your application is approved.</div>
+        <ul style="margin:0;padding-left:18px;list-style:disc;">
+          <li>Verified Portfolio — credentials confirmed with issuers, shareable page &amp; PDF with QR</li>
+          <li>Your local chapter — events, hands-on training, notices</li>
+          <li>Digital member card and the GSMP network</li>
+        </ul>
+      </div>
 
       <div id="errorMsg" style="display:none; background:#FEE2E2; color:#991B1B; padding:12px 16px; border-radius:6px; font-size:14px; margin-bottom:16px;"></div>
       <div id="successMsg" style="display:none; background:#D1FAE5; color:#065F46; padding:12px 16px; border-radius:6px; font-size:14px; margin-bottom:16px;"></div>
@@ -158,6 +171,11 @@
           <textarea id="appMessage" maxlength="1000" rows="3" required placeholder="A few lines about you, your training and what you hope to get from GSMP." style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font:inherit;"></textarea>
         </div>
 
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.5;margin:6px 0 16px;color:#374151;">
+          <input type="checkbox" id="termsOk" required style="margin-top:3px;width:auto;">
+          <span>I agree to the <a href="../terms" target="_blank">Terms of Membership</a> and the <a href="../privacy" target="_blank">Privacy Policy</a>, and confirm the information I provide is accurate.</span>
+        </label>
+
         <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Submit Application</button>
       </form>
 
@@ -170,6 +188,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="../../js/supabase-config.js"></script>
   <script>
+    const TERMS_VERSION = '2026-11-09';
+    // show the current fee from site settings (falls back to the default text)
+    sb.from('site_settings').select('value').eq('key', 'membership_fee').maybeSingle().then(({ data }) => {
+      const m = data && /([\d.,]+\s*[A-Z]{3})/.exec(data.value || '');
+      if (m) document.getElementById('feeAmount').textContent = m[1];
+    });
     const form = document.getElementById('joinForm');
     const errorMsg = document.getElementById('errorMsg');
     const successMsg = document.getElementById('successMsg');
@@ -269,6 +293,7 @@
             interests: interests,
             referred_by: referralCode || null,
             application_message: appMessage,
+            terms_version: TERMS_VERSION,
             referral_code: personalCode,
           });
 

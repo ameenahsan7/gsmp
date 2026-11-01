@@ -35,6 +35,15 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 - **Portfolio integrity:** an admin acting on their OWN portfolio is treated as a member (cannot verify own claims,
   activate/suspend own portfolio, or set own identity flag). Theatre ("surgical") claims with photos require a
   consent confirmation and can never be self-declared — published only after another admin verifies.
+- **Emails = `notification_outbox`** (2026-11-09). DB triggers enqueue (`gsmp_enqueue`, dedupe keys); Edge Function
+  `supabase/functions/notify` drains it via Resend (`gsmp_claim_outbox` SKIP LOCKED, retries ≤3). Triggered by a
+  Database Webhook on INSERT into `notification_outbox`; renewal reminders enqueued daily by pg_cron
+  (`2026-11-09b_cron_renewal_reminders.sql`). New member-facing event = add a trigger + a template in `notify`.
+  Verified claims are NOT emailed (only needs_info / rejected / portfolio status) to avoid noise.
+- **"I've paid" = `payment_reports`** (member inserts own, max 3/day; admins notified). Recording a payment in the
+  ledger auto-closes open reports and emails a receipt.
+- **Terms:** join page sends `terms_version`; DB stamps `terms_accepted_at`. Bump `TERMS_VERSION` in
+  `pages/join` and the version line on `pages/terms` + `pages/privacy` together when the text changes.
 - **Never commit member names/emails in migrations** (repo is public) — one-off data fixes are run by hand.
 - Members table is private: self, admins, and Chapter Leads (own chapter only). Public card goes through
   `get_member_card(code)` RPC.
@@ -64,6 +73,8 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 | 2026-11-07 | Payments ledger + accounting dashboard; voided rows kept | Audit trail for a membership org handling fees |
 | 2026-11-08 | Portfolio = GSMP-branded editorial document generated from verified data (inspired by Anees's PDF, not a copy); every claim carries Verified / Self-declared | Scales to all members; credibility comes from per-claim status, not design |
 | 2026-11-08 | Theatre photos never seeded/confirmed on a member's behalf; member confirms consent; another admin reviews | Patient privacy (UAE health-data rules) |
+| 2026-11-09 | Fee shown on join page before applying; legal pages (privacy, terms) + consent checkbox; transactional emails; "I've paid" reports; LinkedIn add-to-profile | Conversion, trust, less WhatsApp admin, free growth channel |
+| 2026-11-09 | Legal text is a practical draft (UAE law named) — to be reviewed by a lawyer before scaling | Not legal advice |
 | 2026-11-01 | Personal project uses personal accounts only (GitHub `ameenahsan7`, personal laptop) | Keep GSMP out of employer org/logs |
 
 ## Roadmap (in order)
@@ -89,12 +100,12 @@ so they are not re-litigated. Update the Decision log whenever a decision change
    sections, photos in public bucket `portfolio-media/<uid>/` (client-side resize to 1600px JPEG, strips EXIF),
    cover highlights (max 4), public links. First portfolio: Anees (seeded by hand, data NOT in repo).
 6. Stripe payment link + webhook (Edge Function sets paid_until) → triggers Supabase Pro upgrade.
-7. Renewal reminder emails (Resend) at 30 / 7 / 0 days before paid_until.
+7. ~~Renewal reminder emails~~ (2026-11-09: 30 days, 7 days, overdue; pg_cron daily 05:17 UTC).
 
 ## Testing
 - DB changes are tested on a local Postgres 16 with Supabase stubs (auth.uid/role/jwt, anon/authenticated roles):
   load `schema/live-schema.sql`, then migrations in order, then scenario tests (role switch via
-  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03; 22 for issuer confirmation on 2026-11-05; 25 for membership applications on 2026-11-06; 16 for the payments ledger on 2026-11-07; 17 for the portfolio document on 2026-11-08.
+  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03; 22 for issuer confirmation on 2026-11-05; 25 for membership applications on 2026-11-06; 16 for the payments ledger on 2026-11-07; 17 for the portfolio document on 2026-11-08; 18 for notifications / payment reports on 2026-11-09.
 
 ## Known gaps
 1. `validate_and_use_referral_code` (now check-only) still answers valid/invalid to anyone → codes can be

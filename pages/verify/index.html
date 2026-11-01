@@ -6,6 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <title>Verified Portfolio — GSMP</title>
+  <meta name="description" content="A GSMP Verified Portfolio: credentials confirmed with their issuers by the Galen Society of Medical Professionals.">
+  <meta property="og:type" content="profile">
+  <meta property="og:site_name" content="Galen Society of Medical Professionals">
+  <meta property="og:title" content="GSMP Verified Portfolio">
+  <meta property="og:description" content="Credentials confirmed with their issuers by the Galen Society of Medical Professionals. Open to verify.">
+  <meta property="og:image" content="https://gsmpglobal.org/images/pgcmp_logo_inverted.jpeg">
+  <meta name="twitter:card" content="summary">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
   <style>
@@ -184,7 +191,8 @@
       bar.style.display = '';
       bar.innerHTML = `<img src="../../images/pgcmp_logo_inverted.jpeg" alt=""><b>GSMP VERIFIED PORTFOLIO</b>
         <span class="st ${active ? 'ok' : 'bad'}">${active ? '✓ Active · ' + nVer + ' verified' : e(p.status).toUpperCase()}</span>
-        ${active ? `<button onclick="downloadPdf()">Download PDF</button><button class="share" onclick="share()">Share</button>` : ''}`;
+        ${active ? `<button onclick="downloadPdf()">Download PDF</button><button class="share" onclick="share()">Share</button>
+          <a class="share" style="display:inline-flex;align-items:center;text-decoration:none;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 12px;font-weight:700;" target="_blank" rel="noopener" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}">in</a>` : ''}`;
 
       const creds = [p.degree, p.specialty].filter(Boolean).map(e).join(' · ');
       const where = [p.chapter ? p.chapter + ' Chapter' : null, p.school, p.country].filter(Boolean).map(e).join(' · ');
@@ -293,7 +301,7 @@
           <h3>Verify this portfolio</h3>
           <p>Scan the code or open <b style="color:#fff;">${e(url.replace(/^https?:\/\//, ''))}</b>. The live page always overrides printed or PDF copies — if this portfolio is suspended or revoked, the page will say so.</p>
           <p><b style="color:#fff;">What “Verified” means:</b> GSMP confirmed the credential with its issuer or an official source on the date shown. It does not certify clinical competence. “Self-declared” items were provided by the member and not checked.</p>
-          <p style="opacity:.7;">Portfolio ID ${e(id)} · Version ${e(p.version)} · First issued ${fmt(p.published_at)} · Status ${e(p.status)}</p></div></div>`);
+          <p style="opacity:.7;"><a href="../terms" style="color:inherit;">Terms</a> · <a href="../privacy" style="color:inherit;">Privacy</a> · Portfolio ID ${e(id)} · Version ${e(p.version)} · First issued ${fmt(p.published_at)} · Status ${e(p.status)}</p></div></div>`);
 
       doc.innerHTML = html;
       if (window.QRCode) {

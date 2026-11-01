@@ -63,11 +63,12 @@
     const set = (k, n, soft) => document.querySelectorAll(`[data-badge="${k}"]`).forEach(b => {
       b.textContent = n; b.style.display = n ? '' : 'none'; b.classList.toggle('soft', !!soft); });
     try {
-      const [a, c, u] = await Promise.all([
+      const [a, c, u, r] = await Promise.all([
         sb.from('members').select('id', { count: 'exact', head: true }).eq('membership_status', 'applicant'),
         sb.from('portfolio_claims').select('id', { count: 'exact', head: true }).eq('status', 'submitted'),
-        sb.from('members').select('id', { count: 'exact', head: true }).eq('membership_status', 'approved')]);
-      set('apps', a.count || 0); set('claims', c.count || 0); set('unpaid', u.count || 0, true);
+        sb.from('members').select('id', { count: 'exact', head: true }).eq('membership_status', 'approved'),
+        sb.from('payment_reports').select('id', { count: 'exact', head: true }).eq('status', 'open')]);
+      set('apps', (a.count || 0) + (r.count || 0)); set('claims', c.count || 0); set('unpaid', u.count || 0, true);
     } catch (_) { /* badges are optional */ }
   };
 })();

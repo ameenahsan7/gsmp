@@ -101,12 +101,19 @@
     const badge = s => `<span class="badge b-${s}">${STATUS_LABEL[s] || s}</span>`;
     function flash(text, ok) { const m = $('msg'); m.textContent = text; m.className = 'msg ' + (ok ? 'ok' : 'err'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     function verifyUrl() { return location.origin + '/pages/verify/?id=' + portfolio.public_id; }
+    function linkedInAddUrl() {
+      const d = new Date(portfolio.published_at || Date.now());
+      const q = new URLSearchParams({ startTask: 'CERTIFICATION_NAME', name: 'GSMP Verified Portfolio',
+        organizationName: 'Galen Society of Medical Professionals', issueYear: d.getFullYear(), issueMonth: d.getMonth() + 1,
+        certUrl: verifyUrl(), certId: portfolio.public_id });
+      return 'https://www.linkedin.com/profile/add?' + q.toString();
+    }
 
     async function load() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) { location.href = '../login'; return; }
       uid = session.user.id;
-      const { data: me } = await sb.from('members').select('membership_status, paid_until, review_note').eq('id', session.user.id).maybeSingle();
+      const { data: me } = await sb.from('members').select('id, membership_status, paid_until, review_note').eq('id', session.user.id).maybeSingle();
       const notice = await gsmpMembershipNotice(me);
       if (notice) document.querySelector('.dash-header').insertAdjacentHTML('afterend', notice);
       const { data: p } = await sb.from('portfolios').select('*').eq('member_id', session.user.id).maybeSingle();
@@ -138,6 +145,11 @@
                <button class="pf-btn primary" onclick="copyUrl()">Copy link</button>
                <a class="pf-btn ghost" style="text-decoration:none;" target="_blank" href="${gsmpEsc(verifyUrl())}">Open / print PDF</a>
              </div>
+             <div class="pf-actions" style="margin-top:8px;">
+               <a class="pf-btn" style="text-decoration:none;background:#0a66c2;color:#fff;" target="_blank" rel="noopener" href="${gsmpEsc(linkedInAddUrl())}">in&nbsp; Add to LinkedIn profile</a>
+               <a class="pf-btn ghost" style="text-decoration:none;" target="_blank" rel="noopener" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(verifyUrl())}">Share on LinkedIn</a>
+             </div>
+             <p class="pf-hint" style="margin-top:6px;">"Add to LinkedIn profile" lists GSMP Verified Portfolio under <em>Licenses &amp; certifications</em> with a link back to your verification page.</p>
              <p class="pf-hint" style="margin-top:8px;">Only verified and self-declared items are public. Evidence links and issuer emails are never shown.</p>
            </div></div>`
         : `<p class="pf-hint">Your page goes live when GSMP activates your portfolio${p.status === 'draft' ? ' — add your credentials below and submit them for review.' : '.'}</p>`)
