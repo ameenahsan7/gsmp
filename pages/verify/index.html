@@ -150,7 +150,14 @@
       ? `<span class="tag v" title="${e(METHOD[c.method] || 'Verified')} · ${fmt(c.verified_at)}">✓ Verified</span>`
       : `<span class="tag s" title="Provided by the member, not checked by GSMP">Self-declared</span>`;
     const meta = c => [c.organization, c.role, c.period].filter(Boolean).map(e).join(' · ');
-    const img = (u, alt) => u ? `<img src="${e(u)}" alt="${e(alt || '')}" loading="lazy" referrerpolicy="no-referrer">` : '';
+    // a photo that fails to load (not uploaded yet / removed) disappears instead of showing a broken box
+    const img = (u, alt) => u ? `<img src="${e(u)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="gsmpImgMissing(this)">` : '';
+    window.gsmpImgMissing = el => {
+      const box = el.closest('.img'), cover = el.closest('.photo');
+      if (box) box.remove();
+      else if (cover) { cover.classList.add('none'); cover.textContent = (NAME || '?').split(' ').map(w => w[0]).join('').slice(0, 2); }
+      else el.remove();
+    };
     const link = c => c.public_url ? ` <a class="lnk" href="${e(c.public_url)}" target="_blank" rel="noopener nofollow">source ↗</a>` : '';
     const chunk = (a, n) => a.reduce((r, x, i) => (i % n ? r[r.length - 1].push(x) : r.push([x]), r), []);
     let pageNo = 0, NAME = '';
