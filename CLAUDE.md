@@ -36,13 +36,20 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 ## Roadmap (in order)
 1. ~~Security lockdown~~ (done 2026-11-01)
 2. ~~Admins via app_admins~~ (2026-11-02)
-3. Dump full live schema into git (`supabase db dump`) — tables/functions/triggers not yet in repo
+3. ~~Live schema in git~~ (2026-11-02, `schema/live-schema.sql`)
+3b. **Server-side referral enforcement** — see Known gaps #1
 4. Verified Portfolio **pilot**: 5 members, 4 sections (identity, clinical, research, awards), per-claim status,
    issuer email confirmation (Edge Function + Resend), `/verify/?id=<random>` page with revocation, print-to-PDF.
    No government ID/selfie storage. "Verified" = issuer confirmed the document, never competence.
 5. Paid Verified Portfolio tier → triggers Supabase Pro upgrade.
 
 ## Known gaps
+1. **Referral code is enforced only in the browser.** Anyone can call Supabase signUp directly and insert a
+   member row with any `chapter_id` — joining any chapter and reading its referral codes. Fix: validate
+   `referred_by` and derive `chapter_id` server-side in the members INSERT trigger.
+2. `validate_and_use_referral_code` is callable by anyone and counts a use before signup succeeds →
+   limited codes can be burned; codes can be guessed (valid/invalid oracle).
+3. Every member's personal referral code is unlimited (`max_uses 0`) and appears in their public profile URL.
 - No CI, no tests, no backups (Free plan) — take a manual `pg_dump` weekly; never commit dumps (repo is public).
 - `event_rsvps` readable by anyone; `resources` insertable by any member; `activity_logs` insertable by any member.
 - Stock images hot-linked from Unsplash.
