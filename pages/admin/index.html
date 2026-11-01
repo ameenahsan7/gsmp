@@ -262,12 +262,21 @@
 
     <!-- MEMBERS TAB -->
     <div class="tab-content" id="tab-members">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px;">
+        <div class="row">
+          <input id="memSearch" placeholder="Search name, email, institution, code" oninput="filterMembers()" style="min-width:260px;">
+          <select id="memStatus" onchange="filterMembers()">
+            <option value="">All statuses</option><option value="active">Paid</option><option value="grace">Renewal due</option>
+            <option value="lapsed">Lapsed</option><option value="approved">Unpaid · awaiting</option>
+            <option value="applicant">Applicant</option><option value="rejected">Rejected</option>
+          </select>
+          <span class="muted" id="memCount"></span>
+        </div>
         <button class="btn-sm btn-csv" onclick="exportMembersCSV()">&#x2B73; Export CSV</button>
       </div>
-      <table class="admin-table">
+      <table class="admin-table members-compact">
         <thead>
-          <tr><th>Name</th><th>Email</th><th>Membership</th><th>Institution</th><th>Chapter</th><th>Title</th><th>Referred By</th><th></th></tr>
+          <tr><th>Member</th><th>Membership</th><th>Institution</th><th>Chapter</th><th>Title</th><th>Ref.</th><th style="text-align:right;">Actions</th></tr>
         </thead>
         <tbody id="membersTable">
           <tr><td colspan="6" class="loading-text">Loading...</td></tr>
@@ -977,7 +986,7 @@
       window._members = data || [];
       const tbody = document.getElementById('membersTable');
       if (!data || !data.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="color:#9ca3af;">No members yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="muted">No members yet.</td></tr>';
         return;
       }
       const TITLE_OPTIONS = ['Member','Active Member','Senior Member','Ambassador','Chapter Lead','Fellow'];
@@ -985,11 +994,10 @@
         const selectedChapter = m.chapter_id || '';
         const currentTitle = m.member_title || 'Member';
         return `
-        <tr>
-          <td><strong>${gsmpEsc(m.first_name)} ${gsmpEsc(m.last_name)}</strong></td>
-          <td>${gsmpEsc(m.email) || '—'}</td>
+        <tr data-st="${gsmpMemberState(m)}" data-q="${gsmpEsc([m.first_name, m.last_name, m.email, m.school, m.referred_by].join(' ').toLowerCase())}">
+          <td class="mc-name"><strong>${gsmpEsc(m.first_name)} ${gsmpEsc(m.last_name)}</strong><span>${gsmpEsc(m.email) || '—'}</span></td>
           <td>${membershipPill(m)}</td>
-          <td>${gsmpEsc(m.school) || '—'}</td>
+          <td class="mc-trunc" title="${gsmpEsc(m.school)}">${gsmpEsc(m.school) || '—'}</td>
           <td>
             <select class="member-chapter-select" onchange="assignChapter('${m.id}', this.value)">
               <option value="">— None —</option>
@@ -1001,14 +1009,26 @@
               ${TITLE_OPTIONS.map(t => `<option value="${t}" ${t === currentTitle ? 'selected' : ''}>${t}</option>`).join('')}
             </select>
           </td>
-          <td><span style="font-family:monospace;font-size:12px;">${gsmpEsc(m.referred_by) || '—'}</span></td>
-          <td class="admin-actions">
-            <button class="btn-sm" onclick="viewAsMember('${m.id}')" title="View dashboard as this user">Dashboard</button>
-            <button class="btn-sm" onclick="viewProfileAs('${m.id}')" title="View profile as this user">Profile</button>
-            <button class="btn-sm btn-danger" onclick="deleteMember('${m.id}')">Remove</button>
+          <td class="mc-ref">${gsmpEsc(m.referred_by) || '—'}</td>
+          <td class="mc-act">
+            <button class="btn-sm" onclick="viewAsMember('${m.id}')" title="Open this member's dashboard">View</button>
+            <button class="btn-sm" onclick="viewProfileAs('${m.id}')" title="View profile as this member">Profile</button>
+            <button class="btn-sm btn-danger" onclick="deleteMember('${m.id}')" title="Remove member" aria-label="Remove member">✕</button>
           </td>
         </tr>
       `}).join('');
+      filterMembers();
+    }
+
+    function filterMembers() {
+      const q = document.getElementById('memSearch').value.trim().toLowerCase();
+      const st = document.getElementById('memStatus').value;
+      let shown = 0;
+      document.querySelectorAll('#membersTable tr[data-q]').forEach(tr => {
+        const ok = (!q || tr.dataset.q.includes(q)) && (!st || tr.dataset.st === st);
+        tr.style.display = ok ? '' : 'none'; if (ok) shown++;
+      });
+      document.getElementById('memCount').textContent = shown + ' of ' + (window._members || []).length;
     }
 
     const memberLabel = id => { const m = (window._members || []).find(x => x.id === id);
