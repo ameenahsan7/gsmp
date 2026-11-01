@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS public.app_admins (
 -- Seed admin (gmail only — never seed work emails).
 -- Add more later via: INSERT INTO public.app_admins (email) VALUES ('someone@example.com');
 INSERT INTO public.app_admins (email) VALUES
-  ('ameenahsan7@gmail.com')
+  ('ameenahsan7@gmail.com')  -- only admin; employer email deliberately excluded
 ON CONFLICT (email) DO NOTHING;
 
 ALTER TABLE public.app_admins ENABLE ROW LEVEL SECURITY;
