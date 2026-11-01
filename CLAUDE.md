@@ -22,8 +22,10 @@ so they are not re-litigated. Update the Decision log whenever a decision change
   `get_member_card(code)` RPC.
 - Privilege fields on `members` (`member_title`, `chapter_id`) are guarded by trigger
   `gsmp_guard_member_privileges`. Chapter Leads may assign only: Member, Active Member, Senior Member, Ambassador.
-- Workflow: Claude pushes to a `claude/*` branch; owner merges to `main` (fast-forward) and runs any new migration
-  immediately after the merge.
+- Workflow: Claude pushes to a `claude/*` branch; owner merges to `main` (fast-forward).
+- **Deploy order: run the migration in Supabase FIRST, verify, THEN merge to `main`.** Every migration must be
+  backward-compatible with the currently-live pages. (2026-11-02: join page went live before its migration →
+  one signup landed with no chapter.)
 
 ## Decision log
 | Date | Decision | Why |
