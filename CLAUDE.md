@@ -37,6 +37,7 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 | 2026-11-02 | Referral enforced in DB trigger; chapter derived from code; personal codes capped at **5** invites | Invite-only must hold server-side; scarcity supports paid tier |
 | 2026-11-04 | Portfolio can go **active** only with ≥1 verified credential (DB-enforced) | "Verified Portfolio" with 0 verified items dilutes the mark |
 | 2026-11-05 | Resend on root `gsmpglobal.org` (single team, Servlee domain removed); API key = sending-only, domain-scoped | Free plan = 1 domain; least privilege |
+| 2026-11-05 | Anees Mohamed (founder's brother, runs the service; Tashkent Chapter Lead) made a SaaS admin. Chapter Leads get NO portfolio-review rights | Operator needs network-wide access; keeping review out of chapter leads keeps "Verified" strict as chapters grow |
 | 2026-11-01 | Personal project uses personal accounts only (GitHub `ameenahsan7`, personal laptop) | Keep GSMP out of employer org/logs |
 
 ## Roadmap (in order)
