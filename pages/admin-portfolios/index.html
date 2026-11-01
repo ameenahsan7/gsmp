@@ -50,7 +50,8 @@
   <script src="../../js/admin-shell.js?v=2"></script>
   <script>
     const e = gsmpEsc, $ = id => document.getElementById(id);
-    const SECTIONS = { education: 'Education', clinical: 'Clinical', research: 'Research', award: 'Award' };
+    const SECTIONS = { education: 'Education', clinical: 'Clinical journey', surgical: 'Operating theatre', research: 'Research',
+      membership: 'Membership', initiative: 'Initiative', award: 'Award', media: 'Media', credential: 'CME / certificate', beyond: 'Beyond medicine' };
     const FILTERS = [['submitted', 'Queue'], ['needs_info', 'Needs info'], ['verified', 'Verified'], ['rejected', 'Rejected'], ['self_declared', 'Self-declared'], ['all', 'All']];
     let filter = 'submitted';
     const pill = s => `<span class="pill p-${s}">${e(s.replace('_', ' '))}</span>`;
@@ -87,6 +88,9 @@
               <span class="muted">${meta}</span></div>${pill(c.status)}</div>
           <div class="muted" style="margin-top:6px;">Member: ${memberName(m)} &lt;${e(m && m.email)}&gt;</div>
           ${c.description ? `<div style="margin-top:6px;">${e(c.description)}</div>` : ''}
+          ${c.image_url ? `<div style="margin-top:8px;"><a href="${e(c.image_url)}" target="_blank" rel="noopener"><img src="${e(c.image_url)}" alt="" style="max-width:260px;max-height:180px;border-radius:8px;border:1px solid var(--line);"></a>
+            ${c.section === 'surgical' ? `<div class="muted" style="margin-top:4px;">${c.consent_confirmed ? '✓ Member confirmed consent / de-identification.' : '⚠ No consent confirmation.'} Check: no faces, names, wristbands, charts or screens with patient data.</div>` : ''}</div>` : ''}
+          ${c.public_url ? `<div style="margin-top:6px;"><a href="${e(c.public_url)}" target="_blank" rel="noopener nofollow">Public link ↗</a> <span class="muted">(shown on the portfolio)</span></div>` : ''}
           <div class="row" style="margin-top:6px;">
             ${c.evidence_url ? `<a href="${e(c.evidence_url)}" target="_blank" rel="noopener noreferrer nofollow">Open evidence ↗</a>` : '<span class="muted">No evidence link</span>'}
             ${c.issuer_email ? `<span class="muted">Issuer: ${e(c.issuer_email)}</span>` : ''}

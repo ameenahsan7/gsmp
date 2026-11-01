@@ -86,7 +86,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="../../js/supabase-config.js"></script>
   <script>
-    const SECTIONS = { education: 'Education & degrees', clinical: 'Clinical experience', research: 'Research', award: 'Awards & honours' };
+    const SECTIONS = { education: 'Education & degrees', clinical: 'Clinical journey (observerships, internships, duties)',
+      surgical: 'Operating theatre (cases)', research: 'Research & innovation', membership: 'Memberships & roles',
+      initiative: 'Initiatives & events you led', award: 'Awards & recognition', media: 'Media & features',
+      credential: 'CME & certificates', beyond: 'Beyond medicine' };
+    const PHOTO_SECTIONS = ['surgical', 'initiative', 'award', 'media', 'beyond', 'clinical'];
+    let uid = null;
     const STATUS_LABEL = { draft: 'Draft', submitted: 'Submitted for review', verified: 'Verified', needs_info: 'Needs info',
                            rejected: 'Rejected', self_declared: 'Self-declared', active: 'Active', suspended: 'Suspended', revoked: 'Revoked' };
     const LOCKED = ['verified', 'rejected'];
@@ -100,6 +105,7 @@
     async function load() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) { location.href = '../login'; return; }
+      uid = session.user.id;
       const { data: me } = await sb.from('members').select('membership_status, paid_until, review_note').eq('id', session.user.id).maybeSingle();
       const notice = await gsmpMembershipNotice(me);
       if (notice) document.querySelector('.dash-header').insertAdjacentHTML('afterend', notice);
@@ -137,9 +143,23 @@
         : `<p class="pf-hint">Your page goes live when GSMP activates your portfolio${p.status === 'draft' ? ' — add your credentials below and submit them for review.' : '.'}</p>`)
         + `</div>`;
 
-      html += `<div class="dash-section"><h2>About</h2>
-        <div class="pf-field"><label>Headline</label><input id="headline" maxlength="120" value="${gsmpEsc(p.headline)}" placeholder="e.g. Surgical intern · Dubai"></div>
-        <div class="pf-field"><label>Short bio (shown as self-declared)</label><textarea id="bio" maxlength="1500">${gsmpEsc(p.bio)}</textarea></div>
+      html += `<div class="dash-section"><h2>Cover &amp; story</h2>
+        <div class="pf-row">
+          <div class="pf-field"><label>Cover photo</label>
+            <div style="display:flex;gap:12px;align-items:center;">
+              <div style="width:84px;height:104px;border-radius:8px;overflow:hidden;background:#f3f4f6;flex:none;">${p.photo_url ? `<img src="${gsmpEsc(p.photo_url)}" style="width:100%;height:100%;object-fit:cover;filter:grayscale(1);">` : ''}</div>
+              <div><input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp"><div class="pf-hint">Portrait, plain background. Shown in black &amp; white on the cover.</div></div>
+            </div></div>
+          <div class="pf-field"><label>Headline</label><input id="headline" maxlength="120" value="${gsmpEsc(p.headline)}" placeholder="e.g. Medical doctor · Tashkent">
+            <label style="margin-top:10px;">Tagline (3 words)</label><input id="tagline" maxlength="80" value="${gsmpEsc(p.tagline)}" placeholder="e.g. Resilience · Surgical ambition · Service"></div>
+        </div>
+        <div class="pf-field"><label>Quote for the cover</label><input id="quote" maxlength="200" value="${gsmpEsc(p.quote)}" placeholder="A line that says who you are"></div>
+        <div class="pf-field"><label>Your story (shown as written by you)</label><textarea id="bio" maxlength="4000" style="min-height:180px;">${gsmpEsc(p.bio)}</textarea><span class="pf-hint">Up to ~600 words. Separate paragraphs with a blank line.</span></div>
+        <div class="pf-row">
+          <div class="pf-field"><label>Logbook — procedures logged</label><input id="lbTotal" type="number" min="0" value="${p.logbook_total ?? ''}" placeholder="e.g. 700"></div>
+          <div class="pf-field"><label>Logbook — performed or assisted</label><input id="lbCurated" type="number" min="0" value="${p.logbook_curated ?? ''}" placeholder="e.g. 350"></div>
+        </div>
+        <div class="pf-field"><label>Logbook note</label><textarea id="lbNote" maxlength="800" style="min-height:60px;">${gsmpEsc(p.logbook_note)}</textarea></div>
         <div class="pf-row">
           <label style="display:flex;gap:8px;align-items:center;font-size:14px;"><input type="checkbox" id="showEmail" ${p.show_email ? 'checked' : ''}> Show my email publicly</label>
           <label style="display:flex;gap:8px;align-items:center;font-size:14px;"><input type="checkbox" id="showPhone" ${p.show_phone ? 'checked' : ''}> Show my phone publicly</label>
@@ -154,11 +174,14 @@
         html += `<div class="section-label">${SECTIONS[sec]}</div>`;
         for (const c of list) {
           const meta = [c.organization, c.role, c.period].filter(Boolean).map(gsmpEsc).join(' · ');
-          html += `<div class="claim"><div class="claim-top"><div><h4>${gsmpEsc(c.title)}</h4>
-            ${meta ? `<div class="meta">${meta}</div>` : ''}</div>${badge(c.status)}</div>
+          html += `<div class="claim"><div class="claim-top"><div style="display:flex;gap:12px;">
+            ${c.image_url ? `<img src="${gsmpEsc(c.image_url)}" style="width:64px;height:48px;object-fit:cover;border-radius:6px;flex:none;">` : ''}
+            <div><h4>${c.highlight ? '★ ' : ''}${gsmpEsc(c.title)}</h4>
+            ${meta ? `<div class="meta">${meta}</div>` : ''}</div></div>${badge(c.status)}</div>
             ${c.reviewer_note && ['needs_info', 'rejected'].includes(c.status) ? `<div class="note"><strong>Reviewer:</strong> ${gsmpEsc(c.reviewer_note)}</div>` : ''}
             <div class="pf-actions" style="margin-top:10px;">
               ${LOCKED.includes(c.status) ? '' : `<button class="pf-btn ghost" onclick="editClaim('${c.id}')">Edit</button>`}
+              <button class="pf-btn ghost" onclick="toggleHighlight('${c.id}', ${!c.highlight})" title="Show on the cover (max 4)">${c.highlight ? '★ On cover' : '☆ Add to cover'}</button>
               <button class="pf-btn danger" onclick="deleteClaim('${c.id}')">Remove</button>
             </div></div>`;
         }
@@ -167,7 +190,7 @@
 
       html += `<div class="dash-section" id="claimForm"><h2 id="formTitle">Add a credential</h2>
         <div class="pf-row">
-          <div class="pf-field"><label>Section</label><select id="cSection">${Object.entries(SECTIONS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
+          <div class="pf-field"><label>Section</label><select id="cSection" onchange="consentToggle()">${Object.entries(SECTIONS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
           <div class="pf-field"><label>Title *</label><input id="cTitle" maxlength="200" placeholder="e.g. Clinical observership — General Surgery"></div>
         </div>
         <div class="pf-row">
@@ -182,6 +205,14 @@
           <div class="pf-field"><label>Issuer contact email</label><input id="cIssuer" type="email" placeholder="supervisor or department email"><span class="pf-hint">Private — GSMP may ask them to confirm.</span></div>
           <div class="pf-field"><label>Details</label><textarea id="cDesc" maxlength="1000" style="min-height:44px;"></textarea></div>
         </div>
+        <div class="pf-row">
+          <div class="pf-field"><label>Photo (optional)</label><input type="file" id="cImage" accept="image/jpeg,image/png,image/webp" onchange="consentToggle()">
+            <span class="pf-hint" id="cImageNow"></span></div>
+          <div class="pf-field"><label>Public link (optional)</label><input id="cPublic" placeholder="https:// news article, DOI, registry page">
+            <span class="pf-hint">Shown on your portfolio as "source".</span></div>
+        </div>
+        <label id="consentRow" style="display:none;gap:8px;align-items:flex-start;font-size:13px;background:#fffbeb;border:1px solid #fde68a;padding:10px;border-radius:8px;margin-bottom:12px;">
+          <input type="checkbox" id="cConsent" style="margin-top:3px;"> I confirm the patient consented (or the image is fully de-identified: no face, name, wristband, chart or screen showing patient data) and that the hospital permits publication. Theatre photos are only published after a GSMP admin reviews them.</label>
         <div class="pf-actions">
           <button class="pf-btn gold" onclick="saveClaim('submitted')">Submit for verification</button>
           <button class="pf-btn ghost" onclick="saveClaim('draft')">Save draft</button>
@@ -196,10 +227,16 @@
     function copyUrl() { navigator.clipboard.writeText($('pubUrl').value).then(() => flash('Link copied.', true)); }
 
     async function saveAbout() {
-      const { error } = await sb.from('portfolios').update({
+      const patch = {
         headline: $('headline').value.trim() || null, bio: $('bio').value.trim() || null,
-        show_email: $('showEmail').checked, show_phone: $('showPhone').checked
-      }).eq('id', portfolio.id);
+        tagline: $('tagline').value.trim() || null, quote: $('quote').value.trim() || null,
+        logbook_total: $('lbTotal').value ? parseInt($('lbTotal').value, 10) : null,
+        logbook_curated: $('lbCurated').value ? parseInt($('lbCurated').value, 10) : null,
+        logbook_note: $('lbNote').value.trim() || null,
+        show_email: $('showEmail').checked, show_phone: $('showPhone').checked };
+      const f = $('photoFile').files[0];
+      if (f) { try { patch.photo_url = await uploadImage(f); } catch (err) { return flash(err.message, false); } }
+      const { error } = await sb.from('portfolios').update(patch).eq('id', portfolio.id);
       if (error) return flash(error.message, false);
       flash('Saved.', true); load();
     }
@@ -207,7 +244,16 @@
     function val(id) { const v = $(id).value.trim(); return v || null; }
     async function saveClaim(status) {
       const row = { section: $('cSection').value, title: val('cTitle'), organization: val('cOrg'), role: val('cRole'),
-        period: val('cPeriod'), evidence_url: val('cEvidence'), issuer_email: val('cIssuer'), description: val('cDesc'), status };
+        period: val('cPeriod'), evidence_url: val('cEvidence'), issuer_email: val('cIssuer'), description: val('cDesc'),
+        public_url: val('cPublic'), consent_confirmed: $('cConsent').checked, status };
+      if (row.public_url && !/^https:\/\//i.test(row.public_url)) return flash('Public link must start with https://', false);
+      const existing = editingId ? claims.find(x => x.id === editingId) : null;
+      const willHaveImage = $('cImage').files[0] || (existing && existing.image_url);
+      if (row.section === 'surgical' && willHaveImage) {
+        if (!row.consent_confirmed) return flash('Theatre photos need the patient-consent confirmation.', false);
+        if (status === 'self_declared') return flash('Theatre photos must be reviewed: use "Submit for verification".', false);
+      }
+      if ($('cImage').files[0]) { try { row.image_url = await uploadImage($('cImage').files[0]); } catch (err) { return flash(err.message, false); } }
       if (!row.title) return flash('Title is required.', false);
       if (row.evidence_url && !/^https:\/\//i.test(row.evidence_url)) return flash('Evidence link must start with https://', false);
       if (status === 'submitted' && !row.evidence_url && !row.issuer_email)
@@ -226,10 +272,40 @@
       $('cSection').value = c.section; $('cTitle').value = c.title || ''; $('cOrg').value = c.organization || '';
       $('cRole').value = c.role || ''; $('cPeriod').value = c.period || ''; $('cEvidence').value = c.evidence_url || '';
       $('cIssuer').value = c.issuer_email || ''; $('cDesc').value = c.description || '';
+      $('cPublic').value = c.public_url || ''; $('cConsent').checked = !!c.consent_confirmed;
+      $('cImageNow').textContent = c.image_url ? 'Has a photo — choose a file to replace it.' : '';
+      consentToggle();
       $('formTitle').textContent = 'Edit credential'; $('cancelEdit').style.display = '';
       $('claimForm').scrollIntoView({ behavior: 'smooth' });
     }
     function resetForm() { editingId = null; render(); }
+
+    function consentToggle() {
+      const c = editingId ? claims.find(x => x.id === editingId) : null;
+      const hasImg = $('cImage').files[0] || (c && c.image_url);
+      $('consentRow').style.display = ($('cSection').value === 'surgical' && hasImg) ? 'flex' : 'none';
+    }
+
+    async function toggleHighlight(id, on) {
+      if (on && claims.filter(c => c.highlight).length >= 4) return flash('The cover shows up to 4 highlights. Remove one first.', false);
+      const { error } = await sb.from('portfolio_claims').update({ highlight: on }).eq('id', id);
+      if (error) return flash(error.message, false);
+      load();
+    }
+
+    // Resize to max 1600px and re-encode as JPEG before upload (keeps storage small, strips EXIF/GPS).
+    async function uploadImage(file) {
+      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error('Use a JPG, PNG or WebP image.');
+      const bmp = await createImageBitmap(file);
+      const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+      const cv = document.createElement('canvas'); cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
+      cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+      const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.82));
+      const path = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const { error } = await sb.storage.from('portfolio-media').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+      if (error) throw new Error('Upload failed: ' + error.message);
+      return sb.storage.from('portfolio-media').getPublicUrl(path).data.publicUrl;
+    }
 
     async function deleteClaim(id) {
       if (!confirm('Remove this credential from your portfolio?')) return;

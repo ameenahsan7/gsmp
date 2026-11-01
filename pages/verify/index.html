@@ -6,121 +6,307 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <title>Verified Portfolio — GSMP</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
   <style>
-    :root { --navy: #1B2A4A; --gold: #C49A3C; --ink: #111827; --muted: #6b7280; --line: #e5e7eb; --paper: #ffffff; --bg: #f5f3ee; }
+    :root { --navy: #1B2A4A; --deep: #0f1830; --gold: #C49A3C; --gold-soft: #e6cf9a; --ivory: #F7F4EE; --ink: #15171c; --muted: #6b7280; --line: #e7e2d6; }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
-    .page { max-width: 820px; margin: 24px auto; background: var(--paper); border: 1px solid var(--line); }
-    .top { background: var(--navy); color: #fff; padding: 28px 32px; display: flex; justify-content: space-between; gap: 20px; align-items: center; flex-wrap: wrap; }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .12em; font-size: 12px; color: var(--gold); text-transform: uppercase; }
-    .brand img { width: 30px; height: 30px; border-radius: 6px; }
-    h1 { font-family: 'Playfair Display', serif; font-size: 34px; margin: 10px 0 4px; }
-    .sub { color: rgba(255,255,255,.75); font-size: 14px; }
-    #qr { background: #fff; padding: 6px; border-radius: 6px; }
-    .banner { padding: 14px 32px; font-weight: 600; font-size: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .banner.active { background: #ecfdf5; color: #065f46; border-bottom: 1px solid #a7f3d0; }
-    .banner.bad { background: #fef2f2; color: #991b1b; border-bottom: 1px solid #fecaca; }
-    .body { padding: 8px 32px 28px; }
-    .section { margin-top: 22px; }
-    .section h2 { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid var(--line); padding-bottom: 6px; margin: 0 0 6px; }
-    .item { display: flex; justify-content: space-between; gap: 14px; padding: 10px 0; border-bottom: 1px dashed var(--line); }
-    .item:last-child { border-bottom: none; }
-    .item h3 { margin: 0; font-size: 15px; color: var(--navy); }
-    .item .meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
-    .item .desc { font-size: 13px; margin-top: 4px; }
-    .tag { font-size: 11px; font-weight: 700; border-radius: 999px; padding: 3px 9px; white-space: nowrap; align-self: flex-start; }
-    .tag.v { background: #d1fae5; color: #065f46; }
-    .tag.s { background: #f3f4f6; color: #4b5563; }
-    .bio { font-size: 14px; line-height: 1.6; color: #374151; }
-    .contact { font-size: 14px; margin-top: 8px; }
-    .foot { border-top: 1px solid var(--line); padding: 16px 32px; font-size: 11px; color: var(--muted); line-height: 1.6; }
-    .actions { text-align: center; margin: 0 auto 24px; }
-    .actions button { background: var(--navy); color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-weight: 600; cursor: pointer; }
-    .center { text-align: center; padding: 60px 24px; }
-    @media (max-width: 600px) { .top, .body, .banner, .foot { padding-left: 18px; padding-right: 18px; } h1 { font-size: 26px; } .page { margin: 0; border: none; } }
+    html, body { margin: 0; }
+    body { background: #e9e6df; color: var(--ink); font-family: Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    .serif { font-family: 'Playfair Display', Georgia, serif; }
+    .bar { position: sticky; top: 0; z-index: 10; background: rgba(15, 24, 48, .96); color: #fff; display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; backdrop-filter: blur(6px); }
+    .bar img { width: 26px; height: 26px; border-radius: 6px; }
+    .bar b { letter-spacing: .14em; font-size: 11px; color: var(--gold); }
+    .bar .st { padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: 12px; }
+    .bar .st.ok { background: rgba(52, 211, 153, .15); color: #6ee7b7; }
+    .bar .st.bad { background: rgba(248, 113, 113, .18); color: #fca5a5; }
+    .bar button { margin-left: auto; background: var(--gold); color: var(--deep); border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; cursor: pointer; font: inherit; font-weight: 700; }
+    .bar .share { margin-left: 0; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.3); }
+    .doc { padding: 28px 12px 60px; display: flex; flex-direction: column; align-items: center; gap: 28px; }
+    .sheet { width: 210mm; min-height: 297mm; background: #fff; position: relative; overflow: hidden; box-shadow: 0 10px 40px rgba(15, 24, 48, .18); padding: 22mm 18mm 20mm; }
+    .sheet.dark { background: var(--deep); color: #eef1f7; }
+    .sheet.navy { background: var(--navy); color: #eef1f7; }
+    .sheet.ivory { background: var(--ivory); }
+    .pg { position: absolute; bottom: 10mm; left: 18mm; right: 18mm; display: flex; justify-content: space-between; font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+    .dark .pg, .navy .pg { color: rgba(255,255,255,.45); }
+    .kicker { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+    h2.h { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 46px; line-height: 1.02; margin: 8px 0 22px; letter-spacing: -.01em; }
+    h2.h em { color: var(--gold); font-style: italic; }
+    .lead { font-size: 13px; color: var(--muted); max-width: 140mm; line-height: 1.6; margin: -10px 0 22px; }
+    .dark .lead, .navy .lead { color: rgba(238, 241, 247, .7); }
+    .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+    .tag.v { color: #8a6416; background: #fbf3df; border: 1px solid #ecd8a6; }
+    .dark .tag.v, .navy .tag.v { color: var(--gold-soft); background: rgba(196, 154, 60, .14); border-color: rgba(196, 154, 60, .45); }
+    .tag.s { color: var(--muted); background: #f3f4f6; border: 1px solid #e5e7eb; }
+    .dark .tag.s, .navy .tag.s { color: rgba(255,255,255,.55); background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.14); }
+    .meta { font-size: 11.5px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+    .dark .meta, .navy .meta { color: rgba(238, 241, 247, .62); }
+    .desc { font-size: 11.5px; line-height: 1.55; margin-top: 5px; }
+    a.lnk { color: inherit; font-size: 10.5px; text-decoration: none; border-bottom: 1px solid currentColor; opacity: .75; }
+
+    /* cover */
+    .cover { display: grid; grid-template-columns: 68mm 1fr; grid-template-rows: auto 1fr auto; gap: 0 10mm; padding: 18mm 16mm 16mm; }
+    .cover .brand { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; margin-bottom: 14mm; }
+    .cover .brand img { width: 30px; height: 30px; border-radius: 7px; }
+    .cover .brand span { font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--navy); font-weight: 600; }
+    .cover .brand i { margin-left: auto; font-style: normal; font-size: 10px; letter-spacing: .18em; color: var(--muted); }
+    .cover h1 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 54px; line-height: .98; margin: 0 0 6mm; letter-spacing: -.015em; color: var(--navy); }
+    .cover .role { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+    .cover .sub { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+    .cover blockquote { font-family: 'Playfair Display', serif; font-style: italic; font-size: 16px; line-height: 1.45; margin: 10mm 0; color: #2b3242; border-left: 2px solid var(--gold); padding-left: 12px; }
+    .cover .hl { list-style: none; padding: 0; margin: 0; }
+    .cover .hl li { padding: 9px 0; border-top: 1px solid var(--line); font-size: 12.5px; line-height: 1.4; }
+    .cover .hl li small { display: block; color: var(--muted); font-size: 10.5px; margin-top: 2px; }
+    .cover .photo { grid-row: 2 / 3; grid-column: 2; border-radius: 3px; overflow: hidden; background: #ece9e2; min-height: 150mm; }
+    .cover .photo img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.05); display: block; }
+    .cover .photo.none { display: grid; place-items: center; font-family: 'Playfair Display', serif; font-size: 90px; color: var(--navy); background: var(--ivory); }
+    .cover .foot { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10mm; padding-top: 6mm; border-top: 1px solid var(--line); font-size: 10.5px; color: var(--muted); }
+    .cover .foot .qr { display: flex; align-items: center; gap: 10px; }
+    .qrbox { background: #fff; padding: 4px; border-radius: 4px; line-height: 0; }
+
+    /* story */
+    .cols { column-count: 3; column-gap: 8mm; font-size: 12px; line-height: 1.68; color: #262a33; }
+    .cols p { margin: 0 0 10px; break-inside: avoid-column; }
+    .tagline { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--navy); font-weight: 600; margin-bottom: 9mm; }
+
+    /* numbered list (clinical, credentials) */
+    .num { display: grid; grid-template-columns: 1fr 1fr; gap: 7mm 10mm; counter-reset: n; }
+    .num > div { display: grid; grid-template-columns: 26px 1fr; gap: 0 8px; break-inside: avoid; }
+    .num > div::before { counter-increment: n; content: counter(n, decimal-leading-zero); font-family: 'Playfair Display', serif; font-size: 18px; color: var(--gold); line-height: 1.1; }
+    .num h4 { margin: 0; font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; line-height: 1.35; }
+    .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+
+    /* photo cards */
+    .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8mm; }
+    .cards.three { grid-template-columns: repeat(3, 1fr); gap: 6mm; }
+    .cards.four { grid-template-columns: repeat(4, 1fr); gap: 5mm; }
+    .cards.four .img { aspect-ratio: 5 / 4; }
+    .cards.four h4, .cards.three h4 { font-size: 11.5px; }
+    .cards.four .row, .cards.three .row { flex-direction: column; gap: 4px; }
+    .card { break-inside: avoid; }
+    .card .img { aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; background: rgba(127,127,127,.12); margin-bottom: 9px; }
+    .card .img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .card h4 { margin: 0; font-size: 12.5px; line-height: 1.35; font-weight: 600; }
+    .card .cap { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; font-weight: 600; }
+    .note { font-size: 10px; color: rgba(238,241,247,.55); margin-top: 8mm; text-align: center; line-height: 1.5; }
+
+    /* text cards (research, memberships) */
+    .tcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7mm; }
+    .tcards > div { border-top: 2px solid var(--gold); padding-top: 9px; break-inside: avoid; }
+    .tcards h4 { margin: 0 0 4px; font-size: 13px; line-height: 1.35; color: var(--navy); font-weight: 600; }
+    .sec + .sec { margin-top: 14mm; }
+
+    /* logbook */
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; margin: 6mm 0 12mm; }
+    .stats b { display: block; font-family: 'Playfair Display', serif; font-weight: 500; font-size: 64px; line-height: 1; color: var(--navy); }
+    .stats span { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+
+    /* back cover */
+    .back { display: flex; flex-direction: column; justify-content: space-between; }
+    .back .sig { font-family: 'Playfair Display', serif; font-style: italic; font-size: 44px; color: #fff; }
+    .back .ver { display: grid; grid-template-columns: auto 1fr; gap: 10mm; align-items: center; background: rgba(255,255,255,.05); border: 1px solid rgba(196,154,60,.4); border-radius: 12px; padding: 8mm; }
+    .back .ver p { margin: 0 0 6px; font-size: 11px; line-height: 1.6; color: rgba(238,241,247,.78); }
+    .back .ver h3 { margin: 0 0 6px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+    .banner { width: 210mm; max-width: 100%; padding: 14px 18px; border-radius: 10px; font-weight: 600; font-size: 14px; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .center { text-align: center; padding: 80px 20px; }
+
+    @media (max-width: 860px) {
+      .doc { padding: 12px 0 40px; gap: 14px; }
+      .sheet { width: 100%; min-height: 0; padding: 26px 20px 46px; box-shadow: none; }
+      .pg { left: 20px; right: 20px; bottom: 16px; }
+      h2.h { font-size: 34px; }
+      .cover { grid-template-columns: 1fr; padding: 22px 20px 26px; }
+      .cover .photo { grid-row: auto; grid-column: 1; min-height: 360px; margin-bottom: 18px; order: -1; }
+      .cover .brand { margin-bottom: 18px; }
+      .cover h1 { font-size: 40px; }
+      .cols { column-count: 1; }
+      .num, .cards, .tcards, .stats { grid-template-columns: 1fr; }
+      .cards.three, .cards.four { grid-template-columns: 1fr 1fr; }
+      .back .ver { grid-template-columns: 1fr; }
+    }
+    @page { size: A4; margin: 0; }
     @media print {
-      body { background: #fff; } .page { margin: 0; border: none; max-width: none; } .actions { display: none; }
-      .top, .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } .item { break-inside: avoid; }
+      body { background: #fff; }
+      .bar, .banner { display: none !important; }
+      .doc { padding: 0; gap: 0; display: block; }
+      .sheet { box-shadow: none; width: 210mm; min-height: 297mm; break-after: page; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .sheet:last-child { break-after: auto; }
+      a.lnk { border: none; }
     }
   </style>
 </head>
 <body>
-  <div class="page" id="page"><div class="center">Loading…</div></div>
-  <div class="actions" id="actions" style="display:none;"><button onclick="window.print()">Download / print PDF</button></div>
+  <div class="bar" id="bar" style="display:none;"></div>
+  <main class="doc" id="doc"><div class="center">Loading…</div></main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="../../js/supabase-config.js"></script>
   <script>
-    const SECTIONS = { education: 'Education & degrees', clinical: 'Clinical experience', research: 'Research', award: 'Awards & honours' };
-    const METHOD = { issuer_email: 'confirmed by issuer', registry_link: 'checked against official source', document_review: 'document reviewed' };
     const e = gsmpEsc;
+    const METHOD = { issuer_email: 'Confirmed by issuer', registry_link: 'Checked against official source', document_review: 'Document reviewed by GSMP' };
     const fmt = d => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    const tag = c => c.status === 'verified'
+      ? `<span class="tag v" title="${e(METHOD[c.method] || 'Verified')} · ${fmt(c.verified_at)}">✓ Verified</span>`
+      : `<span class="tag s" title="Provided by the member, not checked by GSMP">Self-declared</span>`;
+    const meta = c => [c.organization, c.role, c.period].filter(Boolean).map(e).join(' · ');
+    const img = (u, alt) => u ? `<img src="${e(u)}" alt="${e(alt || '')}" loading="lazy" referrerpolicy="no-referrer">` : '';
+    const link = c => c.public_url ? ` <a class="lnk" href="${e(c.public_url)}" target="_blank" rel="noopener nofollow">source ↗</a>` : '';
+    const chunk = (a, n) => a.reduce((r, x, i) => (i % n ? r[r.length - 1].push(x) : r.push([x]), r), []);
+    let pageNo = 0, NAME = '';
+    const sheet = (cls, inner) => `<section class="sheet ${cls}">${inner}<div class="pg"><span>GSMP Verified Portfolio · ${e(NAME)}</span><span>${String(++pageNo).padStart(2, '0')}</span></div></section>`;
 
     (async () => {
       const id = new URLSearchParams(location.search).get('id') || '';
-      const page = document.getElementById('page');
-      if (!/^[0-9a-f]{32}$/.test(id)) { page.innerHTML = '<div class="center"><h2>Invalid verification link</h2></div>'; return; }
-
+      const doc = document.getElementById('doc');
+      if (!/^[0-9a-f]{32}$/.test(id)) { doc.innerHTML = '<div class="center"><h2 class="serif">Invalid verification link</h2></div>'; return; }
       const { data: p, error } = await sb.rpc('get_portfolio_public', { p_public_id: id });
-      if (error || !p) {
-        page.innerHTML = '<div class="center"><h2>Portfolio not found</h2><p>This verification link is not valid. If you were given this document, treat its claims as unverified.</p></div>';
-        return;
-      }
+      if (error || !p) { doc.innerHTML = '<div class="center"><h2 class="serif">Portfolio not found</h2><p>This verification link is not valid. Treat any document carrying it as unverified.</p></div>'; return; }
 
+      NAME = p.name;
+      const first = (p.name || '').split(' ')[0];
       const active = p.status === 'active';
+      const claims = p.claims || [];
+      const by = s => claims.filter(c => c.section === s);
+      const nVer = claims.filter(c => c.status === 'verified').length;
+      const url = location.origin + location.pathname + '?id=' + id;
+      document.title = p.name + ' — GSMP Verified Portfolio';
+
+      // top bar (screen only)
+      const bar = document.getElementById('bar');
+      bar.style.display = '';
+      bar.innerHTML = `<img src="../../images/pgcmp_logo_inverted.jpeg" alt=""><b>GSMP VERIFIED PORTFOLIO</b>
+        <span class="st ${active ? 'ok' : 'bad'}">${active ? '✓ Active · ' + nVer + ' verified' : e(p.status).toUpperCase()}</span>
+        ${active ? `<button onclick="downloadPdf()">Download PDF</button><button class="share" onclick="share()">Share</button>` : ''}`;
+
       const creds = [p.degree, p.specialty].filter(Boolean).map(e).join(' · ');
-      const sub = [p.member_title, p.chapter ? p.chapter + ' Chapter' : null, p.country].filter(Boolean).map(e).join(' · ');
-      const verifiedCount = (p.claims || []).filter(c => c.status === 'verified').length;
+      const where = [p.chapter ? p.chapter + ' Chapter' : null, p.school, p.country].filter(Boolean).map(e).join(' · ');
+      const highlights = claims.filter(c => c.highlight).slice(0, 4);
+      const hl = (highlights.length ? highlights : claims.filter(c => c.status === 'verified').slice(0, 4));
 
-      let html = `<div class="top"><div>
-          <div class="brand"><img src="../../images/pgcmp_logo_inverted.jpeg" alt="">GSMP Verified Portfolio</div>
+      let html = '';
+      if (!active) html += `<div class="banner">${p.status === 'paused'
+        ? '⏸ Verification paused — this member\'s GSMP membership has lapsed. Credentials are not currently vouched for by GSMP.'
+        : '⚠ This portfolio is ' + e(p.status).toUpperCase() + '. Its credentials are no longer vouched for by GSMP. Do not rely on any printed copy.'}</div>`;
+
+      // 1. cover
+      html += sheet('cover', `
+        <div class="brand"><img src="../../images/pgcmp_logo_inverted.jpeg" alt=""><span>Galen Society of Medical Professionals</span><i>Verified Portfolio</i></div>
+        <div>
           <h1>${e(p.name)}</h1>
+          <div class="role">${e(p.member_title || 'Member')}${p.identity_verified ? ' · ID verified' : ''}</div>
           ${creds ? `<div class="sub">${creds}</div>` : ''}
-          <div class="sub">${sub}</div>
-          ${p.headline ? `<div class="sub" style="margin-top:6px;color:#fff;">${e(p.headline)}</div>` : ''}
-        </div><div id="qr"></div></div>`;
-
-      html += active
-        ? `<div class="banner active">✓ Active · ${verifiedCount} verified credential${verifiedCount === 1 ? '' : 's'}${p.identity_verified ? ' · Identity verified' : ''} · Updated ${fmt(p.updated_at)}</div>`
-        : p.status === 'paused'
-          ? `<div class="banner bad">⏸ Verification paused — this member's GSMP membership has lapsed. Credentials are not currently vouched for by GSMP. Do not rely on any printed copy.</div>`
-          : `<div class="banner bad">⚠ This portfolio is ${e(p.status).toUpperCase()}. Its credentials are no longer vouched for by GSMP. Do not rely on any printed copy.</div>`;
+          ${where ? `<div class="sub">${where}</div>` : ''}
+          ${active && p.quote ? `<blockquote>“${e(p.quote)}”</blockquote>` : '<div style="height:10mm"></div>'}
+          ${active ? `<ul class="hl">${hl.map(c => `<li>${e(c.title)}${c.status === 'verified' ? ' <span style="color:var(--gold)">✓</span>' : ''}<small>${meta(c)}</small></li>`).join('')}</ul>` : ''}
+        </div>
+        <div class="photo ${active && p.photo_url ? '' : 'none'}">${active && p.photo_url ? img(p.photo_url, p.name) : e((p.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2))}</div>
+        <div class="foot"><span>${active ? nVer + ' credential' + (nVer === 1 ? '' : 's') + ' verified by GSMP · Updated ' + fmt(p.updated_at) : 'Status: ' + e(p.status)}</span>
+          <span class="qr"><span style="text-align:right;">Scan to verify<br>this document</span><span class="qrbox" id="qrCover"></span></span></div>`);
 
       if (active) {
-        html += '<div class="body">';
-        if (!(p.claims || []).length) html += '<div class="section"><p class="bio" style="color:#6b7280;">No credentials have been published on this portfolio yet.</p></div>';
-        if (p.bio) html += `<div class="section"><h2>About <span style="color:#9ca3af;letter-spacing:0;text-transform:none;font-weight:500;">(self-declared)</span></h2><div class="bio">${e(p.bio).replace(/\n/g, '<br>')}</div>
-          ${p.email || p.phone ? `<div class="contact">${p.email ? e(p.email) : ''}${p.email && p.phone ? ' · ' : ''}${p.phone ? e(p.phone) : ''}</div>` : ''}</div>`;
-        for (const [k, label] of Object.entries(SECTIONS)) {
-          const list = (p.claims || []).filter(c => c.section === k);
-          if (!list.length) continue;
-          html += `<div class="section"><h2>${label}</h2>` + list.map(c => {
-            const meta = [c.organization, c.role, c.period].filter(Boolean).map(e).join(' · ');
-            const tag = c.status === 'verified'
-              ? `<span class="tag v" title="${e(METHOD[c.method] || 'verified')} on ${fmt(c.verified_at)}">✓ Verified</span>`
-              : `<span class="tag s">Self-declared</span>`;
-            return `<div class="item"><div><h3>${e(c.title)}</h3>${meta ? `<div class="meta">${meta}</div>` : ''}
-              ${c.description ? `<div class="desc">${e(c.description)}</div>` : ''}
-              ${c.status === 'verified' ? `<div class="meta" style="font-size:12px;">Verified ${fmt(c.verified_at)} — ${e(METHOD[c.method] || 'by GSMP')}</div>` : ''}
-              </div>${tag}</div>`;
-          }).join('') + '</div>';
+        // 2. story
+        if (p.bio) {
+          const paras = e(p.bio).split(/\n\s*\n|\n/).filter(Boolean).map(t => `<p>${t}</p>`).join('');
+          html += sheet('', `<div class="kicker">The story</div><h2 class="h">The person behind <em>the work</em></h2>
+            ${p.tagline ? `<div class="tagline">${e(p.tagline)}</div>` : ''}<div class="cols">${paras}</div>
+            <p class="meta" style="margin-top:8mm;">Narrative written by ${e(first)}. Individual credentials are marked Verified or Self-declared on the pages that follow.</p>`);
         }
-        html += '</div>';
+        // 3. education + clinical journey
+        const edu = by('education'), clin = by('clinical');
+        if (edu.length || clin.length) {
+          const list = arr => `<div class="num">${arr.map(c => `<div><div><div class="row"><h4>${e(c.title)}</h4>${tag(c)}</div><div class="meta">${meta(c)}</div>${c.description ? `<div class="desc">${e(c.description)}</div>` : ''}</div></div>`).join('')}</div>`;
+          html += sheet('navy', `<div class="kicker">Training</div><h2 class="h">The clinical <em>journey</em></h2>
+            ${edu.length ? `<div class="sec"><div class="kicker" style="margin-bottom:5mm;">Education</div>${list(edu)}</div>` : ''}
+            ${clin.length ? `<div class="sec"><div class="kicker" style="margin-bottom:5mm;">Clinical experience</div>${list(clin)}</div>` : ''}`);
+        }
+        // 4. operating theatre (8 per sheet)
+        chunk(by('surgical'), 8).forEach((grp, i) => {
+          html += sheet('dark', `<div class="kicker">Surgical exposure${i ? ' · continued' : ''}</div><h2 class="h">Inside the <em>theatre</em></h2>
+            <div class="cards">${grp.map(c => `<div class="card">${c.image_url ? `<div class="img">${img(c.image_url, c.title)}</div>` : ''}
+              <div class="row"><h4>${e(c.title)}</h4>${tag(c)}</div><div class="meta">${meta(c)}</div></div>`).join('')}</div>
+            <div class="note">Theatre photographs are published only after GSMP review, with patient consent and identifiers removed.</div>`);
+        });
+        // 5. logbook
+        if (p.logbook_total || p.logbook_curated || p.logbook_note) {
+          html += sheet('ivory', `<div class="kicker">Clinical competency logbook</div><h2 class="h">Hands-on, <em>on record</em></h2>
+            <div class="stats">${p.logbook_total ? `<div><b>${Number(p.logbook_total).toLocaleString()}</b><span>Procedures logged</span></div>` : ''}
+              ${p.logbook_curated ? `<div><b>${Number(p.logbook_curated).toLocaleString()}</b><span>Performed or assisted</span></div>` : ''}</div>
+            ${p.logbook_note ? `<p style="font-size:13px;line-height:1.7;max-width:150mm;">${e(p.logbook_note)}</p>` : ''}
+            <p class="meta">Logbook figures are declared by the member; the signed logbook is available to institutions on request.</p>`);
+        }
+        // 6. research + memberships
+        const res = by('research'), mem = by('membership');
+        if (res.length || mem.length) {
+          const tc = arr => `<div class="tcards">${arr.map(c => `<div><div class="row"><h4>${e(c.title)}</h4></div>${tag(c)}<div class="meta">${meta(c)}</div>${c.description ? `<div class="desc">${e(c.description)}</div>` : ''}${link(c)}</div>`).join('')}</div>`;
+          html += sheet('', `${res.length ? `<div class="sec"><div class="kicker">Academic work</div><h2 class="h">Research &amp; <em>innovation</em></h2>${tc(res)}</div>` : ''}
+            ${mem.length ? `<div class="sec"><div class="kicker">Affiliations</div><h2 class="h" style="font-size:36px;">Memberships &amp; <em>roles</em></h2>${tc(mem)}</div>` : ''}`);
+        }
+        // 7. initiatives (6 per sheet)
+        chunk(by('initiative'), 6).forEach((grp, i) => {
+          html += sheet('ivory', `<div class="kicker">Leadership${i ? ' · continued' : ''}</div><h2 class="h">Initiatives &amp; <em>events</em></h2>
+            <div class="cards three">${grp.map(c => `<div class="card">${c.image_url ? `<div class="img">${img(c.image_url, c.title)}</div>` : ''}
+              <div class="cap">${e(c.period || '')}</div><div class="row"><h4>${e(c.title)}</h4>${tag(c)}</div>
+              ${c.description ? `<div class="desc">${e(c.description)}</div>` : ''}</div>`).join('')}</div>`);
+        });
+        // 8. awards (6 per sheet)
+        chunk(by('award'), 6).forEach((grp, i) => {
+          html += sheet('navy', `<div class="kicker">Recognition${i ? ' · continued' : ''}</div><h2 class="h">Awards &amp; <em>honours</em></h2>
+            <div class="cards three">${grp.map(c => `<div class="card">${c.image_url ? `<div class="img">${img(c.image_url, c.title)}</div>` : ''}
+              <div class="row"><h4>${e(c.title)}</h4>${tag(c)}</div><div class="meta">${meta(c)}</div>
+              ${c.description ? `<div class="desc">${e(c.description)}</div>` : ''}${link(c)}</div>`).join('')}</div>`);
+        });
+        // 9. media (9 per sheet)
+        chunk(by('media'), 12).forEach((grp, i) => {
+          html += sheet('dark', `<div class="kicker">In the press${i ? ' · continued' : ''}</div><h2 class="h">Media &amp; <em>features</em></h2>
+            <div class="cards four">${grp.map(c => `<div class="card">${c.image_url ? `<div class="img">${img(c.image_url, c.title)}</div>` : ''}
+              <div class="cap">${e(c.organization || '')}${c.period ? ' · ' + e(c.period) : ''}</div><div class="row"><h4>${e(c.title)}</h4>${tag(c)}</div>
+              ${c.description ? `<div class="desc">${e(c.description)}</div>` : ''}${link(c)}</div>`).join('')}</div>`);
+        });
+        // 10. credentials / CME
+        const cme = by('credential');
+        if (cme.length) {
+          html += sheet('', `<div class="kicker">Continuing education</div><h2 class="h">Credentials &amp; <em>training</em></h2>
+            <div class="num">${cme.map(c => `<div><div><div class="row"><h4>${e(c.organization || c.title)}</h4>${tag(c)}</div>
+              <div class="meta">${c.organization ? e(c.title) + (c.period ? ' · ' + e(c.period) : '') : e(c.period || '')}</div></div></div>`).join('')}</div>`);
+        }
+        // 11. beyond medicine (8 per sheet)
+        chunk(by('beyond'), 8).forEach((grp, i) => {
+          html += sheet('ivory', `<div class="kicker">Beyond medicine${i ? ' · continued' : ''}</div><h2 class="h">The other side of <em>the white coat</em></h2>
+            <div class="cards four">${grp.map(c => `<div class="card">${c.image_url ? `<div class="img">${img(c.image_url, c.title)}</div>` : ''}
+              <div class="row"><h4>${e(c.title)}</h4>${tag(c)}</div><div class="meta">${meta(c)}</div></div>`).join('')}</div>`);
+        });
       }
 
-      html += `<div class="foot">
-        <strong>What "Verified" means:</strong> GSMP confirmed this credential with its issuer or an official source on the date shown.
-        It does not certify clinical competence. "Self-declared" items were provided by the member and not checked.
-        This page is the live record — it overrides any printed or PDF copy.<br>
-        Portfolio ID ${e(id)} · Version ${e(p.version)} · First issued ${fmt(p.published_at)}</div>`;
+      // 12. back cover — verification
+      html += sheet('navy back', `
+        <div><div class="kicker">Galen Society of Medical Professionals</div><div class="sig">${e(p.name)}</div>
+          ${active && (p.email || p.phone) ? `<p style="color:rgba(238,241,247,.75);font-size:13px;">${p.email ? e(p.email) : ''}${p.email && p.phone ? ' · ' : ''}${p.phone ? e(p.phone) : ''}</p>` : ''}</div>
+        <div class="ver"><div class="qrbox" id="qrBack"></div><div>
+          <h3>Verify this portfolio</h3>
+          <p>Scan the code or open <b style="color:#fff;">${e(url.replace(/^https?:\/\//, ''))}</b>. The live page always overrides printed or PDF copies — if this portfolio is suspended or revoked, the page will say so.</p>
+          <p><b style="color:#fff;">What “Verified” means:</b> GSMP confirmed the credential with its issuer or an official source on the date shown. It does not certify clinical competence. “Self-declared” items were provided by the member and not checked.</p>
+          <p style="opacity:.7;">Portfolio ID ${e(id)} · Version ${e(p.version)} · First issued ${fmt(p.published_at)} · Status ${e(p.status)}</p></div></div>`);
 
-      page.innerHTML = html;
-      if (window.QRCode) new QRCode(document.getElementById('qr'), { text: location.href, width: 96, height: 96, correctLevel: QRCode.CorrectLevel.M });
-      if (active) document.getElementById('actions').style.display = '';
-      document.title = p.name + ' — GSMP Verified Portfolio';
+      doc.innerHTML = html;
+      if (window.QRCode) {
+        new QRCode(document.getElementById('qrCover'), { text: url, width: 64, height: 64, correctLevel: QRCode.CorrectLevel.M });
+        new QRCode(document.getElementById('qrBack'), { text: url, width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M });
+      }
     })();
+
+    async function downloadPdf() {
+      // make sure every lazy image is loaded before the print dialog
+      const imgs = [...document.images];
+      imgs.forEach(i => i.loading = 'eager');
+      await Promise.all(imgs.map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; })));
+      window.print();
+    }
+    async function share() {
+      const data = { title: document.title, url: location.href };
+      if (navigator.share) { try { await navigator.share(data); } catch (_) {} }
+      else { await navigator.clipboard.writeText(location.href); alert('Link copied'); }
+    }
   </script>
 </body>
 </html>

@@ -32,6 +32,9 @@ so they are not re-litigated. Update the Decision log whenever a decision change
   are hash-routed (`pages/admin/#members`). New admin pages: `<body class="adm">` + `.adm-shell` + `#admSide`.
 - **Cache-busting:** bump `?v=N` on `css/admin.css` / `js/admin-shell.js` links in all admin pages whenever those
   files change (GitHub Pages caches ~10 min; otherwise admins see stale layouts).
+- **Portfolio integrity:** an admin acting on their OWN portfolio is treated as a member (cannot verify own claims,
+  activate/suspend own portfolio, or set own identity flag). Theatre ("surgical") claims with photos require a
+  consent confirmation and can never be self-declared — published only after another admin verifies.
 - **Never commit member names/emails in migrations** (repo is public) — one-off data fixes are run by hand.
 - Members table is private: self, admins, and Chapter Leads (own chapter only). Public card goes through
   `get_member_card(code)` RPC.
@@ -59,6 +62,8 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 | 2026-11-06 | Verified Portfolio pauses (not deleted) 30 days after membership lapses | Retention lever without holding data hostage |
 | 2026-11-07 | Only paid members are active; unpaid grandfathered members moved to "approved/awaiting payment" (manual data fix, 2 people) | Access must match money |
 | 2026-11-07 | Payments ledger + accounting dashboard; voided rows kept | Audit trail for a membership org handling fees |
+| 2026-11-08 | Portfolio = GSMP-branded editorial document generated from verified data (inspired by Anees's PDF, not a copy); every claim carries Verified / Self-declared | Scales to all members; credibility comes from per-claim status, not design |
+| 2026-11-08 | Theatre photos never seeded/confirmed on a member's behalf; member confirms consent; another admin reviews | Patient privacy (UAE health-data rules) |
 | 2026-11-01 | Personal project uses personal accounts only (GitHub `ameenahsan7`, personal laptop) | Keep GSMP out of employer org/logs |
 
 ## Roadmap (in order)
@@ -78,13 +83,18 @@ so they are not re-litigated. Update the Decision log whenever a decision change
    Token: 256-bit, only sha256 stored, single use, 14-day expiry, 1 email/claim/24h.
    Reviewers = SaaS admins. "Verified" = issuer/official source confirmed, never competence.
 5. ~~Membership applications + manual payment~~ (2026-11-06, `migrations/2026-11-06_membership_applications.sql`)
+4b. ~~Portfolio document~~ (2026-11-08, `migrations/2026-11-08_portfolio_document.sql`): public `pages/verify` is an
+   editorial A4 document (cover, story, clinical journey, theatre, logbook, research & memberships, initiatives,
+   awards, media, CME, beyond medicine, verification back cover) generated from data; prints to PDF. 10 claim
+   sections, photos in public bucket `portfolio-media/<uid>/` (client-side resize to 1600px JPEG, strips EXIF),
+   cover highlights (max 4), public links. First portfolio: Anees (seeded by hand, data NOT in repo).
 6. Stripe payment link + webhook (Edge Function sets paid_until) → triggers Supabase Pro upgrade.
 7. Renewal reminder emails (Resend) at 30 / 7 / 0 days before paid_until.
 
 ## Testing
 - DB changes are tested on a local Postgres 16 with Supabase stubs (auth.uid/role/jwt, anon/authenticated roles):
   load `schema/live-schema.sql`, then migrations in order, then scenario tests (role switch via
-  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03; 22 for issuer confirmation on 2026-11-05; 25 for membership applications on 2026-11-06; 16 for the payments ledger on 2026-11-07.
+  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03; 22 for issuer confirmation on 2026-11-05; 25 for membership applications on 2026-11-06; 16 for the payments ledger on 2026-11-07; 17 for the portfolio document on 2026-11-08.
 
 ## Known gaps
 1. `validate_and_use_referral_code` (now check-only) still answers valid/invalid to anyone → codes can be
