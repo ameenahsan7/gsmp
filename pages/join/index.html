@@ -222,7 +222,6 @@
       const interests = document.getElementById('interests').value.trim();
 
       try {
-        // Validate + atomically consume referral code via secure RPC.
         // Pre-check only (no use consumed). The DB enforces + consumes at insert.
         const { data: rpcResult, error: rpcError } = await sb.rpc('validate_and_use_referral_code', { p_code: referralCode });
         if (rpcError) throw new Error('Could not validate referral code: ' + rpcError.message);
