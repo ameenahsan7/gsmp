@@ -172,36 +172,37 @@ CREATE TABLE public.site_settings (
 );
 
 -- ---------- CONSTRAINTS ----------
+-- keys first, then checks, then foreign keys (replay order)
 ALTER TABLE activity_logs ADD CONSTRAINT activity_logs_pkey PRIMARY KEY (id);
 ALTER TABLE announcements ADD CONSTRAINT announcements_pkey PRIMARY KEY (id);
-ALTER TABLE announcements ADD CONSTRAINT announcements_author_id_fkey FOREIGN KEY (author_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-ALTER TABLE announcements ADD CONSTRAINT announcements_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE;
-ALTER TABLE announcements ADD CONSTRAINT announcements_body_check CHECK ((char_length(body) <= 4000));
-ALTER TABLE announcements ADD CONSTRAINT announcements_title_check CHECK (((char_length(title) >= 1) AND (char_length(title) <= 160)));
 ALTER TABLE app_admins ADD CONSTRAINT app_admins_pkey PRIMARY KEY (email);
 ALTER TABLE articles ADD CONSTRAINT articles_pkey PRIMARY KEY (id);
 ALTER TABLE chapters ADD CONSTRAINT chapters_pkey PRIMARY KEY (id);
 ALTER TABLE event_rsvps ADD CONSTRAINT event_rsvps_pkey PRIMARY KEY (id);
-ALTER TABLE event_rsvps ADD CONSTRAINT event_rsvps_event_id_fkey FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE;
-ALTER TABLE event_rsvps ADD CONSTRAINT event_rsvps_member_id_fkey FOREIGN KEY (member_id) REFERENCES auth.users(id) ON DELETE CASCADE;
 ALTER TABLE event_rsvps ADD CONSTRAINT event_rsvps_event_id_member_id_key UNIQUE (event_id, member_id);
 ALTER TABLE events ADD CONSTRAINT events_pkey PRIMARY KEY (id);
-ALTER TABLE events ADD CONSTRAINT events_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES chapters(id);
 ALTER TABLE gallery_albums ADD CONSTRAINT gallery_albums_pkey PRIMARY KEY (id);
-ALTER TABLE gallery_albums ADD CONSTRAINT gallery_albums_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE;
 ALTER TABLE gallery_photos ADD CONSTRAINT gallery_photos_pkey PRIMARY KEY (id);
-ALTER TABLE gallery_photos ADD CONSTRAINT gallery_photos_album_id_fkey FOREIGN KEY (album_id) REFERENCES gallery_albums(id) ON DELETE CASCADE;
 ALTER TABLE members ADD CONSTRAINT members_pkey PRIMARY KEY (id);
-ALTER TABLE members ADD CONSTRAINT members_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
-ALTER TABLE members ADD CONSTRAINT members_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE SET NULL;
 ALTER TABLE members ADD CONSTRAINT members_referral_code_key UNIQUE (referral_code);
 ALTER TABLE referral_codes ADD CONSTRAINT referral_codes_pkey PRIMARY KEY (id);
-ALTER TABLE referral_codes ADD CONSTRAINT referral_codes_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES chapters(id);
 ALTER TABLE referral_codes ADD CONSTRAINT referral_codes_code_key UNIQUE (code);
 ALTER TABLE resources ADD CONSTRAINT resources_pkey PRIMARY KEY (id);
-ALTER TABLE resources ADD CONSTRAINT resources_author_id_fkey FOREIGN KEY (author_id) REFERENCES auth.users(id);
 ALTER TABLE shop_items ADD CONSTRAINT shop_items_pkey PRIMARY KEY (id);
 ALTER TABLE site_settings ADD CONSTRAINT site_settings_pkey PRIMARY KEY (key);
+ALTER TABLE announcements ADD CONSTRAINT announcements_body_check CHECK ((char_length(body) <= 4000));
+ALTER TABLE announcements ADD CONSTRAINT announcements_title_check CHECK (((char_length(title) >= 1) AND (char_length(title) <= 160)));
+ALTER TABLE announcements ADD CONSTRAINT announcements_author_id_fkey FOREIGN KEY (author_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE announcements ADD CONSTRAINT announcements_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE;
+ALTER TABLE event_rsvps ADD CONSTRAINT event_rsvps_event_id_fkey FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE;
+ALTER TABLE event_rsvps ADD CONSTRAINT event_rsvps_member_id_fkey FOREIGN KEY (member_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE events ADD CONSTRAINT events_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES chapters(id);
+ALTER TABLE gallery_albums ADD CONSTRAINT gallery_albums_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE;
+ALTER TABLE gallery_photos ADD CONSTRAINT gallery_photos_album_id_fkey FOREIGN KEY (album_id) REFERENCES gallery_albums(id) ON DELETE CASCADE;
+ALTER TABLE members ADD CONSTRAINT members_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE members ADD CONSTRAINT members_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE SET NULL;
+ALTER TABLE referral_codes ADD CONSTRAINT referral_codes_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES chapters(id);
+ALTER TABLE resources ADD CONSTRAINT resources_author_id_fkey FOREIGN KEY (author_id) REFERENCES auth.users(id);
 
 -- ---------- INDEXES (non-PK) ----------
 CREATE INDEX idx_activity_logs_category ON public.activity_logs USING btree (category);

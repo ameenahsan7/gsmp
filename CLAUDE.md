@@ -42,10 +42,19 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 2. ~~Admins via app_admins~~ (2026-11-02)
 3. ~~Live schema in git~~ (2026-11-02, `schema/live-schema.sql`)
 3b. ~~Server-side referral enforcement~~ (2026-11-02, `migrations/2026-11-02_referral_enforcement.sql`)
-4. Verified Portfolio **pilot**: 5 members, 4 sections (identity, clinical, research, awards), per-claim status,
-   issuer email confirmation (Edge Function + Resend), `/verify/?id=<random>` page with revocation, print-to-PDF.
-   No government ID/selfie storage. "Verified" = issuer confirmed the document, never competence.
+4. Verified Portfolio pilot — **phase 1 built 2026-11-03** (`migrations/2026-11-03_portfolio_pilot.sql`):
+   tables `portfolios` / `portfolio_claims` / `claim_reviews` (trigger-written audit log), member editor
+   `pages/my-portfolio`, admin queue `pages/admin-portfolios`, public `pages/verify/?id=<32-hex>` with QR,
+   revocation, print-to-PDF. Admin creating a portfolio = pilot invitation. Evidence = https links only.
+   Public RPC `get_portfolio_public` never exposes evidence_url / issuer_email.
+   **Phase 2:** issuer confirmation emails (Edge Function + Resend on gsmpglobal.org — needs DNS records).
+   Reviewers = SaaS admins. "Verified" = issuer/official source confirmed, never competence.
 5. Paid Verified Portfolio tier → triggers Supabase Pro upgrade.
+
+## Testing
+- DB changes are tested on a local Postgres 16 with Supabase stubs (auth.uid/role/jwt, anon/authenticated roles):
+  load `schema/live-schema.sql`, then migrations in order, then scenario tests (role switch via
+  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03.
 
 ## Known gaps
 1. `validate_and_use_referral_code` (now check-only) still answers valid/invalid to anyone → codes can be

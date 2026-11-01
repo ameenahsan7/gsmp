@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Portfolio Review — GSMP Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0d1117; --panel: #161b22; --line: #30363d; --text: #c9d1d9; --muted: #8b949e; --green: #3fb950; --blue: #58a6ff; --amber: #d29922; --red: #f85149; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; font-size: 14px; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+    a { color: var(--blue); }
+    h1 { font-size: 22px; margin: 6px 0 16px; color: #fff; }
+    h2 { font-size: 15px; color: #fff; margin: 0 0 12px; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    input, select, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font: inherit; }
+    textarea { width: 100%; min-height: 54px; }
+    button { background: #21262d; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; font-weight: 600; cursor: pointer; font: inherit; }
+    button.ok { background: #238636; border-color: #2ea043; color: #fff; }
+    button.warn { background: #3d2e00; border-color: var(--amber); color: #f0c674; }
+    button.bad { background: #3d0b0b; border-color: var(--red); color: #ffa198; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border-bottom: 1px solid var(--line); padding: 6px 8px; }
+    td { border-bottom: 1px solid #21262d; padding: 8px; vertical-align: top; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .pill { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 8px; background: #21262d; }
+    .p-submitted { color: var(--blue); } .p-verified, .p-active { color: var(--green); } .p-needs_info { color: var(--amber); }
+    .p-rejected, .p-revoked, .p-suspended { color: var(--red); }
+    .card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+    .msg { padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; display: none; }
+    .msg.ok { display: block; background: #0f2d1a; color: var(--green); } .msg.err { display: block; background: #3d0b0b; color: #ffa198; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+    .tabs button.on { border-color: var(--blue); color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="../admin">&larr; Back to Admin</a>
+    <h1>Verified Portfolio — Review</h1>
+    <div id="msg" class="msg"></div>
+    <div id="gate" class="panel">Checking access…</div>
+
+    <div id="app" style="display:none;">
+      <div class="panel">
+        <h2>Invite a member to the pilot</h2>
+        <div class="row">
+          <input id="inviteEmail" type="email" placeholder="member@email.com" style="min-width:260px;">
+          <button class="ok" onclick="invite()">Create portfolio</button>
+        </div>
+        <p class="muted">The member must already be registered. Creating their portfolio is the invitation — they'll see it under "Verified Portfolio".</p>
+      </div>
+
+      <div class="panel">
+        <h2>Claims</h2>
+        <div class="tabs" id="tabs"></div>
+        <div id="claims"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Portfolios</h2>
+        <table><thead><tr><th>Member</th><th>Status</th><th>Identity</th><th>Claims</th><th>Public page</th></tr></thead><tbody id="ports"></tbody></table>
+        <p class="muted">Identity: tick only after you've seen a government ID on a video call. GSMP does not store ID documents.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    const e = gsmpEsc, $ = id => document.getElementById(id);
+    const SECTIONS = { education: 'Education', clinical: 'Clinical', research: 'Research', award: 'Award' };
+    const FILTERS = [['submitted', 'Queue'], ['needs_info', 'Needs info'], ['verified', 'Verified'], ['rejected', 'Rejected'], ['self_declared', 'Self-declared'], ['all', 'All']];
+    let filter = 'submitted';
+    const pill = s => `<span class="pill p-${s}">${e(s.replace('_', ' '))}</span>`;
+    function flash(t, ok) { const m = $('msg'); m.textContent = t; m.className = 'msg ' + (ok ? 'ok' : 'err'); }
+    const memberName = m => m ? e(((m.first_name || '') + ' ' + (m.last_name || '')).trim()) : '—';
+
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { location.href = '../login'; return; }
+      if (!(await checkIsSaasAdmin())) { $('gate').textContent = 'Admins only.'; return; }
+      $('gate').style.display = 'none'; $('app').style.display = '';
+      renderTabs(); loadClaims(); loadPortfolios();
+    })();
+
+    function renderTabs() {
+      $('tabs').innerHTML = FILTERS.map(([k, l]) => `<button class="${k === filter ? 'on' : ''}" onclick="setFilter('${k}')">${l}</button>`).join('');
+    }
+    function setFilter(k) { filter = k; renderTabs(); loadClaims(); }
+
+    async function loadClaims() {
+      let q = sb.from('portfolio_claims')
+        .select('*, portfolios(public_id, members(first_name, last_name, email))')
+        .order('updated_at', { ascending: filter === 'submitted' });
+      if (filter !== 'all') q = q.eq('status', filter);
+      const { data, error } = await q.limit(200);
+      if (error) return flash(error.message, false);
+      if (!data.length) { $('claims').innerHTML = '<p class="muted">Nothing here.</p>'; return; }
+      $('claims').innerHTML = data.map(c => {
+        const m = c.portfolios && c.portfolios.members;
+        const meta = [c.organization, c.role, c.period].filter(Boolean).map(e).join(' · ');
+        return `<div class="card">
+          <div class="row" style="justify-content:space-between;">
+            <div><strong>${e(c.title)}</strong> <span class="muted">· ${SECTIONS[c.section] || e(c.section)}</span><br>
+              <span class="muted">${meta}</span></div>${pill(c.status)}</div>
+          <div class="muted" style="margin-top:6px;">Member: ${memberName(m)} &lt;${e(m && m.email)}&gt;</div>
+          ${c.description ? `<div style="margin-top:6px;">${e(c.description)}</div>` : ''}
+          <div class="row" style="margin-top:6px;">
+            ${c.evidence_url ? `<a href="${e(c.evidence_url)}" target="_blank" rel="noopener noreferrer nofollow">Open evidence ↗</a>` : '<span class="muted">No evidence link</span>'}
+            ${c.issuer_email ? `<span class="muted">Issuer: ${e(c.issuer_email)}</span>` : ''}
+          </div>
+          ${c.verified_at ? `<div class="muted" style="margin-top:4px;">Verified ${new Date(c.verified_at).toLocaleDateString()} by ${e(c.verified_by)} (${e(c.method)})</div>` : ''}
+          <div class="row" style="margin-top:10px;">
+            <select id="m-${c.id}">
+              <option value="issuer_email" ${c.method === 'issuer_email' ? 'selected' : ''}>Issuer confirmed</option>
+              <option value="registry_link" ${c.method === 'registry_link' ? 'selected' : ''}>Official source / registry</option>
+              <option value="document_review" ${c.method === 'document_review' ? 'selected' : ''}>Document reviewed</option>
+            </select>
+          </div>
+          <textarea id="n-${c.id}" placeholder="Note to member (required for Needs info / Reject)" style="margin-top:8px;">${e(c.reviewer_note)}</textarea>
+          <div class="row" style="margin-top:8px;">
+            <button class="ok" onclick="decide('${c.id}','verified')">Verify</button>
+            <button class="warn" onclick="decide('${c.id}','needs_info')">Needs info</button>
+            <button class="bad" onclick="decide('${c.id}','rejected')">Reject</button>
+          </div></div>`;
+      }).join('');
+    }
+
+    async function decide(id, status) {
+      const note = $('n-' + id).value.trim() || null;
+      if (status !== 'verified' && !note) return flash('Add a note so the member knows what to do.', false);
+      if (status === 'verified' && !confirm('Mark as VERIFIED? This appears publicly with your name in the audit log.')) return;
+      const { error } = await sb.from('portfolio_claims')
+        .update({ status, reviewer_note: note, method: status === 'verified' ? $('m-' + id).value : null }).eq('id', id);
+      if (error) return flash(error.message, false);
+      flash('Saved: ' + status.replace('_', ' '), true);
+      loadClaims(); loadPortfolios();
+    }
+
+    async function loadPortfolios() {
+      const { data, error } = await sb.from('portfolios')
+        .select('id, public_id, status, identity_verified, members(first_name, last_name, email), portfolio_claims(status)')
+        .order('created_at', { ascending: false });
+      if (error) return flash(error.message, false);
+      $('ports').innerHTML = data.map(p => {
+        const counts = {}; (p.portfolio_claims || []).forEach(c => counts[c.status] = (counts[c.status] || 0) + 1);
+        const url = location.origin + '/pages/verify/?id=' + p.public_id;
+        return `<tr>
+          <td>${memberName(p.members)}<br><span class="muted">${e(p.members && p.members.email)}</span></td>
+          <td><select onchange="setStatus('${p.id}', this.value)">
+            ${['draft', 'active', 'suspended', 'revoked'].map(s => `<option ${s === p.status ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+          <td><input type="checkbox" ${p.identity_verified ? 'checked' : ''} onchange="setIdentity('${p.id}', this.checked)"></td>
+          <td class="muted">${Object.entries(counts).map(([k, v]) => `${e(k.replace('_', ' '))}: ${v}`).join('<br>') || '—'}</td>
+          <td>${p.status === 'draft' ? '<span class="muted">not live</span>' : `<a href="${e(url)}" target="_blank">open ↗</a>`}</td></tr>`;
+      }).join('') || '<tr><td colspan="5" class="muted">No portfolios yet — invite a member above.</td></tr>';
+    }
+
+    async function setStatus(id, status) {
+      if (['suspended', 'revoked'].includes(status) && !confirm(`Set portfolio to ${status.toUpperCase()}? Its public page will immediately show this.`)) return loadPortfolios();
+      const { error } = await sb.from('portfolios').update({ status }).eq('id', id);
+      if (error) return flash(error.message, false);
+      flash('Portfolio is now ' + status, true); loadPortfolios();
+    }
+    async function setIdentity(id, v) {
+      const { error } = await sb.from('portfolios').update({ identity_verified: v }).eq('id', id);
+      if (error) return flash(error.message, false);
+      flash('Identity ' + (v ? 'verified' : 'unverified'), true);
+    }
+
+    async function invite() {
+      const email = $('inviteEmail').value.trim().toLowerCase();
+      if (!email) return;
+      const { data: m, error } = await sb.from('members').select('id, first_name, last_name').ilike('email', email).maybeSingle();
+      if (error || !m) return flash('No registered member with that email.', false);
+      const { error: e2 } = await sb.from('portfolios').insert({ member_id: m.id });
+      if (e2) return flash(e2.code === '23505' ? 'That member already has a portfolio.' : e2.message, false);
+      flash(`Portfolio created for ${m.first_name} ${m.last_name}.`, true);
+      $('inviteEmail').value = ''; loadPortfolios();
+    }
+  </script>
+</body>
+</html>

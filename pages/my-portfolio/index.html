@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Verified Portfolio — GSMP</title>
+  <link rel="stylesheet" href="../../css/style.css?v=8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    .pf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pf-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+    .pf-field label { font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .pf-field input, .pf-field select, .pf-field textarea {
+      border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font: inherit; font-size: 14px; background: #fff;
+    }
+    .pf-field textarea { min-height: 90px; resize: vertical; }
+    .pf-hint { font-size: 12px; color: #9ca3af; }
+    .pf-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .pf-btn { border: none; border-radius: 8px; padding: 10px 16px; font-weight: 600; font-size: 14px; cursor: pointer; }
+    .pf-btn.primary { background: var(--navy); color: #fff; }
+    .pf-btn.gold { background: var(--gold); color: #fff; }
+    .pf-btn.ghost { background: #f3f4f6; color: var(--navy); }
+    .pf-btn.danger { background: #fee2e2; color: #991b1b; }
+    .pf-btn:disabled { opacity: .5; cursor: default; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .b-draft { background: #f3f4f6; color: #4b5563; }
+    .b-submitted { background: #dbeafe; color: #1e40af; }
+    .b-verified { background: #d1fae5; color: #065f46; }
+    .b-needs_info { background: #fef3c7; color: #92400e; }
+    .b-rejected { background: #fee2e2; color: #991b1b; }
+    .b-self_declared { background: #ede9fe; color: #5b21b6; }
+    .b-active { background: #d1fae5; color: #065f46; }
+    .b-suspended, .b-revoked { background: #fee2e2; color: #991b1b; }
+    .claim { border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+    .claim-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+    .claim h4 { font-size: 15px; color: var(--navy); margin: 0; }
+    .claim .meta { font-size: 13px; color: #6b7280; margin-top: 2px; }
+    .claim .note { font-size: 13px; background: #fffbeb; border-left: 3px solid #f59e0b; padding: 8px 10px; margin-top: 8px; border-radius: 4px; }
+    .section-label { font-size: 12px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: .08em; margin: 18px 0 8px; }
+    .share-box { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .share-box input { flex: 1; min-width: 220px; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+    #qr { background: #fff; padding: 6px; border: 1px solid #e5e7eb; border-radius: 8px; }
+    .msg { padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 14px; display: none; }
+    .msg.ok { background: #d1fae5; color: #065f46; display: block; }
+    .msg.err { background: #fee2e2; color: #991b1b; display: block; }
+    .empty { text-align: center; padding: 40px 20px; color: #6b7280; }
+    .empty h2 { font-family: var(--font-serif); color: var(--navy); }
+    @media (max-width: 768px) { .pf-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="mobile-topbar" style="display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--navy);position:sticky;top:0;z-index:100;">
+    <a href="../../" style="display:flex;align-items:center;gap:8px;text-decoration:none;">
+      <img src="../../images/pgcmp_logo_inverted.jpeg" alt="GSMP" style="width:28px;height:28px;border-radius:6px;">
+      <span style="color:#fff;font-weight:700;font-size:16px;">GSMP</span>
+    </a>
+    <a href="../dashboard" style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:500;text-decoration:none;">Dashboard</a>
+  </div>
+
+  <div class="dash-layout">
+    <aside class="dash-sidebar">
+      <a href="../../" class="nav-logo">
+        <img src="../../images/pgcmp_logo_inverted.jpeg" alt="GSMP" class="logo-icon">
+        <span class="logo-text">GSMP</span>
+      </a>
+      <nav class="dash-nav">
+        <a href="../dashboard"><span class="dash-nav-icon">⌂</span> Dashboard</a>
+        <a href="../my-profile"><span class="dash-nav-icon">◉</span> My Profile</a>
+        <a href="../my-portfolio" class="active"><span class="dash-nav-icon">✓</span> Verified Portfolio</a>
+        <a href="#" id="logoutBtn" style="margin-top:auto;color:rgba(255,255,255,0.4);"><span class="dash-nav-icon">⇥</span> Log Out</a>
+      </nav>
+    </aside>
+
+    <main class="dash-main">
+      <div class="dash-header">
+        <h1>Verified Portfolio</h1>
+        <div style="margin-top:8px;" id="statusLine"></div>
+      </div>
+      <div id="msg" class="msg"></div>
+      <div id="root"><div class="dash-section">Loading…</div></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    const SECTIONS = { education: 'Education & degrees', clinical: 'Clinical experience', research: 'Research', award: 'Awards & honours' };
+    const STATUS_LABEL = { draft: 'Draft', submitted: 'Submitted for review', verified: 'Verified', needs_info: 'Needs info',
+                           rejected: 'Rejected', self_declared: 'Self-declared', active: 'Active', suspended: 'Suspended', revoked: 'Revoked' };
+    const LOCKED = ['verified', 'rejected'];
+    let portfolio = null, claims = [], editingId = null;
+
+    const $ = id => document.getElementById(id);
+    const badge = s => `<span class="badge b-${s}">${STATUS_LABEL[s] || s}</span>`;
+    function flash(text, ok) { const m = $('msg'); m.textContent = text; m.className = 'msg ' + (ok ? 'ok' : 'err'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    function verifyUrl() { return location.origin + '/pages/verify/?id=' + portfolio.public_id; }
+
+    async function load() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { location.href = '../login'; return; }
+      const { data: p } = await sb.from('portfolios').select('*').eq('member_id', session.user.id).maybeSingle();
+      portfolio = p;
+      if (!p) {
+        $('root').innerHTML = `<div class="dash-section empty">
+          <h2>Invite-only pilot</h2>
+          <p>The GSMP Verified Portfolio is in a closed pilot. Each credential is confirmed with its issuer,
+          and you get a public page with a QR code anyone can check.</p>
+          <p class="pf-hint">You'll see your portfolio here once GSMP invites you.</p></div>`;
+        return;
+      }
+      const { data: c } = await sb.from('portfolio_claims').select('*').eq('portfolio_id', p.id)
+        .order('section').order('sort_order').order('created_at');
+      claims = c || [];
+      render();
+    }
+
+    function render() {
+      const p = portfolio;
+      $('statusLine').innerHTML = badge(p.status) + (p.identity_verified ? ' <span class="badge b-verified">Identity verified</span>' : '');
+      const live = p.status === 'active';
+      let html = '';
+
+      html += `<div class="dash-section"><h2>Your public page</h2>` + (live
+        ? `<div class="share-box"><div id="qr"></div><div style="flex:1;min-width:220px;">
+             <input id="pubUrl" readonly value="${gsmpEsc(verifyUrl())}">
+             <div class="pf-actions" style="margin-top:8px;">
+               <button class="pf-btn primary" onclick="copyUrl()">Copy link</button>
+               <a class="pf-btn ghost" style="text-decoration:none;" target="_blank" href="${gsmpEsc(verifyUrl())}">Open / print PDF</a>
+             </div>
+             <p class="pf-hint" style="margin-top:8px;">Only verified and self-declared items are public. Evidence links and issuer emails are never shown.</p>
+           </div></div>`
+        : `<p class="pf-hint">Your page goes live when GSMP activates your portfolio${p.status === 'draft' ? ' — add your credentials below and submit them for review.' : '.'}</p>`)
+        + `</div>`;
+
+      html += `<div class="dash-section"><h2>About</h2>
+        <div class="pf-field"><label>Headline</label><input id="headline" maxlength="120" value="${gsmpEsc(p.headline)}" placeholder="e.g. Surgical intern · Dubai"></div>
+        <div class="pf-field"><label>Short bio (shown as self-declared)</label><textarea id="bio" maxlength="1500">${gsmpEsc(p.bio)}</textarea></div>
+        <div class="pf-row">
+          <label style="display:flex;gap:8px;align-items:center;font-size:14px;"><input type="checkbox" id="showEmail" ${p.show_email ? 'checked' : ''}> Show my email publicly</label>
+          <label style="display:flex;gap:8px;align-items:center;font-size:14px;"><input type="checkbox" id="showPhone" ${p.show_phone ? 'checked' : ''}> Show my phone publicly</label>
+        </div>
+        <div class="pf-actions" style="margin-top:12px;"><button class="pf-btn primary" onclick="saveAbout()">Save</button></div></div>`;
+
+      html += `<div class="dash-section"><h2>Credentials</h2>`;
+      if (!claims.length) html += `<p class="pf-hint">No credentials yet. Add your first one below.</p>`;
+      for (const sec of Object.keys(SECTIONS)) {
+        const list = claims.filter(c => c.section === sec);
+        if (!list.length) continue;
+        html += `<div class="section-label">${SECTIONS[sec]}</div>`;
+        for (const c of list) {
+          const meta = [c.organization, c.role, c.period].filter(Boolean).map(gsmpEsc).join(' · ');
+          html += `<div class="claim"><div class="claim-top"><div><h4>${gsmpEsc(c.title)}</h4>
+            ${meta ? `<div class="meta">${meta}</div>` : ''}</div>${badge(c.status)}</div>
+            ${c.reviewer_note && ['needs_info', 'rejected'].includes(c.status) ? `<div class="note"><strong>Reviewer:</strong> ${gsmpEsc(c.reviewer_note)}</div>` : ''}
+            <div class="pf-actions" style="margin-top:10px;">
+              ${LOCKED.includes(c.status) ? '' : `<button class="pf-btn ghost" onclick="editClaim('${c.id}')">Edit</button>`}
+              <button class="pf-btn danger" onclick="deleteClaim('${c.id}')">Remove</button>
+            </div></div>`;
+        }
+      }
+      html += `</div>`;
+
+      html += `<div class="dash-section" id="claimForm"><h2 id="formTitle">Add a credential</h2>
+        <div class="pf-row">
+          <div class="pf-field"><label>Section</label><select id="cSection">${Object.entries(SECTIONS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
+          <div class="pf-field"><label>Title *</label><input id="cTitle" maxlength="200" placeholder="e.g. Clinical observership — General Surgery"></div>
+        </div>
+        <div class="pf-row">
+          <div class="pf-field"><label>Institution / issuer</label><input id="cOrg" maxlength="200" placeholder="e.g. Rashid Hospital"></div>
+          <div class="pf-field"><label>Your role</label><input id="cRole" maxlength="120" placeholder="e.g. Observer, First author, Recipient"></div>
+        </div>
+        <div class="pf-row">
+          <div class="pf-field"><label>Period</label><input id="cPeriod" maxlength="60" placeholder="e.g. 2024 or Jan–Mar 2025"></div>
+          <div class="pf-field"><label>Evidence link (https)</label><input id="cEvidence" placeholder="DOI, registry page, certificate link"><span class="pf-hint">Private — only GSMP reviewers see it.</span></div>
+        </div>
+        <div class="pf-row">
+          <div class="pf-field"><label>Issuer contact email</label><input id="cIssuer" type="email" placeholder="supervisor or department email"><span class="pf-hint">Private — GSMP may ask them to confirm.</span></div>
+          <div class="pf-field"><label>Details</label><textarea id="cDesc" maxlength="1000" style="min-height:44px;"></textarea></div>
+        </div>
+        <div class="pf-actions">
+          <button class="pf-btn gold" onclick="saveClaim('submitted')">Submit for verification</button>
+          <button class="pf-btn ghost" onclick="saveClaim('draft')">Save draft</button>
+          <button class="pf-btn ghost" onclick="saveClaim('self_declared')" title="Shown publicly with a 'Self-declared' label, not verified">Add as self-declared</button>
+          <button class="pf-btn ghost" id="cancelEdit" style="display:none;" onclick="resetForm()">Cancel</button>
+        </div></div>`;
+
+      $('root').innerHTML = html;
+      if (live && window.QRCode) new QRCode($('qr'), { text: verifyUrl(), width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M });
+    }
+
+    function copyUrl() { navigator.clipboard.writeText($('pubUrl').value).then(() => flash('Link copied.', true)); }
+
+    async function saveAbout() {
+      const { error } = await sb.from('portfolios').update({
+        headline: $('headline').value.trim() || null, bio: $('bio').value.trim() || null,
+        show_email: $('showEmail').checked, show_phone: $('showPhone').checked
+      }).eq('id', portfolio.id);
+      if (error) return flash(error.message, false);
+      flash('Saved.', true); load();
+    }
+
+    function val(id) { const v = $(id).value.trim(); return v || null; }
+    async function saveClaim(status) {
+      const row = { section: $('cSection').value, title: val('cTitle'), organization: val('cOrg'), role: val('cRole'),
+        period: val('cPeriod'), evidence_url: val('cEvidence'), issuer_email: val('cIssuer'), description: val('cDesc'), status };
+      if (!row.title) return flash('Title is required.', false);
+      if (row.evidence_url && !/^https:\/\//i.test(row.evidence_url)) return flash('Evidence link must start with https://', false);
+      if (status === 'submitted' && !row.evidence_url && !row.issuer_email)
+        return flash('To submit for verification, add an evidence link or an issuer contact email.', false);
+      const q = editingId ? sb.from('portfolio_claims').update(row).eq('id', editingId)
+                          : sb.from('portfolio_claims').insert({ ...row, portfolio_id: portfolio.id });
+      const { error } = await q;
+      if (error) return flash(error.message, false);
+      flash(status === 'submitted' ? 'Submitted — a GSMP reviewer will check it.' : 'Saved.', true);
+      editingId = null; load();
+    }
+
+    function editClaim(id) {
+      const c = claims.find(x => x.id === id); if (!c) return;
+      editingId = id;
+      $('cSection').value = c.section; $('cTitle').value = c.title || ''; $('cOrg').value = c.organization || '';
+      $('cRole').value = c.role || ''; $('cPeriod').value = c.period || ''; $('cEvidence').value = c.evidence_url || '';
+      $('cIssuer').value = c.issuer_email || ''; $('cDesc').value = c.description || '';
+      $('formTitle').textContent = 'Edit credential'; $('cancelEdit').style.display = '';
+      $('claimForm').scrollIntoView({ behavior: 'smooth' });
+    }
+    function resetForm() { editingId = null; render(); }
+
+    async function deleteClaim(id) {
+      if (!confirm('Remove this credential from your portfolio?')) return;
+      const { error } = await sb.from('portfolio_claims').delete().eq('id', id);
+      if (error) return flash(error.message, false);
+      flash('Removed.', true); load();
+    }
+
+    $('logoutBtn').addEventListener('click', async e => { e.preventDefault(); await sb.auth.signOut(); location.href = '../login'; });
+    load();
+  </script>
+</body>
+</html>
