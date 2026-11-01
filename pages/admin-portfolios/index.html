@@ -94,7 +94,7 @@
 
     async function loadClaims() {
       let q = sb.from('portfolio_claims')
-        .select('*, portfolios(public_id, members(first_name, last_name, email))')
+        .select('*, portfolios(public_id, members(first_name, last_name, email)), issuer_confirmations(sent_at, expires_at, responded_at, response, response_note, auto_verified)')
         .order('updated_at', { ascending: filter === 'submitted' });
       if (filter !== 'all') q = q.eq('status', filter);
       const { data, error } = await q.limit(200);
@@ -113,6 +113,7 @@
             ${c.evidence_url ? `<a href="${e(c.evidence_url)}" target="_blank" rel="noopener noreferrer nofollow">Open evidence ↗</a>` : '<span class="muted">No evidence link</span>'}
             ${c.issuer_email ? `<span class="muted">Issuer: ${e(c.issuer_email)}</span>` : ''}
           </div>
+          ${issuerLine(c)}
           ${c.verified_at ? `<div class="muted" style="margin-top:4px;">Verified ${new Date(c.verified_at).toLocaleDateString()} by ${e(c.verified_by)} (${e(c.method)})</div>` : ''}
           <div class="row" style="margin-top:10px;">
             <select id="m-${c.id}">
@@ -126,8 +127,31 @@
             <button class="ok" onclick="decide('${c.id}','verified')">Verify</button>
             <button class="warn" onclick="decide('${c.id}','needs_info')">Needs info</button>
             <button class="bad" onclick="decide('${c.id}','rejected')">Reject</button>
+            ${c.issuer_email && ['submitted', 'needs_info'].includes(c.status) ? `<button onclick="emailIssuer('${c.id}', this)">✉ Email issuer</button>` : ''}
           </div></div>`;
       }).join('');
+    }
+
+    function issuerLine(c) {
+      const list = (c.issuer_confirmations || []).slice().sort((a, b) => b.sent_at.localeCompare(a.sent_at));
+      if (!list.length) return '';
+      const r = list[0], d = x => new Date(x).toLocaleDateString();
+      let t;
+      if (r.response === 'confirmed') t = `<span style="color:var(--green)">Issuer CONFIRMED ${d(r.responded_at)}</span>${r.auto_verified ? '' : ' — not auto-verified (claim changed or no longer pending): review manually'}`;
+      else if (r.response === 'denied') t = `<span style="color:var(--red)">Issuer DENIED ${d(r.responded_at)}</span>`;
+      else if (new Date(r.expires_at) < new Date()) t = `Issuer email ${d(r.sent_at)} — expired, no answer`;
+      else t = `Issuer emailed ${d(r.sent_at)} — awaiting answer (expires ${d(r.expires_at)})`;
+      return `<div class="muted" style="margin-top:6px;">${t}${r.response_note ? ` · “${e(r.response_note)}”` : ''}</div>`;
+    }
+
+    async function emailIssuer(id, btn) {
+      if (!confirm('Send a verification request to the issuer by email? (single-use link, expires in 14 days)')) return;
+      btn.disabled = true;
+      const { data, error } = await sb.functions.invoke('send-issuer-confirmation', { body: { claim_id: id } });
+      let msg = error ? error.message : null;
+      if (error && error.context && error.context.json) { try { msg = (await error.context.json()).error || msg; } catch (_) {} }
+      if (msg) { btn.disabled = false; return flash(msg, false); }
+      flash('Request sent to ' + data.sent_to, true); loadClaims();
     }
 
     async function decide(id, status) {

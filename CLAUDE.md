@@ -36,6 +36,7 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 | 2026-11-02 | Admin access only via `app_admins`; employer (propertyfinder.ae) email removed | Employer controls that mailbox → would control GSMP |
 | 2026-11-02 | Referral enforced in DB trigger; chapter derived from code; personal codes capped at **5** invites | Invite-only must hold server-side; scarcity supports paid tier |
 | 2026-11-04 | Portfolio can go **active** only with ≥1 verified credential (DB-enforced) | "Verified Portfolio" with 0 verified items dilutes the mark |
+| 2026-11-05 | Resend on root `gsmpglobal.org` (single team, Servlee domain removed); API key = sending-only, domain-scoped | Free plan = 1 domain; least privilege |
 | 2026-11-01 | Personal project uses personal accounts only (GitHub `ameenahsan7`, personal laptop) | Keep GSMP out of employer org/logs |
 
 ## Roadmap (in order)
@@ -48,14 +49,18 @@ so they are not re-litigated. Update the Decision log whenever a decision change
    `pages/my-portfolio`, admin queue `pages/admin-portfolios`, public `pages/verify/?id=<32-hex>` with QR,
    revocation, print-to-PDF. Admin creating a portfolio = pilot invitation. Evidence = https links only.
    Public RPC `get_portfolio_public` never exposes evidence_url / issuer_email.
-   **Phase 2:** issuer confirmation emails (Edge Function + Resend on gsmpglobal.org — needs DNS records).
+   **Phase 2 built 2026-11-05** (`migrations/2026-11-05_issuer_confirmation.sql`): admin "Email issuer" →
+   Edge Function `supabase/functions/send-issuer-confirmation` (deployed via Dashboard editor; secret
+   `RESEND_API_KEY`; sender `verify@gsmpglobal.org`, Resend domain verified 2026-11-01, Tokyo region) →
+   issuer page `pages/confirm/?t=<64-hex>` → confirm auto-verifies ONLY if claim unchanged since email.
+   Token: 256-bit, only sha256 stored, single use, 14-day expiry, 1 email/claim/24h.
    Reviewers = SaaS admins. "Verified" = issuer/official source confirmed, never competence.
 5. Paid Verified Portfolio tier → triggers Supabase Pro upgrade.
 
 ## Testing
 - DB changes are tested on a local Postgres 16 with Supabase stubs (auth.uid/role/jwt, anon/authenticated roles):
   load `schema/live-schema.sql`, then migrations in order, then scenario tests (role switch via
-  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03.
+  `set request.jwt.claims` + `SET ROLE`). 35 scenarios passed for referral + pilot on 2026-11-03; 22 for issuer confirmation on 2026-11-05.
 
 ## Known gaps
 1. `validate_and_use_referral_code` (now check-only) still answers valid/invalid to anyone → codes can be

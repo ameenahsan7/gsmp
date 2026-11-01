@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <!-- the URL holds a single-use token: never leak it via Referer -->
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" type="image/png" href="../../images/favicon-white.png">
+  <title>Confirm a credential — GSMP</title>
+  <style>
+    :root { --navy: #1B2A4A; --gold: #C49A3C; --muted: #6b7280; --line: #e5e7eb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f5f3ee; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif; color: #111827; }
+    .card { max-width: 560px; margin: 32px auto; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .top { background: var(--navy); color: #fff; padding: 20px 24px; }
+    .top .k { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .14em; }
+    .top h1 { margin: 6px 0 0; font-size: 20px; }
+    .body { padding: 20px 24px 24px; line-height: 1.55; }
+    table { border-collapse: collapse; margin: 12px 0 16px; width: 100%; }
+    td { padding: 6px 0; vertical-align: top; border-bottom: 1px solid var(--line); }
+    td:first-child { color: var(--muted); width: 120px; padding-right: 12px; }
+    label.chk { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; margin: 12px 0; }
+    textarea { width: 100%; min-height: 70px; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; font: inherit; font-size: 14px; }
+    .btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    button { border: none; border-radius: 8px; padding: 12px 18px; font-weight: 700; font-size: 15px; cursor: pointer; }
+    .yes { background: #15803d; color: #fff; } .no { background: #f3f4f6; color: #991b1b; }
+    button:disabled { opacity: .5; cursor: default; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .err { background: #fee2e2; color: #991b1b; padding: 10px 12px; border-radius: 8px; margin-top: 12px; display: none; }
+    @media (max-width: 600px) { .card { margin: 0; border-radius: 0; border: none; } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="top"><div class="k">GSMP VERIFICATION REQUEST</div><h1 id="h">Loading…</h1></div>
+    <div class="body" id="body"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="../../js/supabase-config.js"></script>
+  <script>
+    const e = gsmpEsc, $ = id => document.getElementById(id);
+    const SECTION = { education: 'Education / degree', clinical: 'Clinical experience', research: 'Research', award: 'Award' };
+    const token = new URLSearchParams(location.search).get('t') || '';
+
+    function done(title, msg) { $('h').textContent = title; $('body').innerHTML = `<p>${msg}</p><p class="muted">You can close this page.</p>`; }
+
+    (async () => {
+      const { data, error } = await sb.rpc('get_issuer_request', { p_token: token });
+      const st = (data && data.state) || 'invalid';
+      if (error || st === 'invalid') return done('Link not valid', 'This verification link is not valid. Please use the exact link from the email.');
+      if (st === 'expired') return done('Link expired', 'This request has expired. No action is needed.');
+      if (st === 'responded') return done('Already answered', 'Thank you — a response to this request has already been recorded.');
+
+      const s = data.snapshot || {};
+      const rows = [['Credential', s.title], ['Type', SECTION[s.section] || s.section], ['Institution', s.organization], ['Role', s.role], ['Period', s.period]]
+        .filter(([, v]) => v).map(([k, v]) => `<tr><td>${e(k)}</td><td><strong>${e(v)}</strong></td></tr>`).join('');
+      $('h').textContent = 'Please confirm a credential';
+      $('body').innerHTML = `
+        <p><strong>${e(data.member_name)}</strong> listed this credential on their GSMP Verified Portfolio and named
+           <strong>${e(data.issuer_email)}</strong> as a contact who can confirm it.</p>
+        <table>${rows}</table>
+        <label class="chk"><input type="checkbox" id="auth">
+          <span>I am authorised to confirm this on behalf of the institution, or I supervised this person directly.</span></label>
+        <textarea id="note" maxlength="500" placeholder="Optional comment (e.g. correct dates or role)"></textarea>
+        <div class="btns">
+          <button class="yes" id="yes">Yes, this is accurate</button>
+          <button class="no" id="no">I can't confirm this</button>
+        </div>
+        <div class="err" id="err"></div>
+        <p class="muted" style="margin-top:16px;">Your answer is recorded with your email address and is used only to verify this credential.
+          GSMP does not certify clinical competence.</p>`;
+      $('yes').onclick = () => respond('confirmed');
+      $('no').onclick = () => respond('denied');
+    })();
+
+    async function respond(response) {
+      if (response === 'confirmed' && !$('auth').checked) {
+        $('err').textContent = 'Please tick the box to confirm you are authorised.'; $('err').style.display = 'block'; return;
+      }
+      $('yes').disabled = $('no').disabled = true;
+      const { error } = await sb.rpc('respond_issuer_request', {
+        p_token: token, p_response: response, p_note: $('note').value, p_authorised: $('auth').checked
+      });
+      if (error) { $('err').textContent = error.message; $('err').style.display = 'block'; $('yes').disabled = $('no').disabled = false; return; }
+      done('Thank you', response === 'confirmed'
+        ? 'Your confirmation has been recorded. The credential will show as verified on the member\'s GSMP portfolio.'
+        : 'Your response has been recorded. A GSMP reviewer will follow up with the member.');
+    }
+  </script>
+</body>
+</html>
