@@ -477,7 +477,7 @@
             <input id="logSearch" placeholder="Search action, details, person" oninput="renderLogs()" style="min-width:240px;">
             <label class="muted row" style="gap:6px;"><input type="checkbox" id="logHideAuth" checked onchange="renderLogs()"> Hide logins</label>
           </div>
-          <div class="row"><span id="logCount" class="muted">0 entries</span><button onclick="loadLogs()">↻ Refresh</button></div>
+          <div class="row"><span id="logCount" class="muted">0 entries</span><button onclick="logNames = {}; loadLogs()">↻ Refresh</button></div>
         </div>
         <div class="table-wrap" style="max-height:640px;overflow-y:auto;">
           <table class="log-table">
@@ -551,8 +551,39 @@
       } catch (e) { console.warn('Log write failed:', e); }
     }
 
-    let logRows = [];
+    let logRows = [], logNames = {};
+    async function loadLogNames() {
+      // id -> human label for everything a log line may reference
+      const src = [['members', 'id, first_name, last_name, email', r => `${r.first_name} ${r.last_name} (${r.email})`],
+                   ['chapters', 'id, name', r => r.name], ['events', 'id, title', r => r.title],
+                   ['articles', 'id, title', r => r.title], ['shop_items', 'id, name', r => r.name],
+                   ['referral_codes', 'id, code', r => 'code ' + r.code], ['gallery_albums', 'id, title', r => 'album “' + r.title + '”'],
+                   ['announcements', 'id, title', r => '“' + r.title + '”']];
+      const res = await Promise.all(src.map(([t, cols]) => sb.from(t).select(cols)));
+      logNames = {};
+      res.forEach((r, i) => (r.data || []).forEach(row => { logNames[row.id] = src[i][2](row); }));
+    }
+    function humanizeLog(text, cat) {
+      const kind = { member: 'member', chapter: 'chapter', event: 'event', article: 'article', shop: 'shop item', code: 'referral code', gallery: 'album', notice: 'notice' }[cat] || 'record';
+      if (!text) return '';
+      let t = String(text);
+      // full UUIDs ("ID: <uuid>" or bare)
+      t = t.replace(/(?:ID:\s*)?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/gi,
+        (_, id) => logNames[id.toLowerCase()] || 'a deleted ' + kind + ' (' + id.slice(0, 8) + ')');
+      // legacy "Member 1234abcd…" prefixes
+      t = t.replace(/Member ([0-9a-f]{8})…/gi, (m, pre) => {
+        const hit = Object.keys(logNames).find(k => k.startsWith(pre.toLowerCase()));
+        return hit ? logNames[hit] : 'a deleted member (' + pre + ')';
+      });
+      // ISO dates/times -> "17 Dec 2026, 17:00"
+      t = t.replace(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?/g, (_, d, hm) =>
+        new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + hm);
+      t = t.replace(/\(max: 0\)/g, '(unlimited uses)').replace(/\(max: (\d+)\)/g, '(max $1 uses)');
+      return t;
+    }
+
     async function loadLogs() {
+      if (!Object.keys(logNames).length) await loadLogNames();
       const filter = document.getElementById('logFilter').value;
       let query = sb.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(500);
       if (filter !== 'all') query = query.eq('category', filter);
@@ -576,7 +607,7 @@
         return `<tr>
           <td class="muted" style="white-space:nowrap;">${ts}</td>
           <td><span class="pill" style="color:var(--${c});">${gsmpEsc(l.category === 'auth' ? 'login' : l.category)}</span></td>
-          <td><b style="font-weight:600;">${gsmpEsc(l.action)}</b>${l.details ? `<div class="muted">${gsmpEsc(l.details)}</div>` : ''}</td>
+          <td><b style="font-weight:600;">${gsmpEsc(l.action)}</b>${l.details ? `<div class="muted">${gsmpEsc(humanizeLog(l.details, l.category))}</div>` : ''}</td>
           <td class="muted">${gsmpEsc(l.user_email || 'system')}</td></tr>`;
       }).join('') : '<tr><td colspan="4" class="muted">No matching entries.</td></tr>';
     }
@@ -943,6 +974,7 @@
     async function loadMembers() {
       const { data, error } = await sb.from('members').select('*').order('first_name');
       if (error) { showMsg('Error loading members: ' + error.message, 'error'); return; }
+      window._members = data || [];
       const tbody = document.getElementById('membersTable');
       if (!data || !data.length) {
         tbody.innerHTML = '<tr><td colspan="6" style="color:#9ca3af;">No members yet.</td></tr>';
@@ -979,27 +1011,31 @@
       `}).join('');
     }
 
+    const memberLabel = id => { const m = (window._members || []).find(x => x.id === id);
+      return m ? `${m.first_name} ${m.last_name} (${m.email})` : 'Member ' + id.slice(0, 8); };
+
     async function assignChapter(memberId, chapterId) {
       const value = chapterId || null;
       const { error } = await sb.from('members').update({ chapter_id: value }).eq('id', memberId);
       if (error) { showMsg('Error assigning chapter: ' + error.message, 'error'); return; }
       const chName = chapters.find(c => c.id === chapterId)?.name || 'None';
-      logAction('member', 'Assigned chapter', 'Member ' + memberId.slice(0,8) + '… → ' + chName);
+      logAction('member', 'Assigned chapter', memberLabel(memberId) + ' → ' + chName);
       showMsg('Chapter assigned!', 'success');
     }
 
     async function assignTitle(memberId, title) {
       const { error } = await sb.from('members').update({ member_title: title }).eq('id', memberId);
       if (error) { showMsg('Error assigning title: ' + error.message, 'error'); return; }
-      logAction('member', 'Changed member title', 'Member ' + memberId.slice(0,8) + '… → ' + title);
+      logAction('member', 'Changed member title', memberLabel(memberId) + ' → ' + title);
       showMsg('Title updated to ' + title + '!', 'success');
     }
 
     async function deleteMember(id) {
       if (!confirm('Remove this member? This only removes their profile, not their auth account.')) return;
+      const who = memberLabel(id);
       const { error } = await sb.from('members').delete().eq('id', id);
       if (error) { showMsg('Error: ' + error.message, 'error'); return; }
-      logAction('member', 'Deleted member', 'ID: ' + id);
+      logAction('member', 'Deleted member', who);
       showMsg('Member removed.', 'success');
       loadMembers();
     }
