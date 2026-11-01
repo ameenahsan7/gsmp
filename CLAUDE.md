@@ -30,6 +30,8 @@ so they are not re-litigated. Update the Decision log whenever a decision change
 - **Admin UI = one light design system**: `css/admin.css` + shared sidebar `js/admin-shell.js`
   (`gsmpAdminShell('<section>')`, live badges for applications / claims / unpaid). Main admin page sections
   are hash-routed (`pages/admin/#members`). New admin pages: `<body class="adm">` + `.adm-shell` + `#admSide`.
+- **Cache-busting:** bump `?v=N` on `css/admin.css` / `js/admin-shell.js` links in all admin pages whenever those
+  files change (GitHub Pages caches ~10 min; otherwise admins see stale layouts).
 - **Never commit member names/emails in migrations** (repo is public) — one-off data fixes are run by hand.
 - Members table is private: self, admins, and Chapter Leads (own chapter only). Public card goes through
   `get_member_card(code)` RPC.
